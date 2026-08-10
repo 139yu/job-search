@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "career-changer-translator": {
+      "source": "paramchoudhary/resumeskills",
+      "sourceType": "github",
+      "skillPath": "skills/career-changer-translator/SKILL.md",
+      "computedHash": "c19a92b1fd19a7b5fa52df7e7b81dde610bc8faf749761477ab49ea18af1e619"
+    },
+    "salary-negotiation-prep": {
+      "source": "paramchoudhary/resumeskills",
+      "sourceType": "github",
+      "skillPath": "skills/salary-negotiation-prep/SKILL.md",
+      "computedHash": "64ee8b7d96149d4161bccebac00ef03f99e70160bd8565ab31fecd61526eb2f4"
+    },
+    "tailored-resume-generator": {
+      "source": "composiohq/awesome-claude-skills",
+      "sourceType": "github",
+      "skillPath": "tailored-resume-generator/SKILL.md",
+      "computedHash": "41a39b5fb096ce30e4274a1e1994197056ae5a570dbe8cae3bb460ae71c24f14"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+[
+ {
+  "company": "海目星",
+  "url": "https://www.zhipin.com/job_detail/3dd00328181794270nF_2NW0F1pX.html",
+  "error": "HTTP Error 400: Bad Request"
+ },
+ {
+  "company": "大族数控",
+  "url": "https://www.zhipin.com/job_detail/dfd3cb116ea0d81a0nJ73N60FFRY.html",
+  "error": "HTTP Error 400: Bad Request"
+ },
+ {
+  "company": "正业科技",
+  "url": "https://www.zhipin.com/job_detail/531351330799792903J729q9EFVU.html",
+  "error": "HTTP Error 400: Bad Request"
+ },
+ {
+  "company": "恒翼能",
+  "url": "https://www.zhipin.com/job_detail/6d9b81a580d8475603x63t28GFVU.html",
+  "error": "HTTP Error 400: Bad Request"
+ },
+ {
+  "company": "汇成真空",
+  "url": "https://www.zhipin.com/job_detail/c68fbde6f72721f703xy2tm_EVFU.html",
+  "error": "HTTP Error 400: Bad Request"
+ },
+ {
+  "company": "沃德精密",
+  "url": "https://www.zhipin.com/job_detail/b244518b2791a21a1HZz2920EF_.html",
+  "error": "HTTP Error 400: Bad Request"
+ }
+]

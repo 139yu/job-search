@@ -1,0 +1,22 @@
+[
+  {"platform": "boss", "city": "深圳", "company": "大族数控", "job": "C#上位机开发--运动控制", "salary": "15-25K", "degree": "本科", "url": "https://www.zhipin.com/job_detail/dfd3cb116ea0d81a0nJ73N60FFRY.html"},
+  {"platform": "zhaopin", "city": "深圳", "company": "大族数控", "job": "上位机软件工程师（C++）", "salary": "1.8-3.5万·13薪", "degree": "本科", "url": "http://www.zhaopin.com/jobdetail/CC334402310J40978957102.htm"},
+  {"platform": "boss", "city": "深圳", "company": "海目星激光", "job": "上位机软件工程师（C#/非标）", "salary": "15-30K", "degree": "大专", "url": "https://www.zhipin.com/job_detail/3dd00328181794270nF_2NW0F1pX.html"},
+  {"platform": "zhaopin", "city": "深圳", "company": "海目星激光", "job": "上位机软件工程师", "salary": "1.5-2.5万", "degree": "大专", "url": "http://www.zhaopin.com/jobdetail/CC298574210J40748885114.htm"},
+  {"platform": "zhaopin", "city": "深圳", "company": "中建钢构", "job": "上位机软件工程师", "salary": "2-3.5万", "degree": "本科", "url": "http://www.zhaopin.com/jobdetail/CCL1258822160J40779928806.htm"},
+  {"platform": "zhaopin", "city": "深圳", "company": "海浦蒙特", "job": "上位机软件开发工程师", "salary": "1.5-3万·13薪", "degree": "本科", "url": "http://www.zhaopin.com/jobdetail/CC416033010J40822053401.htm"},
+  {"platform": "zhaopin", "city": "深圳", "company": "丰源升", "job": "上位机软件工程师", "salary": "1.8-2.5万", "degree": "本科", "url": "http://www.zhaopin.com/jobdetail/CC333354310J40501529810.htm"},
+  {"platform": "boss", "city": "深圳", "company": "智立方", "job": "C#（上位机）", "salary": "15-30K", "degree": "本科", "url": "https://www.zhipin.com/job_detail/1fccd76ed657e52b0nZ90t-5EFFT.html"},
+  {"platform": "boss", "city": "深圳", "company": "卓茂科技", "job": "C#软件开发工程师", "salary": "15-25K", "degree": "本科", "url": "https://www.zhipin.com/job_detail/916f829df603ada50nFz3t-0EVZQ.html"},
+  {"platform": "boss", "city": "深圳", "company": "嘉立创", "job": "软件开发（C#）", "salary": "15-30K", "degree": "本科", "url": "https://www.zhipin.com/job_detail/694c736e424d32810nFy392_FFdU.html"},
+  {"platform": "boss", "city": "深圳", "company": "易天股份", "job": "上位机软件工程师", "salary": "20-30K", "degree": "本科", "url": "https://www.zhipin.com/job_detail/9d8bc5a43d27536e031-3Ny0EFJW.html"},
+  {"platform": "boss", "city": "深圳", "company": "科达利", "job": "上位机/软件工程师", "salary": "20-30K·13薪", "degree": "本科", "url": "https://www.zhipin.com/job_detail/f4959ba71d28b9d80nFz09S4GVFV.html"},
+  {"platform": "zhaopin", "city": "东莞", "company": "恒翼能", "job": "c#上位机开发工程师", "salary": "1.5-2.2万", "degree": "本科", "url": "http://www.zhaopin.com/jobdetail/CC861869350J40663633513.htm"},
+  {"platform": "zhaopin", "city": "东莞", "company": "恒翼能", "job": "C#视觉上位机开发工程师", "salary": "1.5-2.5万", "degree": "本科", "url": "http://www.zhaopin.com/jobdetail/CC861869350J40836846713.htm"},
+  {"platform": "boss", "city": "东莞", "company": "正业科技", "job": "软件开发工程师（C#）", "salary": "15-30K", "degree": "大专", "url": "https://www.zhipin.com/job_detail/531351330799792903J729q9EFVU.html"},
+  {"platform": "boss", "city": "东莞", "company": "冠佳技术", "job": "上位机软件工程师", "salary": "15-20K", "degree": "本科", "url": "https://www.zhipin.com/job_detail/b492042b80e8c71f0nB70ty7GVJT.html"},
+  {"platform": "boss", "city": "东莞", "company": "台德智慧", "job": "上位机软件开发工程师", "salary": "16-23K", "degree": "大专", "url": "https://www.zhipin.com/job_detail/7616fea6c199d4680nJ42tm0FFtS.html"},
+  {"platform": "zhaopin", "city": "东莞", "company": "沃德精密", "job": "软件工程师（上位机）", "salary": "1.5-2.5万·14薪", "degree": "大专", "url": "http://www.zhaopin.com/jobdetail/CC353120210J40277126116.htm"},
+  {"platform": "boss", "city": "东莞", "company": "腾盛精密装备", "job": "上位机软件工程师", "salary": "20-40K·14薪", "degree": "本科", "url": "https://www.zhipin.com/job_detail/a6dcb564a9db27660nF-2di0FFRZ.html"},
+  {"platform": "boss", "city": "东莞", "company": "中科原子", "job": "上位机软件开发工程师", "salary": "15-20K", "degree": "本科", "url": "https://www.zhipin.com/job_detail/4a9072f47cfa40dd0nd_3di5GVRQ.html"}
+]

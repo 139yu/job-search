@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>方案 A · 深色流程台（设计稿）</title>
+<style>
+:root{
+  --bg:#0E1117; --panel:#161B22; --panel2:#1B232F; --panel3:#202A38;
+  --border:#2A3442; --border2:#384554;
+  --text:#E6EDF3; --muted:#9AA6B2; --dim:#5B6875;
+  --accent:#4FC3F7; --ok:#4ADE80; --warn:#FBBF24; --err:#F87171;
+  --mono:Consolas,'Courier New',monospace;
+  --font:'Segoe UI','Microsoft YaHei',system-ui,sans-serif;
+  --tr:150ms ease;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font);font-size:13px;color:var(--text);background:var(--bg)}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:flex;flex-direction:column;height:100vh}
+.ic{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.dot{width:8px;height:8px;border-radius:99px;display:inline-block}
+.dot.ok{background:var(--ok)}.dot.off{background:var(--dim)}.dot.err{background:var(--err)}.dot.blink{background:var(--ok);animation:bk 1.2s infinite}
+@keyframes bk{50%{opacity:.25}}
+
+/* 菜单栏 */
+.topbar{height:44px;flex:none;background:#12161D;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;padding:0 10px}
+.app-name{font-size:13px;font-weight:700;color:var(--text);padding:0 8px}
+.app-name b{color:var(--accent)}
+.sep{width:1px;height:20px;background:var(--border);margin:0 6px}
+.tbtn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:5px;color:var(--muted);font-size:12px}
+.tbtn:hover{background:var(--panel2);color:var(--text)}
+.tbtn.pri{background:var(--accent);color:#06202F;font-weight:700}
+.tbtn.warn{background:var(--warn);color:#231a04;font-weight:700}
+.tbtn.err{background:var(--err);color:#fff;font-weight:700}
+.right{margin-left:auto;display:flex;align-items:center;gap:6px}
+.role{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid var(--border2);border-radius:5px;color:var(--muted);font-size:12px}
+
+/* 主体三栏 */
+.body{flex:1;display:flex;min-height:0}
+
+/* 左列 步骤 */
+.left{width:188px;flex:none;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column}
+.l-h{height:34px;flex:none;display:flex;align-items:center;padding:0 12px;font-size:11px;font-weight:600;color:var(--dim);letter-spacing:.04em;border-bottom:1px solid var(--border)}
+.steps{flex:1;overflow-y:auto;padding:6px}
+.step{display:flex;gap:9px;padding:8px 9px;border-radius:6px;color:var(--muted);cursor:pointer}
+.step:hover{background:var(--panel2)}
+.step.on{background:var(--panel3);color:var(--text)}
+.step .no{width:18px;height:18px;flex:none;border-radius:5px;background:var(--panel3);display:grid;place-items:center;font-size:10.5px;font-weight:700;color:var(--muted)}
+.step.on .no{background:var(--accent);color:#06202F}
+.step .t{font-size:12.5px;font-weight:600}
+.step .s{font-size:10.5px;color:var(--dim);margin-top:2px}
+.runbtns{flex:none;display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--border)}
+.runbtns button{flex:1;height:28px;border-radius:5px;background:var(--panel2);color:var(--text);font-size:12px;font-weight:600}
+.runbtns button:hover{background:var(--panel3)}
+.runbtns button.go{background:var(--ok);color:#06231a}
+
+/* 中列 */
+.center{flex:1;display:flex;flex-direction:column;min-width:0;padding:10px;gap:10px}
+.halcon{flex:1;position:relative;background:#070A0E;border:1px solid var(--border);border-radius:8px;overflow:hidden;display:grid;place-items:center}
+.halcon .ph{color:#2A3442;font-size:13px;letter-spacing:.05em}
+.halcon .lg{position:absolute;right:10px;bottom:10px;background:rgba(18,22,29,.85);border:1px solid var(--border2);border-radius:6px;padding:6px 9px;font-size:10.5px;color:var(--muted);line-height:1.7}
+.halcon .lg b{color:var(--text)}
+.halcon .st{position:absolute;top:10px;left:10px;display:flex;gap:6px}
+.split{height:282px;flex:none;display:flex;gap:10px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;min-width:0}
+.p-h{height:32px;flex:none;display:flex;align-items:center;padding:0 11px;font-size:11.5px;font-weight:700;color:var(--text);border-bottom:1px solid var(--border)}
+.p-h .tag{margin-left:auto;font-size:10px;color:var(--dim);font-weight:500}
+.p-b{flex:1;overflow:auto;padding:10px 11px}
+
+/* 运动调试 */
+.motion{flex:1.15}
+.axis-chip{display:inline-flex;gap:5px;margin-bottom:8px}
+.axis-chip button{height:24px;padding:0 10px;border-radius:4px;background:var(--panel2);color:var(--muted);font-size:11.5px;font-weight:600}
+.axis-chip button.on{background:var(--accent);color:#06202F}
+.m-field{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.m-field label{width:16px;font-size:11px;color:var(--dim);font-weight:700}
+.m-field input{flex:1;height:26px;background:var(--bg);border:1px solid var(--border2);border-radius:5px;color:var(--text);padding:0 8px;font-family:var(--mono);font-size:12px}
+.m-field .u{font-size:10.5px;color:var(--dim)}
+.m-actions{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.m-actions button{height:27px;padding:0 9px;border-radius:5px;background:var(--panel2);color:var(--text);font-size:11.5px;font-weight:600}
+.m-actions button:hover{background:var(--panel3)}
+.m-actions .go{background:var(--ok);color:#06231a}
+.m-actions .home{background:var(--warn);color:#231a04}
+.m-pos{margin-top:8px;font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.m-pos b{color:var(--accent)}
+
+/* 测量结果 */
+.results{flex:1}
+.dtable{width:100%;border-collapse:collapse;font-size:12px}
+.dtable th{text-align:left;font-size:10.5px;color:var(--dim);font-weight:600;padding:5px 7px;border-bottom:1px solid var(--border)}
+.dtable td{padding:6px 7px;border-bottom:1px solid var(--border);font-family:var(--mono);color:var(--muted)}
+.dtable tr:last-child td{border-bottom:none}
+.dtable .nm{color:var(--text);font-weight:600}
+.dtable .mm{color:var(--accent)}
+.res-ok{display:flex;gap:8px;margin-top:8px}
+.res-ok span{font-size:11px;color:var(--dim)}
+.res-ok b{color:var(--ok)}
+
+/* 右列 */
+.right{width:318px;flex:none;background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column}
+.log{flex:1;display:flex;flex-direction:column;min-height:0}
+.log .p-b{font-family:var(--mono);font-size:11.5px;line-height:1.85}
+.logline{color:var(--muted);white-space:nowrap}
+.logline .t{color:var(--dim)}
+.logline.ok{color:var(--ok)}.logline.warn{color:var(--warn)}.logline.err{color:var(--err)}
+.status{flex:none;border-top:1px solid var(--border);padding:0}
+.st-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.st-cell{background:var(--panel);padding:9px 11px}
+.st-cell .k{font-size:10.5px;color:var(--dim);font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.st-cell .v{font-family:var(--mono);font-size:12px;color:var(--text)}
+.st-cell .v small{color:var(--muted);font-size:10px}
+.st-cell .ok{color:var(--ok)}.st-cell .err{color:var(--err)}
+
+/* 底部状态条 */
+.statusbar{height:28px;flex:none;background:#12161D;border-top:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 14px;font-size:11px;color:var(--muted)}
+.statusbar b{color:var(--text);font-family:var(--mono)}
+.statusbar .dot{margin-right:4px}
+.statusbar .rt{margin-left:auto}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <span class="app-name">视觉<b>调试台</b></span>
+    <span class="sep"></span>
+    <button class="tbtn">加载图像</button>
+    <button class="tbtn pri">▶ 单步</button>
+    <button class="tbtn">连续</button>
+    <button class="tbtn">停止</button>
+    <span class="sep"></span>
+    <button class="tbtn">使能</button>
+    <button class="tbtn warn">回零</button>
+    <button class="tbtn err">急停</button>
+    <div class="right">
+      <span class="role">● 工程师</span>
+      <button class="tbtn">设置</button>
+    </div>
+  </header>
+
+  <div class="body">
+
+    <!-- 左列：视觉流程步骤 -->
+    <aside class="left">
+      <div class="l-h">视觉流程 · 步骤</div>
+      <div class="steps">
+        <div class="step"><span class="no">1</span><div><div class="t">采集图像</div><div class="s">Cam-0 · 1920×1080</div></div><span class="dot ok" style="margin-left:auto"></span></div>
+        <div class="step"><span class="no">2</span><div><div class="t">模板定位</div><div class="s">shape model · 0.98</div></div><span class="dot ok" style="margin-left:auto"></span></div>
+        <div class="step on"><span class="no">3</span><div><div class="t">阈值分割</div><div class="s">blob · 进行中</div></div><span class="dot blink" style="margin-left:auto"></span></div>
+        <div class="step"><span class="no">4</span><div><div class="t">特征测量</div><div class="s">距离 / 圆 / 角度</div></div></div>
+        <div class="step"><span class="no">5</span><div><div class="t">判定输出</div><div class="s">OK / NG</div></div></div>
+      </div>
+      <div class="runbtns">
+        <button class="go">单步</button><button>连续</button><button>停止</button>
+      </div>
+    </aside>
+
+    <!-- 中列 -->
+    <div class="center">
+      <div class="halcon">
+        <span class="ph">Halcon 窗口 · 示例图占位（图像 + 测量叠加）</span>
+        <div class="st"><span class="chip" style="background:#06202F;color:var(--accent);font-size:10.5px;padding:3px 8px;border-radius:4px">● LIVE 帧 42</span></div>
+        <div class="lg">
+          L1 距离 · 128.40 px / <b style="color:var(--accent)">3.21 mm</b><br>
+          C1 三点圆 · Ø 96.20 px / <b style="color:var(--accent)">Ø 2.41 mm</b>
+        </div>
+      </div>
+
+      <div class="split">
+        <!-- 运动调试 -->
+        <div class="panel motion">
+          <div class="p-h">运动调试<span class="tag">轴 · Jog · 点位</span></div>
+          <div class="p-b">
+            <div class="axis-chip"><button class="on">X</button><button>Y</button><button>Z</button></div>
+            <div class="m-field"><label>X</label><input value="118.237"><span class="u">mm</span></div>
+            <div class="m-field"><label>Y</label><input value="32.510"><span class="u">mm</span></div>
+            <div class="m-actions">
+              <button>◀ Jog-</button><button>Jog+ ▶</button><button>停止</button><button class="go">点位运动</button><button class="home">回零</button>
+            </div>
+            <div class="m-pos">实时位置 · X <b>118.237</b> / Y <b>32.510</b> / Z <b>0.000</b></div>
+          </div>
+        </div>
+
+        <!-- 测量结果 -->
+        <div class="panel results">
+          <div class="p-h">测量结果<span class="tag">px → mm</span></div>
+          <div class="p-b">
+            <table class="dtable">
+              <thead><tr><th>名称</th><th>类型</th><th>像素</th><th>实际</th><th>判定</th></tr></thead>
+              <tbody>
+                <tr><td class="nm">L1</td><td>两点距离</td><td>128.40px</td><td class="mm">3.21mm</td><td style="color:var(--ok)">OK</td></tr>
+                <tr><td class="nm">C1</td><td>三点圆</td><td>Ø96.2px</td><td class="mm">Ø2.41mm</td><td style="color:var(--ok)">OK</td></tr>
+                <tr><td class="nm">A1</td><td>三点角度</td><td>63.40°</td><td class="mm">63.40°</td><td style="color:var(--ok)">OK</td></tr>
+              </tbody>
+            </table>
+            <div class="res-ok"><span>OK <b>3</b></span><span>NG <b style="color:var(--err)">0</b></span><span>PixChange 0.025 mm/px</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右列 -->
+    <aside class="right">
+      <div class="panel log" style="border:none;border-radius:0">
+        <div class="p-h">实时日志<span class="tag">自动滚动</span></div>
+        <div class="p-b">
+          <div class="logline"><span class="t">[12:00:01]</span> 控制卡 GTS-800 连接成功</div>
+          <div class="logline ok"><span class="t">[12:00:02]</span> 相机 Cam-0 连接 · 30 fps</div>
+          <div class="logline"><span class="t">[12:00:05]</span> 加载图像 test.tif (1920×1080)</div>
+          <div class="logline"><span class="t">[12:00:07]</span> 模板定位完成 · 分数 0.98</div>
+          <div class="logline warn"><span class="t">[12:00:09]</span> 阈值分割：飞点数 12 已过滤</div>
+          <div class="logline"><span class="t">[12:00:11]</span> 距离 L1 = 128.40 px</div>
+          <div class="logline"><span class="t">[12:00:11]</span> × PixChange 0.025 → <b style="color:var(--ok)">3.21 mm</b></div>
+          <div class="logline err"><span class="t">[12:00:14]</span> 轴 Z 回零失败：限位触发</div>
+        </div>
+      </div>
+
+      <div class="status">
+        <div class="st-grid">
+          <div class="st-cell"><div class="k"><span class="dot ok"></span>控制卡</div><div class="v">GTS-800 <small>· 3轴</small></div></div>
+          <div class="st-cell"><div class="k"><span class="dot ok"></span>相机</div><div class="v">30 fps <small>· 曝光 2000μs</small></div></div>
+          <div class="st-cell"><div class="k"><span class="dot blink"></span>轴 X</div><div class="v">118.237 <small>mm</small></div></div>
+          <div class="st-cell"><div class="k"><span class="dot blink"></span>轴 Y</div><div class="v">32.510 <small>mm</small></div></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="statusbar">
+    <span><span class="dot ok"></span>控制卡</span>
+    <span><span class="dot ok"></span>相机 30fps</span>
+    <span>轴 X <b>118.237</b></span>
+    <span>轴 Y <b>32.510</b></span>
+    <span>心跳 <b>600ms</b></span>
+    <span class="rt">2026-08-13 12:00:15</span>
+  </footer>
+</div>
+</body>
+</html>

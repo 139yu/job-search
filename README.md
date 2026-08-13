@@ -19,6 +19,10 @@
 
 使用方式：在 Codex 中打开本目录作为工作目录，或把简历、JD 文件放进对应子目录后直接让 Codex 调用相关技能。
 
+## Agent 规范
+
+协作与实现约定见 [PROJECT_STANDARDS.md](./PROJECT_STANDARDS.md)（从 ImgApp 规范抽取的通用子集）。`AGENTS.md` 只是入口索引。
+
 ## 说明
 
 - 目前没有找到安装量足够高的模拟面试技能，需要模拟面试时直接让 Codex 扮演面试官即可，素材可以用 `D:\Code\RMI\Interview_Guide.md`

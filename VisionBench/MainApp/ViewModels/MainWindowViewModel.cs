@@ -17,6 +17,13 @@ namespace MainApp.ViewModels
             get { return menuItems; }
             set { menuItems = value; }
         }
+        private string title = "Nobody";
+
+        public string Title
+        {
+            get { return title = "Nobody"; }
+            set { title = value; }
+        }
 
         public MainWindowViewModel()
         {

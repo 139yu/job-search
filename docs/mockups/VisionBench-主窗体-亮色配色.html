@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VisionBench · 主窗体设计稿（亮色 · 细化版）</title>
+<style>
+/* ========== 设计令牌（本稿权威，与 DefaultTheme.xaml 一致） ========== */
+:root {
+  /* 表面层级：越「顶」略深，越「内容」越白 */
+  --bg-app:        #F4F6F9;
+  --bg-title:      #E8EDF3;
+  --bg-menu:       #EEF2F7;
+  --bg-panel:      #FFFFFF;
+  --bg-muted:      #F7F9FC;
+  --bg-hover:      #E8EEF6;
+  --bg-selected:   #DCE8F8;
+
+  --border:        #D5DEE9;
+  --border-strong: #B8C5D6;
+
+  --text:          #0F172A;
+  --text-2:        #475569;
+  --text-3:        #64748B;
+  --text-disabled: #94A3B8;
+
+  /* 强调：单一主色，避免多色抢戏 */
+  --accent:        #2B6CB0;
+  --accent-hover:  #245A96;
+  --accent-soft:   #DBEAFE;
+  --on-accent:     #FFFFFF;
+
+  /* 结果语义（仅结果/状态用） */
+  --ok:            #0D9488;
+  --ok-soft:       #CCFBF1;
+  --warn:          #D97706;
+  --warn-soft:     #FEF3C7;
+  --err:           #DC2626;
+  --err-soft:      #FEE2E2;
+
+  /* 图像区例外：深底护眼，不破坏整体亮色 */
+  --vision-bg:     #12161C;
+  --vision-grid:   #1C2430;
+  --vision-label:  #94A3B8;
+  --vision-roi:    #60A5FA;
+
+  --font: "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", system-ui, sans-serif;
+  --mono: Consolas, "Cascadia Mono", "Courier New", monospace;
+  --tr: 150ms ease;
+  --radius: 0; /* 对齐无边框 WPF 窗体，区域用分割线而非圆角卡片 */
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--text);
+  background: #CBD5E1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  padding: 28px 20px 48px;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.page-head {
+  width: min(1600px, 100%);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+.page-head h1 { font-size: 18px; font-weight: 700; letter-spacing: .02em; }
+.page-head p { color: var(--text-3); font-size: 12.5px; margin-top: 4px; max-width: 52em; line-height: 1.55; }
+.badge {
+  font-size: 11px; font-weight: 600; color: var(--accent);
+  background: var(--accent-soft); padding: 4px 10px; border-radius: 999px;
+}
+
+/* —— Token 色板 —— */
+.tokens {
+  width: min(1600px, 100%);
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 16px 18px 14px;
+}
+.tokens h2 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.tokens .sub { font-size: 11.5px; color: var(--text-3); margin-bottom: 8px; }
+.swatch-group h3 {
+  font-size: 10.5px; font-weight: 700; color: var(--text-3);
+  letter-spacing: .05em; margin: 10px 0 6px; text-transform: uppercase;
+}
+.swatch-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.swatch {
+  width: 118px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  background: var(--bg-muted);
+}
+.swatch .chip { height: 36px; }
+.swatch .meta { padding: 6px 8px; }
+.swatch .meta b { display: block; font-size: 11px; font-weight: 600; }
+.swatch .meta span { font-family: var(--mono); font-size: 10.5px; color: var(--text-3); }
+
+/* —— 窗体模拟 1600×900 —— */
+.frame-wrap {
+  width: min(1600px, 100%);
+  aspect-ratio: 1600 / 900;
+  max-height: min(900px, calc(100vh - 220px));
+  box-shadow: 0 18px 48px rgba(15, 23, 42, .18);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-app);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 520px;
+}
+
+/* 区域编号徽标：①-⑥ 对应下方「逐区说明」表 */
+.tag-num {
+  width: 18px; height: 18px; flex: none;
+  display: inline-grid; place-items: center;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 10.5px; font-weight: 700;
+  line-height: 1;
+}
+
+/* ① 标题栏 30px */
+.titlebar {
+  height: 30px; flex: none;
+  background: var(--bg-title);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  gap: 10px;
+  padding: 0 0 0 14px;
+  user-select: none;
+}
+.titlebar .app-title { font-size: 12px; font-weight: 700; color: var(--text); }
+.titlebar .caption { font-size: 11px; color: var(--text-3); }
+.stchips { margin-left: auto; display: flex; align-items: center; gap: 6px; padding-right: 8px; }
+.stchip {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 19px; padding: 0 8px;
+  border: 1px solid var(--border);
+  background: #fff;
+  font-size: 10.5px; font-weight: 600; color: var(--text-2);
+}
+.stchip .dot { width: 6px; height: 6px; border-radius: 50%; }
+.stchip .dot.ok { background: var(--ok); }
+.stchip .dot.accent { background: var(--accent); }
+.stchip.plain { font-weight: 500; color: var(--text-3); border-style: dashed; }
+.titlebar .win-btns { display: flex; height: 100%; }
+.titlebar .win-btns button {
+  width: 46px; height: 100%;
+  display: grid; place-items: center;
+  color: var(--text-2); font-size: 11px;
+  transition: background var(--tr), color var(--tr);
+}
+.titlebar .win-btns button:hover { background: var(--bg-hover); color: var(--text); }
+.titlebar .win-btns .close:hover { background: var(--err); color: #fff; }
+
+/* ② 菜单栏 50px */
+.menubar {
+  height: 50px; flex: none;
+  background: var(--bg-menu);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 8px 0 12px;
+  gap: 2px;
+}
+.menu-item {
+  padding: 0 16px;
+  display: inline-flex; align-items: center;
+  font-size: 13px; font-weight: 500; color: var(--text-2);
+  position: relative;
+  transition: background var(--tr), color var(--tr);
+}
+.menu-item:hover { background: var(--bg-hover); color: var(--text); }
+.menu-item.active {
+  background: var(--bg-selected);
+  color: var(--accent);
+  font-weight: 600;
+}
+.menu-item.active::after {
+  content: "";
+  position: absolute; left: 12px; right: 12px; bottom: 0;
+  height: 2px; background: var(--accent);
+}
+.menu-item .planned {
+  margin-left: 5px;
+  font-size: 9px; font-weight: 500; color: var(--text-disabled);
+  border: 1px dashed var(--border-strong);
+  padding: 0 4px; line-height: 14px;
+}
+.menubar .spacer { flex: 1; }
+.menubar .hint {
+  align-self: center;
+  font-size: 11px; color: var(--text-3);
+  padding-right: 10px;
+}
+
+/* 主体：左 300 | 中 * | 右 400 */
+.body {
+  flex: 1; min-height: 0;
+  display: grid;
+  grid-template-columns: 300px 1fr 400px;
+}
+
+.panel {
+  background: var(--bg-panel);
+  display: flex; flex-direction: column;
+  min-height: 0;
+}
+.panel.left { border-right: 1px solid var(--border); }
+.panel.right { border-left: 1px solid var(--border); }
+
+.panel-h {
+  height: 32px; flex: none;
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 12px;
+  font-size: 11px; font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: .04em;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-muted);
+}
+.panel-h .tag {
+  margin-left: auto;
+  font-weight: 500; font-size: 10.5px; color: var(--text-disabled);
+}
+.panel-h .tbtn {
+  height: 19px; padding: 0 7px;
+  font-size: 10.5px; font-weight: 500; color: var(--text-3);
+  border: 1px solid var(--border); background: #fff;
+}
+.panel-h .tbtn:hover { background: var(--bg-hover); color: var(--text); }
+.panel-b { flex: 1; overflow: auto; padding: 10px 12px; min-height: 0; }
+
+/* ③ 左：设备树 + 参数 */
+.tree-group {
+  font-size: 10px; font-weight: 700; color: var(--text-disabled);
+  letter-spacing: .05em; margin: 10px 4px 4px;
+}
+.tree-group:first-child { margin-top: 0; }
+.tree-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 8px; font-size: 12.5px; color: var(--text-2);
+  border: 1px solid transparent;
+}
+.tree-item:hover { background: var(--bg-hover); }
+.tree-item.on {
+  background: var(--bg-selected);
+  color: var(--accent); font-weight: 600;
+}
+.tree-item .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.dot.ok { background: var(--ok); }
+.dot.off { background: var(--border-strong); }
+.dot.accent { background: var(--accent); }
+.field { margin-bottom: 10px; }
+.field label {
+  display: block; font-size: 11px; font-weight: 600;
+  color: var(--text-3); margin-bottom: 4px;
+}
+.field input, .field select {
+  width: 100%; height: 28px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-panel);
+  padding: 0 8px;
+  font-family: var(--mono); font-size: 12px; color: var(--text);
+}
+.field input:focus, .field select:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+.field input[readonly] { background: var(--bg-muted); color: var(--text-3); }
+.row-btns { display: flex; gap: 6px; margin-top: 4px; }
+.btn {
+  height: 28px; padding: 0 12px;
+  font-size: 12px; font-weight: 600;
+  border: 1px solid var(--border);
+  background: var(--bg-muted); color: var(--text);
+  transition: background var(--tr), border-color var(--tr);
+}
+.btn:hover { background: var(--bg-hover); border-color: var(--border-strong); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { background: var(--accent-hover); }
+
+/* ④ 中列上：图像视口（唯一深色区） */
+.center {
+  display: grid;
+  grid-template-rows: 1fr 0.6fr;
+  min-width: 0; min-height: 0;
+  background: var(--bg-app);
+}
+.vision {
+  position: relative;
+  background: var(--vision-bg);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  display: grid; place-items: center;
+}
+.vision::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--vision-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--vision-grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: .55;
+}
+.vision .ph {
+  position: relative; z-index: 1;
+  color: var(--vision-label);
+  font-size: 13px; letter-spacing: .08em; font-weight: 500;
+}
+.vision .roi {
+  position: absolute; z-index: 1;
+  width: 44%; height: 42%; left: 28%; top: 26%;
+  border: 1.5px dashed var(--vision-roi);
+}
+.vision .roi::before, .vision .roi::after {
+  content: "";
+  position: absolute; background: rgba(96, 165, 250, .45);
+}
+.vision .roi::before { left: 50%; top: -6%; width: 1px; height: 112%; }
+.vision .roi::after  { top: 50%; left: -6%; width: 112%; height: 1px; }
+.vision .part {
+  position: absolute; z-index: 2;
+  width: 24%; height: 38%; left: 38%; top: 28%;
+  border: 2px solid var(--ok);
+  border-radius: 50%;
+}
+.vision .part::after {
+  content: "";
+  position: absolute; left: 50%; top: 50%;
+  width: 4px; height: 4px; margin: -2px 0 0 -2px;
+  border-radius: 50%; background: var(--ok);
+}
+.vision .chip {
+  position: absolute; z-index: 3; top: 10px; left: 10px;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.94);
+  color: var(--text); font-size: 10.5px; font-weight: 600;
+  padding: 3px 9px; border: 1px solid var(--border);
+}
+.vision .roi-label {
+  position: absolute; z-index: 3; top: 10px; right: 10px;
+  color: var(--vision-roi); font-family: var(--mono); font-size: 10.5px;
+}
+.vision .legend {
+  position: absolute; z-index: 3; right: 10px; bottom: 10px;
+  background: rgba(15,23,42,.82);
+  color: #CBD5E1; font-size: 10.5px; line-height: 1.7;
+  padding: 6px 9px; font-family: var(--mono);
+}
+.vision .legend b { color: var(--ok); }
+
+/* ⑤ 中列下：运动控制 */
+.motion {
+  background: var(--bg-panel);
+  display: flex; flex-direction: column; min-height: 0;
+}
+.motion .panel-b {
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+}
+.m-group .g-t {
+  font-size: 10.5px; font-weight: 700; color: var(--text-disabled);
+  margin-bottom: 6px; letter-spacing: .03em;
+}
+.axis { display: flex; gap: 4px; }
+.axis button {
+  height: 26px; padding: 0 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-muted);
+  font-size: 11.5px; font-weight: 600; color: var(--text-3);
+}
+.axis button.on {
+  background: var(--accent); border-color: var(--accent); color: #fff;
+}
+.m-field { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
+.m-field label { width: 14px; font-size: 11px; font-weight: 700; color: var(--text-3); }
+.m-field input {
+  width: 110px; height: 26px;
+  border: 1px solid var(--border-strong);
+  padding: 0 8px; font-family: var(--mono); font-size: 12px; color: var(--text);
+}
+.m-field .u { font-size: 10.5px; color: var(--text-disabled); }
+.jog { display: flex; gap: 3px; margin-bottom: 8px; }
+.jog button {
+  width: 26px; height: 26px;
+  border: 1px solid var(--border);
+  background: var(--bg-muted);
+  font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text-3);
+}
+.jog button:hover { background: var(--bg-hover); color: var(--text); }
+.m-pos { font-family: var(--mono); font-size: 11.5px; color: var(--text-3); line-height: 1.75; }
+.m-pos b { color: var(--text); }
+.m-pos .st { color: var(--accent); font-weight: 700; }
+.btn.ok { background: var(--ok); border-color: var(--ok); color: #fff; }
+.btn.warn { background: var(--warn); border-color: var(--warn); color: #fff; }
+
+/* ⑥ 右：日志 + 结果 */
+.split-v { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.split-v .half { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.split-v .half + .half { border-top: 1px solid var(--border); }
+.logline {
+  font-family: var(--mono); font-size: 11.5px; line-height: 1.85;
+  color: var(--text-3); white-space: nowrap;
+}
+.logline .t { color: var(--text-disabled); }
+.logline.ok { color: var(--ok); }
+.logline.warn { color: var(--warn); }
+.logline.err { color: var(--err); }
+
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th {
+  text-align: left; font-size: 10.5px; font-weight: 600;
+  color: var(--text-disabled); padding: 6px 6px;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 7px 6px; border-bottom: 1px solid var(--border);
+  font-family: var(--mono); color: var(--text-3);
+}
+td.nm { color: var(--text); font-weight: 600; font-family: var(--font); }
+td.tol { color: var(--text-disabled); }
+td.pass { color: var(--ok); font-weight: 700; }
+td.fail { color: var(--err); font-weight: 700; }
+.status-bar {
+  display: flex; flex-wrap: wrap; gap: 4px 12px; padding: 8px 6px 0;
+  font-size: 11px; color: var(--text-3);
+}
+.status-bar b.ok { color: var(--ok); }
+.status-bar b.err { color: var(--err); }
+.status-bar b.acc { color: var(--accent); }
+
+/* —— 逐区内容与配色说明表 —— */
+.regions {
+  width: min(1600px, 100%);
+  font-size: 12.5px; color: var(--text-2); line-height: 1.65;
+  background: #fff; border: 1px solid var(--border); padding: 16px 18px;
+}
+.regions h2 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.regions .sub { font-size: 11.5px; color: var(--text-3); margin-bottom: 12px; }
+.regions table { font-size: 12.5px; }
+.regions th { padding: 8px 10px; background: var(--bg-muted); }
+.regions td { padding: 9px 10px; vertical-align: top; line-height: 1.7; }
+.regions td.num { text-align: center; width: 40px; }
+.regions td.where { width: 190px; }
+.regions td.role { width: 150px; }
+.regions td.role b { color: var(--text); }
+.regions code {
+  font-family: var(--mono); font-size: 11px;
+  background: var(--bg-muted); padding: 1px 5px; border: 1px solid var(--border);
+}
+.regions .cok { color: var(--ok); font-weight: 600; }
+.regions .cwarn { color: var(--warn); font-weight: 600; }
+.regions .cerr { color: var(--err); font-weight: 600; }
+.regions .cacc { color: var(--accent); font-weight: 600; }
+
+.notes {
+  width: min(1600px, 100%);
+  font-size: 12.5px; color: var(--text-2); line-height: 1.65;
+  background: #fff; border: 1px solid var(--border); padding: 14px 18px;
+}
+.notes h2 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.notes ul { padding-left: 1.2em; }
+.notes li { margin: 4px 0; }
+.notes code {
+  font-family: var(--mono); font-size: 11.5px;
+  background: var(--bg-muted); padding: 1px 5px; border: 1px solid var(--border);
+}
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <div>
+    <h1>VisionBench 主窗体 · 亮色配色设计稿（细化版）</h1>
+    <p>对齐当前 XAML 骨架：标题 30 / 菜单 50 / 左 300 / 中（图像 1 + 运动 0.6）/ 右 400，结构不动。
+    本次只细化「每个区域填什么内容」并逐区标注编号（①-⑥，对应下方说明表）；配色沿用已落地的浅灰分层 + 稳重蓝，色值与 <code>DefaultTheme.xaml</code> 一致。</p>
+  </div>
+  <span class="badge">docs/mockups · 待确认 · 仅细化</span>
+</header>
+
+<section class="tokens" aria-label="色板">
+  <h2>语义色板（写入 DefaultTheme 时的权威值，本次未改）</h2>
+  <p class="sub">大面积只用灰阶分层；彩色只留给交互与结果；图像区是唯一深色例外。</p>
+  <div id="swatches"></div>
+</section>
+
+<!-- 1600×900 窗体 -->
+<div class="frame-wrap" role="img" aria-label="主窗体亮色布局预览">
+  <!-- ① 标题栏 -->
+  <div class="titlebar">
+    <span class="app-title">Nobody</span>
+    <span class="caption">VisionBench · 视觉测量</span>
+    <span class="tag-num">①</span>
+    <div class="stchips">
+      <span class="stchip"><span class="dot ok"></span>相机在线</span>
+      <span class="stchip"><span class="dot accent"></span>轴 Idle</span>
+      <span class="stchip plain">Recipe_01</span>
+    </div>
+    <div class="win-btns">
+      <button type="button" aria-label="最小化">─</button>
+      <button type="button" aria-label="最大化">□</button>
+      <button type="button" class="close" aria-label="关闭">×</button>
+    </div>
+  </div>
+
+  <!-- ② 菜单栏 -->
+  <nav class="menubar" aria-label="主导航">
+    <span class="tag-num">②</span>
+    <button type="button" class="menu-item active">相机设置</button>
+    <button type="button" class="menu-item">运动设置</button>
+    <button type="button" class="menu-item">配方管理<span class="planned">规划</span></button>
+    <button type="button" class="menu-item">系统<span class="planned">规划</span></button>
+    <div class="spacer"></div>
+    <span class="hint">当前配方 Recipe_01 · 手动模式</span>
+  </nav>
+
+  <div class="body">
+    <!-- ③ 左：设备树 + 参数 -->
+    <aside class="panel left">
+      <div class="panel-h"><span class="tag-num">③</span>设备与参数 <span class="tag">Col0 · 300px · Row2-3</span></div>
+      <div class="panel-b">
+        <div class="tree-group">设备树</div>
+        <div class="tree-item on"><span class="dot ok"></span> Camera_01</div>
+        <div class="tree-item"><span class="dot ok"></span> Camera_02</div>
+        <div class="tree-item"><span class="dot off"></span> LightCtrl</div>
+        <div class="tree-group">运动轴</div>
+        <div class="tree-item"><span class="dot accent"></span> Axis_X</div>
+        <div class="tree-item"><span class="dot accent"></span> Axis_Y</div>
+        <div class="tree-item"><span class="dot off"></span> Axis_Z</div>
+        <div class="tree-item"><span class="dot off"></span> Axis_R</div>
+        <div class="tree-group">相机参数（Camera_01）</div>
+        <div class="field">
+          <label>曝光 (μs)</label>
+          <input value="12000">
+        </div>
+        <div class="field">
+          <label>增益</label>
+          <input value="1.0">
+        </div>
+        <div class="field">
+          <label>触发模式</label>
+          <select><option>软件触发</option><option>硬触发</option></select>
+        </div>
+        <div class="field">
+          <label>像素格式 / ROI</label>
+          <input value="Mono8 · 2448×2048" readonly>
+        </div>
+        <div class="row-btns">
+          <button type="button" class="btn primary">应用</button>
+          <button type="button" class="btn">抓图</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ④⑤ 中：图像视口 + 运动控制 -->
+    <main class="center">
+      <div class="vision">
+        <span class="chip"><span class="tag-num">④</span>图像视口 · Halcon HWindow · 2448×2048</span>
+        <span class="roi-label">ROI_1 · 矩形拟合</span>
+        <div class="ph">IMAGE VIEWPORT</div>
+        <div class="roi"></div>
+        <div class="part"></div>
+        <div class="legend">FPS <b>62</b> · ROI 2 · Contour OK · 8.2 ms</div>
+      </div>
+      <div class="motion">
+        <div class="panel-h"><span class="tag-num">⑤</span>运动控制 <span class="tag">Col1 · Row3 · 0.6*</span></div>
+        <div class="panel-b">
+          <div class="m-group">
+            <div class="g-t">轴选择</div>
+            <div class="axis">
+              <button type="button" class="on">X</button>
+              <button type="button">Y</button>
+              <button type="button">Z</button>
+              <button type="button">R</button>
+            </div>
+          </div>
+          <div class="m-group">
+            <div class="g-t">目标位置</div>
+            <div class="m-field"><label>X</label><input value="125.000"><span class="u">mm</span></div>
+            <div class="m-field"><label>Y</label><input value="80.500"><span class="u">mm</span></div>
+            <div class="m-field"><label>V</label><input value="50.0"><span class="u">mm/s</span></div>
+          </div>
+          <div class="m-group">
+            <div class="g-t">点动 Jog</div>
+            <div class="jog">
+              <button type="button">X−</button><button type="button">X+</button>
+              <button type="button">Y−</button><button type="button">Y+</button>
+            </div>
+          </div>
+          <div class="m-group">
+            <div class="g-t">操作</div>
+            <div class="row-btns">
+              <button type="button" class="btn ok">相对移动</button>
+              <button type="button" class="btn warn">回零</button>
+              <button type="button" class="btn">停止</button>
+            </div>
+          </div>
+          <div class="m-pos">Pos X <b>124.982</b> · Pos Y <b>80.501</b> · V <b>49.8</b><br>状态 <span class="st">Idle</span> · 目标差 Δ <b>0.018</b></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ⑥ 右：日志 + 结果 -->
+    <aside class="panel right">
+      <div class="split-v">
+        <div class="half">
+          <div class="panel-h"><span class="tag-num">⑥</span>运行日志 <span class="tag">Col2 · 400px · Row2-3</span>
+            <button type="button" class="tbtn">清空</button><button type="button" class="tbtn">导出</button>
+          </div>
+          <div class="panel-b">
+            <div class="logline"><span class="t">21:04:01</span> 相机连接成功</div>
+            <div class="logline ok"><span class="t">21:04:03</span> 抓图 OK · 2448×2048</div>
+            <div class="logline"><span class="t">21:04:05</span> 开始测量流程</div>
+            <div class="logline warn"><span class="t">21:04:06</span> 曝光偏高，建议下调</div>
+            <div class="logline err"><span class="t">21:04:08</span> ROI_2 超出视野</div>
+            <div class="logline ok"><span class="t">21:04:10</span> 复测通过</div>
+            <div class="logline"><span class="t">21:04:11</span> 测量完成 · 节拍 120 ms</div>
+          </div>
+        </div>
+        <div class="half">
+          <div class="panel-h"><span class="tag-num">⑥</span>测量结果</div>
+          <div class="panel-b">
+            <table>
+              <thead><tr><th>项</th><th>实测</th><th>公差</th><th>判定</th></tr></thead>
+              <tbody>
+                <tr><td class="nm">宽度</td><td>12.052</td><td class="tol">±0.050</td><td class="pass">OK</td></tr>
+                <tr><td class="nm">高度</td><td>8.401</td><td class="tol">±0.100</td><td class="pass">OK</td></tr>
+                <tr><td class="nm">位置X</td><td>124.982</td><td class="tol">±0.020</td><td class="pass">OK</td></tr>
+                <tr><td class="nm">圆度</td><td>0.018</td><td class="tol">≤0.010</td><td class="fail">NG</td></tr>
+              </tbody>
+            </table>
+            <div class="status-bar">合计 <b class="ok">3 OK</b> · <b class="err">1 NG</b> · 节拍 <b class="acc">120 ms</b> · 良率 <b class="acc">75.0%</b></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<section class="regions" aria-label="逐区说明">
+  <h2>逐区内容与配色说明（①-⑥ 对应上图编号）</h2>
+  <p class="sub">落地方向：每个区域按 <code>RegionConstants</code>（MainNavRegion / LeftBarRegion / HalconRegion / MotionRegion / RightBarRegion）拆成独立 UserControl 后填充。</p>
+  <table>
+    <thead>
+      <tr><th class="num">#</th><th>区域（RegionConstants）</th><th class="where">网格位置 / 尺寸</th><th class="role">要填的内容</th><th>配色要点</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="num"><span class="tag-num">①</span></td>
+        <td class="role"><b>标题栏</b><br><code>WindowTitle</code></td>
+        <td class="where">Row 0 · 30px · 跨 3 列</td>
+        <td>应用名 + 版本副标；运行状态徽标（相机在线 / 轴状态 / 当前配方）；最小化 · 最大化 · 关闭</td>
+        <td>底 <code>#E8EDF3</code>，标题字 <code>#0F172A</code>；状态点用 <span class="cok">OK 绿</span>/<span class="cacc">Accent 蓝</span>；关闭悬停 <span class="cerr">#DC2626</span></td>
+      </tr>
+      <tr>
+        <td class="num"><span class="tag-num">②</span></td>
+        <td class="role"><b>主导航</b><br><code>MainNavRegion</code></td>
+        <td class="where">Row 1 · 50px · 跨 3 列</td>
+        <td>菜单项：相机设置 / 运动设置（已在 VM），配方管理 / 系统（规划）；右侧显示当前配方与运行模式</td>
+        <td>底 <code>#EEF2F7</code>；选中态 = <code>#DCE8F8</code> 底 + Accent <code>#2B6CB0</code> 2px 底线；未选中文字 <code>#475569</code></td>
+      </tr>
+      <tr>
+        <td class="num"><span class="tag-num">③</span></td>
+        <td class="role"><b>设备与参数</b><br><code>LeftBarRegion</code></td>
+        <td class="where">Col 0 · 300px · Row 2-3（跨两行）</td>
+        <td>设备树（相机 / 光源 / 运动轴，各带状态圆点）；当前项参数表单（曝光 / 增益 / 触发模式 / 像素格式·ROI）；[应用] [抓图] 按钮</td>
+        <td>白底 <code>#FFFFFF</code>；树选中 <code>#DCE8F8</code> + Accent 字；圆点 OK <span class="cok">#0D9488</span> / 离线 <code>#B8C5D6</code> / 轴 <span class="cacc">Accent</span>；主按钮 Accent 实底白字</td>
+      </tr>
+      <tr>
+        <td class="num"><span class="tag-num">④</span></td>
+        <td class="role"><b>图像视口</b><br><code>HalconRegion</code></td>
+        <td class="where">Col 1 · Row 2 · 1*</td>
+        <td>Halcon HWindow 图像视口：网格 + ROI 框（虚线 + 十字线）+ 检出轮廓；左上信息条（窗口/分辨率）；右下实时 legend（FPS / ROI 数 / 结果 / 耗时）</td>
+        <td>唯一深色例外：底 <span class="cacc">#12161C</span>、网格 <code>#1C2430</code>、标签 <code>#94A3B8</code>；ROI 线 <span class="cacc">#60A5FA</span>；轮廓 <span class="cok">#0D9488</span></td>
+      </tr>
+      <tr>
+        <td class="num"><span class="tag-num">⑤</span></td>
+        <td class="role"><b>运动控制</b><br><code>MotionRegion</code></td>
+        <td class="where">Col 1 · Row 3 · 0.6*</td>
+        <td>轴选择 X/Y/Z/R；目标位置 + 速度输入；点动 Jog±；[相对移动] [回零] [停止]；实时位置 / 速度 / 状态 / 目标差读显</td>
+        <td>白底；选中轴 Accent 实底白字；动作按钮语义色：[相对移动] <span class="cok">OK 绿</span>、[回零] <span class="cwarn">Warn 琥珀</span>、[停止] 默认灰；状态字 Accent</td>
+      </tr>
+      <tr>
+        <td class="num"><span class="tag-num">⑥</span></td>
+        <td class="role"><b>日志与结果</b><br><code>RightBarRegion</code></td>
+        <td class="where">Col 2 · 400px · Row 2-3（上下两半）</td>
+        <td>上：运行日志（时间戳 + 级别着色，带 [清空] [导出]）；下：测量结果表（项 / 实测 / 公差 / 判定）+ 统计条（合计 / 节拍 / 良率）</td>
+        <td>白底；日志级别色 <span class="cok">OK</span>/<span class="cwarn">WARN</span>/<span class="cerr">ERR</span>，普通行 <code>#64748B</code>；判定 PASS <span class="cok">#0D9488</span> / NG <span class="cerr">#DC2626</span>；统计数字 Accent</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="notes">
+  <h2>搭配原则（落地 Theme 时遵守）</h2>
+  <ul>
+    <li><b>大面积只用灰阶</b>：App / Title / Menu / Panel / Border 形成 4～5 级浅色层次，不用多色块铺底。</li>
+    <li><b>彩色只留给交互与结果</b>：Accent 蓝 = 选中/主按钮/焦点；Teal = OK；Amber = 警告；Red = NG / 关闭悬停。</li>
+    <li><b>图像区可单独深色</b>（<code>--vision-bg</code>），其余保持亮色，不影响「整体亮色」观感。</li>
+    <li><b>无圆角卡片风</b>：与无边框 WPF 窗体一致，区域靠分割线分层，避免 Web 卡片阴影。</li>
+    <li>正文对比：<code>#0F172A</code> on <code>#F4F6F9</code> / <code>#FFFFFF</code> ≥ 4.5:1；次要字 <code>#64748B</code> 勿再叠灰底。</li>
+    <li><b>本次范围</b>：仅细化设计稿内容与标注，<code>DefaultTheme.xaml</code> 与 <code>MainWindow.xaml</code> 均未改动；定稿后再决定是否同步色值 / 落地布局。</li>
+  </ul>
+</section>
+
+<script>
+const groups = [
+  ['表面层级', [
+    ['bg-app', '#F4F6F9', '窗口底'],
+    ['bg-title', '#E8EDF3', '标题栏'],
+    ['bg-menu', '#EEF2F7', '菜单栏'],
+    ['bg-panel', '#FFFFFF', '左右面板'],
+    ['bg-muted', '#F7F9FC', '表头/只读'],
+    ['bg-selected', '#DCE8F8', '选中底'],
+  ]],
+  ['边框与文字', [
+    ['border', '#D5DEE9', '分割线'],
+    ['border-strong', '#B8C5D6', '控件描边'],
+    ['text', '#0F172A', '主文字'],
+    ['text-2', '#475569', '次级文字'],
+    ['text-3', '#64748B', '说明文字'],
+    ['text-disabled', '#94A3B8', '禁用/占位'],
+  ]],
+  ['强调与结果语义', [
+    ['accent', '#2B6CB0', '强调蓝'],
+    ['accent-hover', '#245A96', '悬停蓝'],
+    ['accent-soft', '#DBEAFE', '强调浅底'],
+    ['ok', '#0D9488', 'Pass'],
+    ['warn', '#D97706', '警告'],
+    ['err', '#DC2626', 'NG'],
+  ]],
+  ['图像区（深色例外）', [
+    ['vision-bg', '#12161C', '视口底'],
+    ['vision-grid', '#1C2430', '网格线'],
+    ['vision-label', '#94A3B8', '视口标签'],
+    ['vision-roi', '#60A5FA', 'ROI 框'],
+  ]],
+];
+const root = document.getElementById('swatches');
+for (const [group, list] of groups) {
+  const g = document.createElement('div');
+  g.className = 'swatch-group';
+  g.innerHTML = `<h3>${group}</h3>`;
+  const row = document.createElement('div');
+  row.className = 'swatch-row';
+  for (const [name, hex, label] of list) {
+    const el = document.createElement('div');
+    el.className = 'swatch';
+    el.innerHTML = `<div class="chip" style="background:${hex}"></div>
+      <div class="meta"><b>${label}</b><span>${hex}</span><span style="display:block;margin-top:2px;color:#94A3B8">${name}</span></div>`;
+    row.appendChild(el);
+  }
+  g.appendChild(row);
+  root.appendChild(g);
+}
+</script>
+</body>
+</html>

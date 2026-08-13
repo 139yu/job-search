@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>视觉测量台 · 框架骨架 v0.3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ 设计令牌 ============ */
+:root{
+  --bg:#F5F7FA; --surface:#FFFFFF; --surface-2:#F1F3F5; --surface-3:#E7ECF2;
+  --border:#E4E7EB; --border-strong:#C9D3DF;
+  --text:#0F172A; --text-2:#475569; --text-3:#8A96A8;
+  --primary:#1E3A5F; --primary-hover:#16304F; --on-primary:#FFF;
+  --secondary:#2563EB; --accent:#059669;
+  --tag-pri-bg:#E7F6F0; --tag-pri-fg:#047857;
+  --tag-wait-bg:#F1F3F5; --tag-wait-fg:#64748B;
+  --font:'Inter','Microsoft YaHei',system-ui,sans-serif;
+  --radius:10px; --radius-sm:6px;
+  --sh-sm:0 1px 2px rgba(15,23,42,.05);
+  --tr:160ms ease;
+  /* z-index scale */
+  --z-base:0; --z-nav:10; --z-drop:20; --z-modal:50;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font);font-size:14px;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+:focus-visible{outline:2px solid var(--secondary);outline-offset:2px;border-radius:4px}
+.ic{width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ic-sm{width:16px;height:16px}
+
+/* ============ 应用框架 ============ */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:224px;flex:none;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:var(--z-nav)}
+.brand{display:flex;align-items:center;gap:10px;padding:14px 14px 12px;border-bottom:1px solid var(--border)}
+.brand-logo{width:32px;height:32px;flex:none;border-radius:8px;background:var(--primary);color:#fff;display:grid;place-items:center}
+.brand-title{font-size:14px;font-weight:700;line-height:1.2}
+.brand-sub{font-size:10.5px;color:var(--text-3);margin-top:1px}
+.nav{flex:1;padding:10px;overflow-y:auto}
+.nav-group{font-size:11px;font-weight:600;color:var(--text-3);letter-spacing:.04em;padding:10px 10px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:var(--radius-sm);color:var(--text-2);font-size:13px;font-weight:500;transition:background var(--tr),color var(--tr)}
+.nav-item:hover{background:var(--surface-2);color:var(--text)}
+.nav-item.active{background:var(--surface-3);color:var(--primary);font-weight:600}
+.nav-badge{margin-left:auto;font-size:10px;font-weight:600;padding:1px 6px;border-radius:999px;white-space:nowrap}
+.nav-badge.pri{background:var(--tag-pri-bg);color:var(--tag-pri-fg)}
+.nav-badge.wait{background:var(--tag-wait-bg);color:var(--tag-wait-fg)}
+.nav-foot{padding:10px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--text-3);line-height:1.8}
+
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:52px;flex:none;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 16px;z-index:var(--z-nav)}
+.topbar-title{font-size:15px;font-weight:600}
+.topbar-sub{font-size:12px;color:var(--text-3)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.role-chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:7px;background:var(--surface);font-size:12.5px;font-weight:600;color:var(--text);position:relative}
+.role-chip:hover{background:var(--surface-2)}
+.role-drop{position:absolute;right:0;top:38px;background:var(--surface);border:1px solid var(--border);border-radius:9px;box-shadow:var(--sh-sm);padding:6px;min-width:150px;display:none;z-index:var(--z-drop)}
+.role-drop.open{display:block}
+.role-drop button{display:block;width:100%;text-align:left;padding:7px 10px;border-radius:6px;font-size:12.5px;color:var(--text-2)}
+.role-drop button:hover{background:var(--surface-2)}
+.icon-btn{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--text-2)}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+
+.content{flex:1;overflow-y:auto;padding:18px 20px 28px}
+.page{display:none}
+.page.active{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(2px)}to{opacity:1;transform:none}}
+
+/* ============ 骨架占位 ============ */
+.frame-note{font-size:11.5px;color:var(--text-3);margin-bottom:12px}
+.frame-note b{color:var(--text-2)}
+.skel-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.skel-head .t{font-size:14px;font-weight:700}
+.slot{border:2px dashed var(--border-strong);border-radius:var(--radius);display:grid;place-items:center;color:var(--text-3);font-size:12.5px;text-align:center;padding:12px;background:var(--surface);min-height:120px}
+.slot small{display:block;margin-top:4px;font-size:11px;color:var(--text-3)}
+.slot.pri{border-color:#A7C7E7}
+.workbench{display:flex;gap:12px;align-items:stretch;min-height:560px}
+.workbench .slot-tools{width:52px;min-height:520px}
+.workbench .slot-canvas{flex:1}
+.workbench .slot-side{width:260px;display:flex;flex-direction:column;gap:12px}
+.workbench .slot-side .slot{min-height:150px;flex:1}
+.two-col{display:flex;gap:12px;align-items:stretch;min-height:420px}
+.two-col .slot-l{width:250px}
+.two-col .slot-r{flex:1}
+.center-box{min-height:340px}
+.tab-sk{display:flex;gap:8px;margin-bottom:12px}
+.tab-sk i{height:28px;width:86px;border:2px dashed var(--border-strong);border-radius:6px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ 侧栏 ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      </div>
+      <div>
+        <div class="brand-title">视觉测量台</div>
+        <div class="brand-sub">完整小项目 · 实操迭代</div>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav">
+      <div class="nav-group">Halcon（优先）</div>
+      <button class="nav-item active" data-page="page-visual">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+        视觉测量<span class="nav-badge pri">#11 优先</span></button>
+      <button class="nav-item" data-page="page-3d">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.3 7 12 12 20.7 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+        3D 点云<span class="nav-badge pri">#12–16 优先</span></button>
+
+      <div class="nav-group">后续接入</div>
+      <button class="nav-item" data-page="page-program">
+        <svg class="ic" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="14" y2="18"/></svg>
+        程序编辑<span class="nav-badge wait">#5–8 待接入</span></button>
+      <button class="nav-item" data-page="page-navi">
+        <svg class="ic" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+        定位导航<span class="nav-badge wait">#9 待接入</span></button>
+
+      <div class="nav-group">框架</div>
+      <button class="nav-item" data-page="page-settings">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        设置</button>
+    </nav>
+
+    <div class="nav-foot">
+      框架 v0.1 · 虚线框 = 待接入模块布局<br>
+      实操进度在外部文档维护
+    </div>
+  </aside>
+
+  <!-- ============ 主区 ============ -->
+  <div class="main">
+    <header class="topbar">
+      <span class="topbar-title" id="pageTitle">视觉测量</span>
+      <span class="topbar-sub" id="pageSub">实操 #11 · 2D 测量最小闭环</span>
+      <div class="topbar-right">
+        <div class="role-chip" onclick="this.querySelector('.role-drop').classList.toggle('open')">
+          <span id="roleName">工程师</span>
+          <svg class="ic ic-sm" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          <div class="role-drop">
+            <button onclick="setRole(this,'操作员')">操作员</button>
+            <button onclick="setRole(this,'工程师')">工程师</button>
+            <button onclick="setRole(this,'管理员')">管理员</button>
+          </div>
+        </div>
+        <button class="icon-btn" title="搜索">
+          <svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+        <button class="icon-btn" title="设置">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ============ 视觉测量 #11 骨架 ============ -->
+      <section id="page-visual" class="page active">
+        <div class="frame-note">模块骨架 · 待接入实操 <b>#11</b>（左工具条 / 中图像区 / 右结果+标定）</div>
+        <div class="workbench">
+          <div class="slot slot-tools">测量<br>工具条</div>
+          <div class="slot slot-canvas pri">图像区（HWindow 交互）<small>画点 / 线 / 角度 / 三点圆 · 命中拖动</small></div>
+          <div class="slot slot-side">
+            <div class="slot">测量结果</div>
+            <div class="slot">标定参数<small>PixChange · 单位</small></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 3D 点云 #12–16 骨架 ============ -->
+      <section id="page-3d" class="page">
+        <div class="frame-note">模块骨架 · 待接入实操 <b>#12–16</b>（左案例 / 中点云视口 / 右参数+结果）</div>
+        <div class="workbench">
+          <div class="slot slot-tools" style="width:170px">点云<br>案例列表<br><small>01 拟合 / 02 距离 /<br>04 平面度 / 05 夹角<br>06 体积 / 08 交线</small></div>
+          <div class="slot slot-canvas pri">点云视口<small>深度图 → 点云 → 去飞点 → ROI → 拟合 / 测量</small></div>
+          <div class="slot slot-side">
+            <div class="slot">处理参数<small>ROI · 去飞点 · 鲁棒模式</small></div>
+            <div class="slot">测量结果<small>mm / mm³ / °</small></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 程序编辑 #5–8 骨架 ============ -->
+      <section id="page-program" class="page">
+        <div class="frame-note">模块骨架 · 待接入实操 <b>#5–8</b>（左程序树 / 右检查点详情）</div>
+        <div class="two-col">
+          <div class="slot slot-l">程序树<small>检查点 / 点位 / 阵列</small></div>
+          <div>
+            <div class="tab-sk"><i></i><i></i><i></i><i></i></div>
+            <div class="slot" style="min-height:360px">检查点详情<small>点位编辑 · 阵列生成 · 同步 · 算法预览</small></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 定位导航 #9 骨架 ============ -->
+      <section id="page-navi" class="page">
+        <div class="frame-note">模块骨架 · 待接入实操 <b>#9</b>（左图区 / 右坐标信息）</div>
+        <div class="two-col">
+          <div class="slot" style="flex:1">导航拼接图 · 选点<small>缩放 / 平移 / 选点 → 轴坐标</small></div>
+          <div style="width:250px">
+            <div class="slot" style="min-height:260px">选中点坐标<small>图像坐标 → 轴坐标 + 偏移</small></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 设置 ============ -->
+      <section id="page-settings" class="page">
+        <div class="frame-note">框架 · 系统设置（待接入：角色权限 / 标定 / 通信）</div>
+        <div class="slot center-box">设置内容<small>用户权限（#3）· 标定 · 设备连接</small></div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* 导航切换 */
+function go(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===id));
+  const t={
+    'page-visual':['视觉测量','实操 #11 · 2D 测量最小闭环'],
+    'page-3d':['3D 点云','实操 #12–16 · 点云拟合 / 测量'],
+    'page-program':['程序编辑','实操 #5–8 · 待接入'],
+    'page-navi':['定位导航','实操 #9 · 待接入'],
+    'page-settings':['设置','框架']
+  };
+  document.getElementById('pageTitle').textContent=t[id][0];
+  document.getElementById('pageSub').textContent=t[id][1];
+}
+document.querySelectorAll('.nav-item').forEach(n=>n.addEventListener('click',()=>go(n.dataset.page)));
+
+/* 角色下拉（框架占位，#3 RBAC 后续接入） */
+function setRole(btn,name){document.getElementById('roleName').textContent=name;}
+document.addEventListener('click',e=>{if(!e.target.closest('.role-chip'))document.querySelectorAll('.role-drop').forEach(d=>d.classList.remove('open'));});
+</script>
+</body>
+</html>

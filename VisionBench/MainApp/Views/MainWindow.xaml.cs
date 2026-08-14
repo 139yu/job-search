@@ -19,6 +19,26 @@ namespace MainApp.Views
         public MainWindow()
         {
             InitializeComponent();
+            this.WindowState = WindowState.Normal;
+            this.MaxBtn.Visibility = Visibility.Visible;
+            this.NormalBtn.Visibility = Visibility.Collapsed;
+        }
+
+        private void MinimizeClick(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+        private void MaxClick(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Maximized;
+            this.MaxBtn.Visibility = Visibility.Collapsed;
+            this.NormalBtn.Visibility = Visibility.Visible;
+        }
+        private void NormalClick(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Normal;
+            this.MaxBtn.Visibility = Visibility.Visible;
+            this.NormalBtn.Visibility = Visibility.Collapsed;
         }
     }
 }

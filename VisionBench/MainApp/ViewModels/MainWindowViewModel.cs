@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MainApp.ViewModels
 {
@@ -21,9 +22,11 @@ namespace MainApp.ViewModels
 
         public string Title
         {
-            get { return title = "Nobody"; }
+            get { return title; }
             set { title = value; }
         }
+
+        public DelegateCommand CloseCommand;
 
         public MainWindowViewModel()
         {
@@ -36,6 +39,12 @@ namespace MainApp.ViewModels
                 new MenuItem { Title = "相机设置", NavigationPath = "CameraSetting" },
                 new MenuItem { Title = "运动设置", NavigationPath = "CameraSetting" },
             };
+            CloseCommand = new DelegateCommand(DoCloseCommand);
+        }
+
+        public void DoCloseCommand()
+        {
+            Application.Current.MainWindow.Close();
         }
     }
 }

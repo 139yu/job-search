@@ -4,9 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MainApp"
+        xmlns:halcon="clr-namespace:HalconDotNet;assembly=halcondotnet"
+        xmlns:commonUI="clr-namespace:CommonUI;assembly=CommonUI"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen" FontSize="12"
         WindowStyle="None" SnapsToDevicePixels="True"
+        Background="{DynamicResource AppBrush}"
         Title="{Binding Title}" Height="900" Width="1600">
     <WindowChrome.WindowChrome>
         <WindowChrome GlassFrameThickness="-1"></WindowChrome>
@@ -14,6 +17,7 @@
     <Window.Resources>
         <ResourceDictionary>
             <Style TargetType="RadioButton" x:Key="MenuButtonStyle">
+                <Setter Property="Cursor" Value="Hand"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="RadioButton">
@@ -49,6 +53,7 @@
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter TargetName="root" Property="Background" Value="{DynamicResource WindowHoverBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource WindowButtonHoverFontBrush}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -83,14 +88,43 @@
             <TextBlock Text="{Binding Title}" FontWeight="Bold"
                        Foreground="{DynamicResource WinTitleFontBrush}" 
                        VerticalAlignment="Center" Margin="15,0,0,0"/>
-            <Button Grid.Column="2" Style="{StaticResource WinTitleButtonStyle}">
-                <Button.Content>-</Button.Content>
+            <Button Grid.Column="2" Style="{StaticResource WinTitleButtonStyle}" Click="MinimizeClick">
+                <Button.Content>
+                    <Viewbox Width="30" Height="30">
+                        <Border Width="20" Height="20">
+                            <Path Data="M 4,10 L 16,10" StrokeThickness="1.5" Stroke="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=Button},Path=Foreground}"/>
+                        </Border>
+                    </Viewbox>
+                </Button.Content>
             </Button>
-            <Button Grid.Column="3" Style="{StaticResource WinTitleButtonStyle}">
-                
+            <Button Grid.Column="3" Style="{StaticResource WinTitleButtonStyle}" Click="MaxClick" x:Name="MaxBtn">
+                <Button.Content>
+                    <Viewbox Width="30" Height="30">
+                        <Border Width="20" Height="20">
+                            <Path Data="M 5,5 15,5 15,15 5,15 5,5" StrokeThickness="1" 
+                                  Stroke="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=Button},Path=Foreground}"/>
+                        </Border>
+                    </Viewbox>
+                </Button.Content>
+            </Button>
+            <Button Grid.Column="3" Style="{StaticResource WinTitleButtonStyle}" Click="NormalClick" x:Name="NormalBtn">
+                <Button.Content>
+                    <Viewbox Width="30" Height="30">
+                        <Border Width="20" Height="20">
+                            <Path Data="m 10,8 0 -2 8,0 0,8 -2,0 0,-6 -10,0 0,8 10,0 0,-2" StrokeThickness="1"
+                                  Stroke="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=Button},Path=Foreground}"/>
+                        </Border>
+                    </Viewbox>
+                </Button.Content>
             </Button>
             <Button Grid.Column="4" Style="{StaticResource WinTitleButtonStyle}">
-                
+                <Button.Content>
+                    <Viewbox Width="30" Height="30">
+                        <Border Width="20" Height="20">
+                            <Path Data="M 5,5 L 15,15 M 15,5 L 5,15" StrokeThickness="1.2" Stroke="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=Button},Path=Foreground}"/>
+                        </Border>
+                    </Viewbox>
+                </Button.Content>
             </Button>
         </Grid>
         <!--菜单区域-->
@@ -111,7 +145,21 @@
         <!--左侧区域-->
         <Grid Grid.Row="2" Grid.Column="0" Grid.RowSpan="2" Background="Aqua"></Grid>
         <!--Halcon 窗口-->
-        <Grid Grid.Row="2" Grid.Column="1" Grid.RowSpan="1" Background="DarkBlue"></Grid>
+        <Grid Grid.Row="2" Grid.Column="1" Grid.RowSpan="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <commonUI:IconButton Height="50" Content="打开图片" 
+                                     IconCode="&#xe621;" 
+                                     IconSize="16"/>
+                <commonUI:IconButton Height="50" Content="保存图片" 
+                                     IconCode="&#xec09;" 
+                                     IconSize="16"/>
+            </StackPanel>
+            <halcon:HSmartWindowControlWPF Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        </Grid>
         <!--motion区域-->
         <Grid Grid.Row="3" Grid.Column="1" Grid.RowSpan="1" Background="BlueViolet"></Grid>
         <!--右侧区域-->

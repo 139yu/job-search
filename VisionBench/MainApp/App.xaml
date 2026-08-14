@@ -8,6 +8,9 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/Themes/DefaultTheme.xaml"/>
                 <ResourceDictionary Source="Resources/Styles/ControlStyle.xaml" />
+                <ResourceDictionary>
+                    <FontFamily x:Key="IconFont">Resources/Fonts/#iconfont</FontFamily>
+                </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

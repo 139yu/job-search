@@ -6,11 +6,12 @@
     -->
 
     <!-- 表面 -->
+    <Color x:Key="AppColor">#F4F6F9</Color>
     <Color x:Key="WinTitleColor">#CBD5E1</Color>
     <Color x:Key="WinButtonColor">#CBD5E1</Color>
     <Color x:Key="MenuContainerColor">#475569</Color>
-    <Color x:Key="MenuItemColor">#EEF2F7</Color>
     <Color x:Key="MenuHoverColor">#DCE8F8</Color>
+    <Color x:Key="IconButtonHoverColor">#DCE8F8</Color>
 
     <!-- 边框 -->
     <Color x:Key="BorderColor">#D5DEE9</Color>
@@ -22,6 +23,7 @@
     <Color x:Key="TextTertiaryColor">#64748B</Color>
     <Color x:Key="TextDisabledColor">#94A3B8</Color>
     <Color x:Key="WinTitleFontColor">#0F172A</Color>
+    <Color x:Key="MenuFontColor">#EEF2F7</Color>
     <Color x:Key="MenuHoverFontColor">#2B6CB0</Color>
 
     <!-- 强调 -->
@@ -44,16 +46,18 @@
 
 
     <!-- 画笔 -->
+    <SolidColorBrush x:Key="AppBrush" Color="{StaticResource AppColor}"/>
     <SolidColorBrush x:Key="WinTitleBrush" Color="{StaticResource WinTitleColor}"/>
     <SolidColorBrush x:Key="WindowTitleBrush" Color="{StaticResource WinTitleColor}"/>
     <SolidColorBrush x:Key="WindowButtonBrush" Color="{StaticResource WinButtonColor}"/>
     <SolidColorBrush x:Key="WindowButtonFontBrush" Color="{StaticResource WinButtonColor}"/>
+    <SolidColorBrush x:Key="WindowButtonHoverFontBrush" Color="{StaticResource WinButtonColor}"/>
     <SolidColorBrush x:Key="WindowHoverBrush" Color="{StaticResource DangerColor}"/>
     <SolidColorBrush x:Key="WinTitleFontBrush" Color="{StaticResource TextSecondaryColor}"/>
     <SolidColorBrush x:Key="MenuContainerBrush" Color="{StaticResource MenuContainerColor}"/>
-    <SolidColorBrush x:Key="MenuItemBrush" Color="{StaticResource MenuItemColor}"/>
-    <SolidColorBrush x:Key="MenuFontBrush" Color="{StaticResource TextSecondaryColor}"/>
+    <SolidColorBrush x:Key="MenuFontBrush" Color="{StaticResource MenuFontColor}"/>
     <SolidColorBrush x:Key="MenuHoverBrush" Color="{StaticResource MenuHoverColor}"/>
     <SolidColorBrush x:Key="MenuHoverFontBrush" Color="{StaticResource MenuHoverFontColor}"/>
+    <SolidColorBrush x:Key="IconButtonHoverBrush" Color="{StaticResource IconButtonHoverColor}"/>
     
 </ResourceDictionary>

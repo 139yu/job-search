@@ -8,7 +8,7 @@ namespace Commons
 {
     public static class RegionConstants
     {
-        public const string MainNavRegion = "MainNavRegion";
+        public const string MainMenuRegion = "MainMenuRegion";
         public const string LeftBarRegion = "LeftBarRegion";
         public const string HalconRegion = "HalconRegion";
         public const string RightBarRegion = "RightBarRegion";

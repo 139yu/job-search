@@ -12,6 +12,7 @@
                     <FontFamily x:Key="IconFont">Resources/Fonts/#iconfont</FontFamily>
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
+            <BitmapImage x:Key="Logo" UriSource="/Resources/Images/tom.jpg"/>
         </ResourceDictionary>
     </Application.Resources>
 </prism:PrismApplication>

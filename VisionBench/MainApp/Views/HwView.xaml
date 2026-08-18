@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="MainApp.Views.HwView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:local="clr-namespace:MainApp.Views"
+             xmlns:halconDotNet="clr-namespace:HalconDotNet;assembly=halcondotnet"
+             xmlns:commonUi="clr-namespace:CommonUI;assembly=CommonUI"
+             xmlns:components="clr-namespace:CommonUI.Components;assembly=CommonUI"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="60"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0">
+            <components:IconButton Height="50" Content="打开图片" 
+                                 IconCode="&#xe621;" 
+                                 IconSize="16"/>
+            <components:IconButton Height="50" Content="保存图片" 
+                                   IconCode="&#xec09;" 
+                                   IconSize="16"/>
+        </StackPanel>
+        <halconDotNet:HSmartWindowControlWPF Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+    </Grid>
+</UserControl>

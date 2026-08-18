@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <None Remove="Resources\Fonts\iconfont.ttf" />
+    <None Remove="Resources\Images\tom.jpg" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,6 +36,9 @@
 
   <ItemGroup>
     <Resource Include="Resources\Fonts\iconfont.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\tom.jpg">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

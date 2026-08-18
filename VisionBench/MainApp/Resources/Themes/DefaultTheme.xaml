@@ -1,4 +1,5 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:system="clr-namespace:System;assembly=System.Runtime"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <!--
       亮色主题语义色 — 权威来源：docs/mockups/VisionBench-主窗体-亮色配色.html
@@ -59,5 +60,6 @@
     <SolidColorBrush x:Key="MenuHoverBrush" Color="{StaticResource MenuHoverColor}"/>
     <SolidColorBrush x:Key="MenuHoverFontBrush" Color="{StaticResource MenuHoverFontColor}"/>
     <SolidColorBrush x:Key="IconButtonHoverBrush" Color="{StaticResource IconButtonHoverColor}"/>
-    
+
+    <system:Double x:Key="AppFontSize">12</system:Double>
 </ResourceDictionary>

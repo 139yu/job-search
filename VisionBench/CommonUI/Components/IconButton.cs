@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace CommonUI
+namespace CommonUI.Components
 {
     public class IconButton: Button
     {

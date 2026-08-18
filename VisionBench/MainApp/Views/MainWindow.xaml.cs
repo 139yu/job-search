@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Commons.Base;
 
 namespace MainApp.Views
 {
@@ -16,14 +17,18 @@ namespace MainApp.Views
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        public MainWindow(IEventAggregator eventAggregator)
         {
             InitializeComponent();
             this.WindowState = WindowState.Normal;
             this.MaxBtn.Visibility = Visibility.Visible;
             this.NormalBtn.Visibility = Visibility.Collapsed;
+            Loaded += (sender, args) =>
+            {
+                eventAggregator.GetEvent<AppLoadedEvent>().Publish();
+            };
         }
-
+    
         private void MinimizeClick(object sender, RoutedEventArgs e)
         {
             this.WindowState = WindowState.Minimized;

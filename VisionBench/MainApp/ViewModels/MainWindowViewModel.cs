@@ -6,18 +6,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using Commons;
+using Commons.Base;
+using MainApp.Views;
 
 namespace MainApp.ViewModels
 {
     public class MainWindowViewModel: BindableBase
     {
-        private ObservableCollection<MenuItem> menuItems;
-
-        public ObservableCollection<MenuItem> MenuItems
+        private IRegionManager _regionManager;
+        private IEventAggregator _eventAggregator;
+        public MainWindowViewModel(IRegionManager regionManager,IEventAggregator  eventAggregator)
         {
-            get { return menuItems; }
-            set { menuItems = value; }
+            _regionManager = regionManager;
+            _eventAggregator = eventAggregator;
+            CloseCommand = new DelegateCommand(DoCloseCommand);
+            _eventAggregator.GetEvent<AppLoadedEvent>().Subscribe(AppLoaded);
         }
+
+
+   
         private string title = "Nobody";
 
         public string Title
@@ -26,25 +34,20 @@ namespace MainApp.ViewModels
             set { title = value; }
         }
 
-        public DelegateCommand CloseCommand;
-
-        public MainWindowViewModel()
-        {
-            InitView();
-        }
-        private void InitView()
-        {
-            MenuItems = new ObservableCollection<MenuItem>
-            {
-                new MenuItem { Title = "相机设置", NavigationPath = "CameraSetting" },
-                new MenuItem { Title = "运动设置", NavigationPath = "CameraSetting" },
-            };
-            CloseCommand = new DelegateCommand(DoCloseCommand);
-        }
-
-        public void DoCloseCommand()
+        public DelegateCommand CloseCommand { get; set; }
+        public DelegateCommand LoadedCommand { get; set; }
+   
+        private void DoCloseCommand()
         {
             Application.Current.MainWindow.Close();
+        }
+
+        
+        
+        private void AppLoaded()
+        {
+            _regionManager.RequestNavigate(RegionConstants.HalconRegion, "HwView");
+            _regionManager.RequestNavigate(RegionConstants.MainMenuRegion,"MainMenuView");
         }
     }
 }

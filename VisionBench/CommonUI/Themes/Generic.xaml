@@ -1,12 +1,13 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="clr-namespace:CommonUI">
-    <Style TargetType="local:IconButton">
+    xmlns:local="clr-namespace:CommonUI"
+    xmlns:components="clr-namespace:CommonUI.Components">
+    <Style TargetType="components:IconButton">
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="local:IconButton">
+                <ControlTemplate TargetType="components:IconButton">
                     <Border x:Name="root" Background="{TemplateBinding Background}"
                             Padding="0,8"
                             IsHitTestVisible="True"

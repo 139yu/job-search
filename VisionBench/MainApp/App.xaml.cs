@@ -2,6 +2,9 @@
 using System.Configuration;
 using System.Data;
 using System.Windows;
+using Commons;
+using CommonUI.Base;
+using MainApp.ViewModels;
 
 namespace MainApp
 {
@@ -17,6 +20,14 @@ namespace MainApp
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
+            ViewModelLocationProvider.Register<MainWindow, MainWindowViewModel>();
+            ViewModelLocationProvider.Register<HwViewModel, HwViewModel>();
+            
+            containerRegistry.RegisterForNavigation<HwView, HwViewModel>();
+            containerRegistry.RegisterForNavigation<MainMenuView, MainMenuViewModel>();
+            
+            containerRegistry.RegisterDialogWindow<BaseDialog>();
+            containerRegistry.RegisterDialog<CameraSettingDialog,CameraSettingDialogViewModel>();
         }
     }
 

@@ -2,13 +2,13 @@
 
 namespace MainApp.ViewModels;
 
-public class CameraSettingDialogViewModel: IDialogAware
+public class CameraSettingDialogViewModel: IBaseDialogAware
 {
     public CameraSettingDialogViewModel()
     {
-        
     }
 
+    public DelegateCommand DisposeDialogCommand { get; set; }
     public string Title { get; set; } = "相机设置";
 
     public bool CanCloseDialog()
@@ -27,4 +27,5 @@ public class CameraSettingDialogViewModel: IDialogAware
     }
 
     public DialogCloseListener RequestClose { get; }
+
 }

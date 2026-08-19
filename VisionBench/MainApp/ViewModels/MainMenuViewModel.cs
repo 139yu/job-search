@@ -13,7 +13,7 @@ public class MainMenuViewModel: RegionBaseViewModel
         MenuItems = new ObservableCollection<MenuItem>
         {
             new MenuItem { Title = "相机设置", NavigationPath = "CameraSetting" },
-            new MenuItem { Title = "运动设置", NavigationPath = "CameraSetting" },
+            new MenuItem { Title = "运动设置", NavigationPath = "MotionSetting" },
         };
         MenuClickCommand = new DelegateCommand<string>(DoMenuClickCommand);
     }
@@ -35,9 +35,9 @@ public class MainMenuViewModel: RegionBaseViewModel
         switch (navigationPath)
         {
             case  "CameraSetting":
-                _dialogService.Show("CameraSettingDialog");
+                _dialogService.ShowDialog("CameraSettingDialog");
                 break;
-            case  "CameraSettingDialog":
+            case  "MotionSetting":
                 break;
         }
     }

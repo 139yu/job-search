@@ -26,4 +26,9 @@ public partial class BaseDialog : Window,IDialogWindow
     {
         DragMove();
     }
+    
+    private void CloseDialogClick(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
 }

@@ -5,8 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:prism="http://prismlibrary.com/"
              xmlns:local="clr-namespace:MainApp.Views"
-             xmlns:halconDotNet="clr-namespace:HalconDotNet;assembly=halcondotnet"
              xmlns:commonUi="clr-namespace:CommonUI;assembly=CommonUI"
+             xmlns:halcon="clr-namespace:HalconDotNet;assembly=halcondotnet"
              xmlns:components="clr-namespace:CommonUI.Components;assembly=CommonUI"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d"
@@ -24,6 +24,6 @@
                                    IconCode="&#xec09;" 
                                    IconSize="16"/>
         </StackPanel>
-        <halconDotNet:HSmartWindowControlWPF Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <halcon:HSmartWindowControlWPF Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
     </Grid>
 </UserControl>

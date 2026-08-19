@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <UseWPF>true</UseWPF>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Folder Include="Camera\" />
+      <Folder Include="ImageProvider\" />
+      <Folder Include="Libs\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="halcondotnet">
+        <HintPath>Libs\Halcon\halcondotnet.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+</Project>

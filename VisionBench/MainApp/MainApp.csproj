@@ -25,13 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Commons\Commons.csproj" />
     <ProjectReference Include="..\CommonUI\CommonUI.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="halcondotnet">
-      <HintPath>Libs\Halcon\halcondotnet.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
+    <ProjectReference Include="..\Vision\Vision.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,10 +37,16 @@
     </Resource>
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="halcondotnet">
+      <HintPath>..\Vision\Libs\Halcon\halcondotnet.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
   <!-- HALCON 原生运行时：构建后强制拷贝到输出目录（CopyToOutputDirectory 在 WPF 项目不可靠） -->
   <Target Name="CopyHalconNativeToOutput" AfterTargets="Build">
     <ItemGroup>
-      <HalconNative Include="Libs\Halcon\halcon.dll;Libs\Halcon\hcanvas.dll;Libs\Halcon\halconcpp.dll" />
+      <HalconNative Include="..\Vision\Libs\Halcon\halcon.dll;..\Vision\Libs\Halcon\hcanvas.dll;..\Vision\Libs\Halcon\halconcpp.dll" />
     </ItemGroup>
     <Copy SourceFiles="@(HalconNative)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>

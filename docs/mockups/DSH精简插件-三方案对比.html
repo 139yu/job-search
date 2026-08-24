@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSH 精简插件 · 三方案对比设计稿 v2</title>
+<style>
+:root{
+  --bg:#EEF1F6; --surface:#FFFFFF; --surface2:#F6F8FB; --surface3:#EDF1F6;
+  --border:#DDE4EE; --border2:#C6D2E0;
+  --text:#0F172A; --muted:#64748B; --dim:#94A3B8;
+  --accent:#2563EB; --accent-soft:#DBEAFE;
+  --ok:#059669; --ok-soft:#D1FAE5;
+  --warn:#D97706; --warn-soft:#FEF3C7;
+  --err:#DC2626; --err-soft:#FEE2E2;
+  --mono:Consolas,'Cascadia Mono','Courier New',monospace;
+  --font:'Segoe UI','Microsoft YaHei',system-ui,sans-serif;
+  --tr:150ms ease;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font);font-size:13px;color:var(--text);background:#CBD5E1;display:flex;flex-direction:column;align-items:center;gap:26px;padding:26px 20px 48px;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.page-head{width:min(1240px,100%);display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+.page-head h1{font-size:19px;font-weight:700;letter-spacing:.02em}
+.page-head p{color:var(--muted);font-size:12.5px;margin-top:4px;max-width:60em;line-height:1.6}
+.badge{font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-soft);padding:4px 10px;border-radius:999px}
+
+/* ============ 方案卡片 ============ */
+.plan{width:min(1240px,100%);background:var(--surface);border:1px solid var(--border);box-shadow:0 10px 30px rgba(15,23,42,.06);overflow:hidden}
+.plan-h{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--surface2)}
+.plan-no{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:14px;color:#fff;flex:none}
+.plan.no-a .plan-no{background:var(--accent)}
+.plan.no-b .plan-no{background:var(--ok)}
+.plan.no-c .plan-no{background:var(--warn)}
+.plan-t{flex:1;min-width:0}
+.plan-t b{font-size:15px;display:block}
+.plan-t span{font-size:11.5px;color:var(--muted)}
+.plan-tag{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;flex:none}
+.plan.no-a .plan-tag{color:var(--accent);background:var(--accent-soft)}
+.plan.no-b .plan-tag{color:var(--ok);background:var(--ok-soft)}
+.plan.no-c .plan-tag{color:var(--warn);background:var(--warn-soft)}
+.plan-body{padding:16px 18px;display:flex;flex-direction:column;gap:16px}
+.plan-diff{font-size:12px;color:var(--muted);background:var(--surface2);border:1px dashed var(--border2);border-radius:8px;padding:8px 12px}
+.plan-diff b{color:var(--text)}
+.plan-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;font-size:12px;color:var(--muted);line-height:1.65}
+.plan-meta b{color:var(--text)}
+.plan-meta .effort{display:flex;gap:3px;align-items:center}
+.star{color:var(--warn)}
+.plan-meta ul{padding-left:1.1em}
+.plan-meta .pros{color:var(--ok)}
+.plan-meta .cons{color:var(--err)}
+@media(max-width:1000px){.plan-meta{grid-template-columns:1fr}}
+
+/* ============ 窗口模拟 ============ */
+.win{border:1px solid var(--border2);border-radius:10px;overflow:hidden;background:var(--surface);box-shadow:0 6px 20px rgba(15,23,42,.08);font-size:12px}
+.win-titlebar{height:26px;background:var(--surface3);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;padding:0 10px;font-size:10.5px;color:var(--dim)}
+.win-titlebar .dot{width:7px;height:7px;border-radius:50%}
+.win-titlebar .dot:nth-child(1){background:#f87171}
+.win-titlebar .dot:nth-child(2){background:#fbbf24}
+.win-titlebar .dot:nth-child(3){background:#34d399}
+.win-titlebar .t{flex:1;text-align:center;margin-right:28px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* —— 方案 A 布局:左会话 | 中聊天(底部细计费条)| 右窄树 —— */
+.win-a{display:grid;grid-template-columns:150px 1fr 200px;height:340px}
+.sidebar{background:var(--surface2);border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
+.s-h{height:30px;display:flex;align-items:center;padding:0 10px;font-size:10.5px;font-weight:700;color:var(--dim);letter-spacing:.04em;border-bottom:1px solid var(--border)}
+.s-item{display:flex;align-items:center;gap:7px;padding:6px 10px;font-size:11.5px;color:var(--muted);border-left:2px solid transparent}
+.s-item.on{background:var(--surface);color:var(--text);border-left-color:var(--accent);font-weight:600}
+.s-item .ico{width:14px;height:14px;border-radius:4px;background:var(--surface3);display:grid;place-items:center;font-size:9px;color:var(--dim);flex:none}
+.s-spacer{flex:1}
+.chat{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--surface)}
+.msgs{flex:1;overflow:hidden;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:88%;padding:7px 11px;border-radius:9px;font-size:11.5px;line-height:1.6}
+.msg.user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:3px}
+.msg.ai{align-self:flex-start;background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:3px}
+.composer{flex:none;padding:10px 14px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:7px}
+.composer .bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.composer .input{height:30px;border:1px solid var(--border2);border-radius:8px;background:var(--surface);display:flex;align-items:center;padding:0 10px;color:var(--dim);font-size:11.5px;flex:1}
+.composer .send{height:28px;padding:0 14px;background:var(--accent);color:#fff;border-radius:8px;font-weight:600;font-size:11.5px}
+
+/* 计费条 —— 方案 A:一行细条(极简) */
+.billbar-a{display:flex;align-items:center;gap:0;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:2px;font-size:11px}
+.billbar-a .cell{display:flex;align-items:baseline;gap:5px;padding:3px 10px;border-radius:6px;white-space:nowrap}
+.billbar-a .cell+.cell{margin-left:2px}
+.billbar-a .cell:hover{background:var(--surface)}
+.billbar-a .k{color:var(--dim);font-size:10px}
+.billbar-a .v{font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;font-size:12px}
+.billbar-a .cell.msg .v{color:var(--ok)}
+.billbar-a .cell.sess .v{color:var(--accent)}
+.billbar-a .arr{margin-left:auto;color:var(--dim);font-size:10px;padding:2px 8px}
+.billbar-a .arr:hover{color:var(--text)}
+
+/* 右:窄文件树(只读) */
+.r-a{display:flex;flex-direction:column;min-width:0;border-left:1px solid var(--border);background:var(--surface)}
+.r-a .r-status{flex:none;padding:7px 9px;border-top:1px solid var(--border);font-size:9.5px;color:var(--dim);line-height:1.6;background:var(--surface2)}
+.r-a .r-status b{color:var(--ok)}
+.r-a .r-status .br{font-family:var(--mono);font-weight:700;color:var(--text)}
+.r-tree{flex:1;overflow:hidden;padding:6px 4px;font-size:11px;color:var(--muted)}
+.trow{display:flex;align-items:center;gap:5px;padding:3px 6px;border-radius:5px;white-space:nowrap}
+.trow:hover{background:var(--surface3)}
+.trow.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.trow .ic{width:12px;height:12px;border-radius:3px;background:var(--surface3);border:1px solid var(--border);display:grid;place-items:center;font-size:8px;flex:none}
+.trow.dir .ic{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+.trow .st{width:6px;height:6px;border-radius:50%;margin-left:auto;flex:none}
+.trow .st.m{background:var(--warn)}
+.trow .st.a{background:var(--ok)}
+.trow .st.c{background:var(--border2)}
+
+/* ============ 特写放大区 ============ */
+.zoom{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.zoom-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.zoom-box .z-h{font-size:10.5px;font-weight:700;color:var(--dim);letter-spacing:.05em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.zoom-box .z-h .arrow{color:var(--accent)}
+.zoom-box .z-note{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6}
+
+/* —— 方案 B 布局:左会话 | 中聊天(计费条+展开明细)| 右 树/预览/变更 —— */
+.win-b{display:grid;grid-template-columns:150px 1fr 300px;height:360px}
+.r-b{display:flex;flex-direction:column;min-width:0;border-left:1px solid var(--border);background:var(--surface)}
+.r-b .r-h{height:30px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;font-size:10.5px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface2)}
+.r-b .r-h .tabs{display:flex;gap:2px;margin-left:auto}
+.r-b .tab{font-size:10px;font-weight:600;color:var(--dim);padding:3px 8px;border-radius:6px}
+.r-b .tab.on{background:var(--surface);color:var(--accent);box-shadow:inset 0 0 0 1px var(--border)}
+.r-b .split{flex:1;display:grid;grid-template-columns:1fr 1fr;min-height:0}
+.r-b .tree-half{border-right:1px solid var(--border);overflow:hidden;padding:6px 4px}
+.r-b .view-half{overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.r-b .preview{flex:1;overflow:hidden;padding:8px 10px;font-family:var(--mono);font-size:9.5px;color:var(--muted);line-height:1.75;background:var(--surface2)}
+.r-b .preview .hl{color:var(--accent);font-weight:700}
+.r-b .preview .cm{color:var(--dim)}
+.r-b .chglist{flex:none;border-top:1px solid var(--border);padding:6px 8px;font-size:10px;color:var(--muted);background:var(--surface)}
+.r-b .chg{display:flex;align-items:center;gap:5px;padding:3px 4px;border-radius:4px;white-space:nowrap}
+.r-b .chg:hover{background:var(--surface3)}
+.r-b .chg .tag{font-size:8.5px;font-weight:700;padding:0 5px;border-radius:4px;line-height:14px;flex:none}
+.r-b .chg .tag.m{background:var(--warn-soft);color:var(--warn)}
+.r-b .chg .tag.a{background:var(--ok-soft);color:var(--ok)}
+.r-b .chg .act{margin-left:auto;display:none;gap:3px}
+.r-b .chg:hover .act{display:flex}
+.r-b .chg .act button{font-size:9px;padding:1px 6px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--muted)}
+.r-b .chg .act button:hover{color:var(--accent);border-color:var(--accent)}
+.r-b .r-status{flex:none;padding:6px 10px;border-top:1px solid var(--border);font-size:9.5px;color:var(--dim);background:var(--surface2);display:flex;gap:8px;align-items:center}
+.r-b .r-status .br{font-family:var(--mono);font-weight:700;color:var(--text)}
+.r-b .r-status b{color:var(--ok)}
+
+/* 计费条 —— 方案 B:可展开明细(悬停态画出) */
+.bill-wrap{position:relative}
+.billbar-b{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:4px 6px;font-size:11px;box-shadow:0 2px 8px rgba(15,23,42,.05)}
+.billbar-b .cell{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:4px 12px;border-radius:8px;white-space:nowrap}
+.billbar-b .cell:hover{background:var(--surface3)}
+.billbar-b .k{color:var(--dim);font-size:9.5px}
+.billbar-b .v{font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;font-size:14px;line-height:1.1}
+.billbar-b .cell.msg .v{color:var(--ok)}
+.billbar-b .cell.sess .v{color:var(--accent)}
+.billbar-b .sep{width:1px;height:26px;background:var(--border);margin:0 2px}
+.billbar-b .arr{margin-left:auto;align-self:stretch;display:grid;place-items:center;padding:0 10px;color:var(--dim);font-size:11px;border-radius:8px}
+.billbar-b .arr:hover{background:var(--surface3);color:var(--text)}
+.bill-pop{position:absolute;right:0;top:calc(100% + 6px);width:290px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;box-shadow:0 12px 32px rgba(15,23,42,.16);padding:12px 14px;z-index:5}
+.bill-pop .p-h{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px}
+.bill-pop .p-h .x{color:var(--dim);font-size:13px;cursor:pointer}
+.bill-pop .row{display:flex;justify-content:space-between;align-items:baseline;font-size:11.5px;color:var(--muted);padding:4px 0}
+.bill-pop .row+.row{border-top:1px dashed var(--border)}
+.bill-pop .row b{color:var(--text);font-variant-numeric:tabular-nums}
+.bill-pop .row .g{color:var(--ok)}
+.bill-pop .row .b{color:var(--accent)}
+.bill-pop .tok{font-size:10px;color:var(--dim);font-family:var(--mono)}
+
+/* —— 方案 C 布局:左会话 | 中聊天(无计费条)| 右 三tab 工作台 + 顶部计费卡 —— */
+.win-c{display:grid;grid-template-columns:150px 1fr 320px;height:380px}
+.r-c{display:flex;flex-direction:column;min-width:0;border-left:1px solid var(--border);background:var(--surface)}
+.r-c .billcard{flex:none;margin:10px 10px 0;background:linear-gradient(135deg,#EFF6FF,#F8FAFF);border:1px solid #BFDBFE;border-radius:12px;padding:10px 12px}
+.r-c .billcard .bc-h{font-size:10px;font-weight:700;color:var(--dim);letter-spacing:.06em;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.r-c .billcard .bc-h .live{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:bk 1.2s infinite}
+@keyframes bk{50%{opacity:.35}}
+.r-c .billcard .bc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.r-c .billcard .bc-cell{background:rgba(255,255,255,.85);border:1px solid #DBEAFE;border-radius:8px;padding:6px 4px;text-align:center}
+.r-c .billcard .bc-cell .k{font-size:8.5px;color:var(--dim);display:block}
+.r-c .billcard .bc-cell .v{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;display:block;margin-top:1px}
+.r-c .billcard .bc-cell.msg .v{color:var(--ok)}
+.r-c .billcard .bc-cell.sess .v{color:var(--accent)}
+.r-c .billcard .bc-cell.tot .v{color:var(--text)}
+.r-c .billcard .bc-sub{display:flex;justify-content:space-between;font-size:9px;color:var(--dim);margin-top:6px}
+.r-c .billcard .bc-sub .peak{color:var(--warn)}
+.r-c .r-h{height:30px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;font-size:10.5px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface2)}
+.r-c .r-h .tabs{display:flex;gap:2px;margin-left:auto}
+.r-c .tab{font-size:10px;font-weight:600;color:var(--dim);padding:3px 8px;border-radius:6px}
+.r-c .tab.on{background:var(--surface);color:var(--accent);box-shadow:inset 0 0 0 1px var(--border)}
+.r-c .r-tree{flex:1;overflow:hidden;padding:6px 4px;font-size:11px;color:var(--muted)}
+.r-c .r-diff{flex:1;overflow:hidden;padding:6px 8px;font-family:var(--mono);font-size:9.5px;line-height:1.8;background:var(--surface)}
+.dline{display:flex;gap:6px;white-space:nowrap;padding:0 4px;border-radius:3px}
+.dline.add{background:var(--ok-soft);color:var(--ok)}
+.dline.del{background:var(--err-soft);color:var(--err)}
+.dline.ctx{color:var(--muted)}
+.dline .ln{width:14px;color:var(--dim);flex:none;text-align:right}
+.r-c .r-status{flex:none;padding:6px 10px;border-top:1px solid var(--border);font-size:9.5px;color:var(--dim);background:var(--surface2);display:flex;gap:8px;align-items:center}
+.r-c .r-status .br{font-family:var(--mono);font-weight:700;color:var(--text)}
+.r-c .r-status b{color:var(--ok)}
+
+/* 共性说明 */
+.common{width:min(1240px,100%);font-size:12.5px;color:var(--muted);line-height:1.7;background:var(--surface);border:1px solid var(--border);padding:14px 18px}
+.common b{color:var(--text)}
+.common ul{padding-left:1.2em;margin-top:6px}
+code{background:var(--surface3);padding:1px 6px;border-radius:4px;font-family:var(--mono);font-size:11px}
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <div>
+    <h1>DSH 精简插件 · 三方案对比设计稿 v2</h1>
+    <p>v2 修订:三个方案<strong>布局结构完全不同</strong>(计费位置、右侧面板形态各不一样),且每个方案下方都有<strong>计费 UI 特写放大图</strong>。请重点看「计费长什么样、放哪里」——这是本插件区别于全家桶的核心。</p>
+  </div>
+  <span class="badge">docs/mockups · 待确认 · 三选一</span>
+</header>
+
+<!-- ================= 方案 A ================= -->
+<section class="plan no-a">
+  <div class="plan-h">
+    <span class="plan-no">A</span>
+    <div class="plan-t"><b>极简：一行计费条 + 只读文件树</b><span>最轻、最不打扰</span></div>
+    <span class="plan-tag">推荐度 ★★☆</span>
+  </div>
+  <div class="plan-body">
+    <div class="win">
+      <div class="win-titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="t">方案 A · 计费条在输入框上方 · 右侧只有窄文件树</span></div>
+      <div class="win-a">
+        <div class="sidebar">
+          <div class="s-h">会话</div>
+          <div class="s-item on"><span class="ico">◈</span> VisionBench 设计</div>
+          <div class="s-item"><span class="ico">◈</span> 求职资料整理</div>
+          <div class="s-item"><span class="ico">◈</span> 插件开发讨论</div>
+          <div class="s-spacer"></div>
+        </div>
+        <div class="chat">
+          <div class="msgs">
+            <div class="msg user">把计费条放到输入框上方,一行显示三个数</div>
+            <div class="msg ai">方案 A 就是一行细条,三个数字一眼扫完,不展开不打扰。</div>
+          </div>
+          <div class="composer">
+            <div class="bar">
+              <div class="input">输入消息…</div>
+              <button class="send">发送</button>
+            </div>
+            <div class="bar">
+              <div class="billbar-a">
+                <span class="cell msg"><span class="k">本消息</span><span class="v">¥0.0032</span></span>
+                <span class="cell sess"><span class="k">本会话</span><span class="v">¥0.1285</span></span>
+                <span class="cell tot"><span class="k">累计</span><span class="v">¥3.42</span></span>
+                <span class="arr">▾</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="r-a">
+          <div class="r-h" style="height:30px;display:flex;align-items:center;padding:0 10px;font-size:10.5px;font-weight:700;color:var(--dim);border-bottom:1px solid var(--border);background:var(--surface2)">文件</div>
+          <div class="r-tree">
+            <div class="trow dir"><span class="ic">▸</span> VisionBench</div>
+            <div class="trow dir" style="padding-left:14px"><span class="ic">▸</span> MainApp</div>
+            <div class="trow dir" style="padding-left:26px"><span class="ic">▸</span> Views</div>
+            <div class="trow on" style="padding-left:36px"><span class="ic"></span> MainWindow.xaml <span class="st m"></span></div>
+            <div class="trow" style="padding-left:36px"><span class="ic"></span> MainWindow.xaml.cs</div>
+            <div class="trow dir" style="padding-left:26px"><span class="ic">▸</span> ViewModels</div>
+            <div class="trow" style="padding-left:36px"><span class="ic"></span> MainWindowViewModel.cs</div>
+            <div class="trow dir" style="padding-left:14px"><span class="ic">▸</span> docs</div>
+            <div class="trow" style="padding-left:26px"><span class="ic"></span> mockups.html <span class="st a"></span></div>
+          </div>
+          <div class="r-status">main · 修改 <b>2</b> 新增 <b>1</b><br>最近提交 14 分钟前</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="zoom">
+      <div class="zoom-box">
+        <div class="z-h"><span class="arrow">▶</span> 计费 UI 特写（方案 A · 一行细条）</div>
+        <div class="billbar-a" style="max-width:340px">
+          <span class="cell msg"><span class="k">本消息</span><span class="v">¥0.0032</span></span>
+          <span class="cell sess"><span class="k">本会话</span><span class="v">¥0.1285</span></span>
+          <span class="cell tot"><span class="k">累计</span><span class="v">¥3.42</span></span>
+          <span class="arr">▾</span>
+        </div>
+        <div class="z-note">· 悬停单元格高亮,点击 ▾ 弹出按模型明细<br>· 数字等宽字体,滚动时不变形<br>· 三个数字三色:绿=本消息、蓝=本会话、黑=累计</div>
+      </div>
+      <div class="zoom-box">
+        <div class="z-h"><span class="arrow">▶</span> 与全家桶的差异</div>
+        <div class="z-note">
+          ① 全家桶的计费只有「会话头部小徽标」,本方案是常驻三格,信息密度更高<br>
+          ② 右侧只有文件树+git 状态条,没有预览/变更/看板/宠物等任何多余 UI<br>
+          ③ 无皮肤、无任务看板、无 SSH、无梁神模式,插件本体极轻
+        </div>
+      </div>
+    </div>
+
+    <div class="plan-meta">
+      <div><b>功能</b><ul><li>文件树(只读,展开/定位)</li><li>git 状态条:分支·修改/新增数·最近提交</li><li>计费条:本消息/本会话/累计 + 明细弹层</li><li>真实 usage 计费,人民币,峰谷半价</li></ul></div>
+      <div><b>工作量</b> <span class="effort"><span class="star">★★</span>☆☆☆</span> 约 1 天</div>
+      <div><b>优点</b><ul class="pros"><li>最轻,零学习成本</li><li>纯只读,无写风险</li></ul><b style="color:var(--err)">缺点</b><ul class="cons"><li>不能预览文件、不能 git 操作</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 方案 B ================= -->
+<section class="plan no-b">
+  <div class="plan-h">
+    <span class="plan-no">B</span>
+    <div class="plan-t"><b>平衡：可展开计费条 + 树/预览/变更</b><span>日常开发闭环,推荐</span></div>
+    <span class="plan-tag">推荐度 ★★★</span>
+  </div>
+  <div class="plan-body">
+    <div class="win">
+      <div class="win-titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="t">方案 B · 计费条悬停展开明细 · 右侧 树|预览 + 变更列表</span></div>
+      <div class="win-b">
+        <div class="sidebar">
+          <div class="s-h">会话</div>
+          <div class="s-item on"><span class="ico">◈</span> VisionBench 设计</div>
+          <div class="s-item"><span class="ico">◈</span> 求职资料整理</div>
+          <div class="s-item"><span class="ico">◈</span> 插件开发讨论</div>
+          <div class="s-spacer"></div>
+        </div>
+        <div class="chat">
+          <div class="msgs">
+            <div class="msg user">点击文件要在右侧预览内容,还要能看 git 变更</div>
+            <div class="msg ai">方案 B:树点文件 → 右半预览;变更列表可暂存/还原。计费条悬停展开明细。</div>
+          </div>
+          <div class="composer">
+            <div class="bar">
+              <div class="input">输入消息…</div>
+              <button class="send">发送</button>
+            </div>
+            <div class="bar">
+              <div class="bill-wrap">
+                <div class="billbar-b">
+                  <span class="cell msg"><span class="k">本消息</span><span class="v">¥0.0041</span></span>
+                  <span class="sep"></span>
+                  <span class="cell sess"><span class="k">本会话</span><span class="v">¥0.1326</span></span>
+                  <span class="sep"></span>
+                  <span class="cell tot"><span class="k">累计</span><span class="v">¥3.42</span></span>
+                  <span class="arr">▾</span>
+                </div>
+                <div class="bill-pop">
+                  <div class="p-h">本会话费用明细 <span class="x">✕</span></div>
+                  <div class="row"><span>deepseek-v4-pro</span><b class="b">¥0.1285</b></div>
+                  <div class="row tok"><span>输入 86.2K · 缓存 41.0K · 输出 12.4K</span><span></span></div>
+                  <div class="row"><span>deepseek-v4-flash</span><b class="g">¥0.0041</b></div>
+                  <div class="row tok"><span>输入 1.1K · 输出 0.6K</span><span></span></div>
+                  <div class="row"><span>合计(本会话)</span><b>¥0.1326</b></div>
+                  <div class="row" style="font-size:10px;color:var(--dim)"><span>当前时段</span><span style="color:var(--warn)">● 峰值(09:00-12:00)</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="r-b">
+          <div class="r-h">项目文件 <span class="tabs"><span class="tab on">树+预览</span><span class="tab">变更</span></span></div>
+          <div class="split">
+            <div class="tree-half">
+              <div class="trow dir"><span class="ic">▸</span> VisionBench</div>
+              <div class="trow dir" style="padding-left:12px"><span class="ic">▸</span> MainApp</div>
+              <div class="trow dir" style="padding-left:24px"><span class="ic">▸</span> Views</div>
+              <div class="trow on" style="padding-left:34px"><span class="ic"></span> MainWindow.xaml <span class="st m"></span></div>
+              <div class="trow" style="padding-left:34px"><span class="ic"></span> MainWindow.xaml.cs</div>
+              <div class="trow dir" style="padding-left:24px"><span class="ic">▸</span> ViewModels</div>
+              <div class="trow" style="padding-left:34px"><span class="ic"></span> VM.cs</div>
+            </div>
+            <div class="view-half">
+              <div class="preview">
+                <span class="hl">Grid</span> <span class="cm">&lt;!-- 主体 --&gt;</span><br>
+                <span class="hl">RowDefs</span> 30 / 50 / * / 0.6*<br>
+                <span class="cm">&lt;!-- 左300 中* 右400 --&gt;</span><br>
+                <span class="hl">ColDefs</span> 300 / * / 400<br>
+                <span class="cm">… 12 行 …</span>
+              </div>
+              <div class="chglist">
+                <div class="chg"><span class="tag m">M</span> MainWindow.xaml <span class="act"><button>暂存</button><button>还原</button></span></div>
+                <div class="chg"><span class="tag a">A</span> mockups.html <span class="act"><button>暂存</button><button>还原</button></span></div>
+                <div class="chg"><span class="tag m">M</span> VM.cs <span class="act"><button>暂存</button><button>还原</button></span></div>
+              </div>
+            </div>
+          </div>
+          <div class="r-status"><span class="br">main</span> 修改 2 · 新增 1 · <span style="color:var(--accent)">+2 −1</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="zoom">
+      <div class="zoom-box">
+        <div class="z-h"><span class="arrow">▶</span> 计费 UI 特写（方案 B · 展开明细态）</div>
+        <div class="bill-wrap" style="max-width:380px">
+          <div class="billbar-b">
+            <span class="cell msg"><span class="k">本消息</span><span class="v">¥0.0041</span></span>
+            <span class="sep"></span>
+            <span class="cell sess"><span class="k">本会话</span><span class="v">¥0.1326</span></span>
+            <span class="sep"></span>
+            <span class="cell tot"><span class="k">累计</span><span class="v">¥3.42</span></span>
+            <span class="arr">▾</span>
+          </div>
+          <div class="bill-pop">
+            <div class="p-h">本会话费用明细 <span class="x">✕</span></div>
+            <div class="row"><span>deepseek-v4-pro</span><b class="b">¥0.1285</b></div>
+            <div class="row tok"><span>输入 86.2K · 缓存 41.0K · 输出 12.4K</span></div>
+            <div class="row"><span>deepseek-v4-flash</span><b class="g">¥0.0041</b></div>
+            <div class="row tok"><span>输入 1.1K · 输出 0.6K</span></div>
+            <div class="row"><span>合计(本会话)</span><b>¥0.1326</b></div>
+            <div class="row" style="font-size:10px;color:var(--dim)"><span>当前时段</span><span style="color:var(--warn)">● 峰值 09:00-12:00</span></div>
+          </div>
+        </div>
+        <div class="z-note">· 悬停/点击 ▾ 展开:按模型分行、token 拆分(输入/缓存/输出)、峰值时段提示<br>· 计费条三格保持常驻,明细是弹层不占布局</div>
+      </div>
+      <div class="zoom-box">
+        <div class="z-h"><span class="arrow">▶</span> 与全家桶的差异</div>
+        <div class="z-note">
+          ① 右侧「树+预览」双栏 + 变更列表,功能对齐 aionui-panel 但只有两个 tab,无预览编辑/分屏<br>
+          ② 计费从「会话头小徽标」升级为「输入框上方三格+明细弹层」,主面板直接可见<br>
+          ③ 无看板/宠物/皮肤/SSH 等任何冗余,插件本体 3 个模块
+        </div>
+      </div>
+    </div>
+
+    <div class="plan-meta">
+      <div><b>功能</b><ul><li>文件树 + 文件只读预览(高亮)</li><li>变更列表:暂存/取消暂存/还原</li><li>diff 简视图(+/−)</li><li>计费条三格 + 明细弹层(按模型/token)</li></ul></div>
+      <div><b>工作量</b> <span class="effort"><span class="star">★★★</span>☆☆</span> 约 2~3 天</div>
+      <div><b>优点</b><ul class="pros"><li>开发闭环:看树→预览→暂存</li><li>计费主面板常驻,信息到位</li></ul><b style="color:var(--err)">缺点</b><ul class="cons"><li>无编辑保存、无提交历史图</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 方案 C ================= -->
+<section class="plan no-c">
+  <div class="plan-h">
+    <span class="plan-no">C</span>
+    <div class="plan-t"><b>完整：右侧计费卡 + 三 Tab 工作台</b><span>最全,信息密度最高</span></div>
+    <span class="plan-tag">推荐度 ★★☆</span>
+  </div>
+  <div class="plan-body">
+    <div class="win">
+      <div class="win-titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="t">方案 C · 计费做成右侧面板顶部卡片 · 树/预览/变更三 Tab</span></div>
+      <div class="win-c">
+        <div class="sidebar">
+          <div class="s-h">会话</div>
+          <div class="s-item on"><span class="ico">◈</span> VisionBench 设计</div>
+          <div class="s-item"><span class="ico">◈</span> 求职资料整理</div>
+          <div class="s-item"><span class="ico">◈</span> 插件开发讨论</div>
+          <div class="s-spacer"></div>
+        </div>
+        <div class="chat">
+          <div class="msgs">
+            <div class="msg user">计费放右侧面板顶部,聊天区保持干净</div>
+            <div class="msg ai">方案 C:计费是一张常驻卡片,右侧三 tab 切换树/预览/变更。</div>
+          </div>
+          <div class="composer">
+            <div class="bar">
+              <div class="input">输入消息…</div>
+              <button class="send">发送</button>
+            </div>
+          </div>
+        </div>
+        <div class="r-c">
+          <div class="billcard">
+            <div class="bc-h"><span class="live"></span> 本次会话计费</div>
+            <div class="bc-grid">
+              <div class="bc-cell msg"><span class="k">本消息</span><span class="v">¥0.0056</span></div>
+              <div class="bc-cell sess"><span class="k">本会话</span><span class="v">¥0.1382</span></div>
+              <div class="bc-cell tot"><span class="k">累计</span><span class="v">¥3.42</span></div>
+            </div>
+            <div class="bc-sub"><span>今日 ¥0.86</span><span class="peak">● 峰值时段</span><span>本月 ¥12.4</span></div>
+          </div>
+          <div class="r-h">工作台 <span class="tabs"><span class="tab on">树</span><span class="tab">预览</span><span class="tab">变更</span></span></div>
+          <div class="r-tree">
+            <div class="trow dir"><span class="ic">▸</span> VisionBench</div>
+            <div class="trow dir" style="padding-left:14px"><span class="ic">▸</span> MainApp</div>
+            <div class="trow dir" style="padding-left:26px"><span class="ic">▸</span> Views</div>
+            <div class="trow on" style="padding-left:36px"><span class="ic"></span> MainWindow.xaml <span class="st m"></span></div>
+            <div class="trow" style="padding-left:36px"><span class="ic"></span> MainWindow.xaml.cs</div>
+            <div class="trow dir" style="padding-left:26px"><span class="ic">▸</span> ViewModels</div>
+            <div class="trow" style="padding-left:36px"><span class="ic"></span> MainWindowViewModel.cs</div>
+            <div class="trow dir" style="padding-left:14px"><span class="ic">▸</span> docs</div>
+          </div>
+          <div class="r-status"><span class="br">main</span> 修改 2 · 新增 1 · 最近提交 14 分钟前</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="zoom">
+      <div class="zoom-box">
+        <div class="z-h"><span class="arrow">▶</span> 计费 UI 特写（方案 C · 右侧卡片）</div>
+        <div class="billcard" style="max-width:300px;margin:0">
+          <div class="bc-h"><span class="live"></span> 本次会话计费</div>
+          <div class="bc-grid">
+            <div class="bc-cell msg"><span class="k">本消息</span><span class="v">¥0.0056</span></div>
+            <div class="bc-cell sess"><span class="k">本会话</span><span class="v">¥0.1382</span></div>
+            <div class="bc-cell tot"><span class="k">累计</span><span class="v">¥3.42</span></div>
+          </div>
+          <div class="bc-sub"><span>今日 ¥0.86</span><span class="peak">● 峰值时段</span><span>本月 ¥12.4</span></div>
+        </div>
+        <div class="z-note">· 三格数字卡片 + 底部副行(今日/峰值/本月)<br>· 浅蓝渐变底,呼吸灯表示实时刷新<br>· 点击卡片任意格 → 展开按模型明细</div>
+      </div>
+      <div class="zoom-box">
+        <div class="z-h"><span class="arrow">▶</span> 与全家桶的差异</div>
+        <div class="z-note">
+          ① 计费是右侧面板顶部常驻卡片,信息密度最高(含今日/本月/峰值)<br>
+          ② 树/预览/变更三 tab 是完整工作台,diff 独立视图<br>
+          ③ 聊天区零侵入,计费完全移到右侧——如果你喜欢「主面板干净」选这个<br>
+          ④ 注意:这与你要的「计费在 git 图右侧」不完全一致,计费在右面板内
+        </div>
+      </div>
+    </div>
+
+    <div class="plan-meta">
+      <div><b>功能</b><ul><li>计费卡:本消息/本会话/累计+今日/本月/峰值</li><li>树 / 预览 / 变更 三 tab</li><li>diff 独立视图</li><li>暂存/取消暂存/还原</li></ul></div>
+      <div><b>工作量</b> <span class="effort"><span class="star">★★★★</span>☆</span> 约 4~5 天</div>
+      <div><b>优点</b><ul class="pros"><li>功能最全,信息密度最高</li><li>聊天区干净</li></ul><b style="color:var(--err)">缺点</b><ul class="cons"><li>周期最长</li><li>计费不在聊天区(偏离你最初的位置要求)</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="common">
+  <b>三方案共性(都会实现)</b>
+  <ul>
+    <li>计费:真实 usage(assistant 消息带 usage 即记账)+ 官方定价表(含峰谷半价,人民币),持久化账本,重启不丢</li>
+    <li>右侧面板:会话工作目录真实文件系统 + 真实 git 仓库,随会话切换;浅色明亮圆角视觉,与 DSH GUI 一致</li>
+    <li>卸载全家桶(含 pet/皮肤/看板/SSH/梁神模式),新插件独立于 <code>D:\Code\dsh-simple-billing</code>,零依赖全家桶,可随时卸载</li>
+    <li>三条路线的计费形态不同:<b>A=一行细条(最轻)、B=三格+明细弹层(平衡)、C=右侧卡片(最全)</b>——选方案其实就是选计费形态</li>
+  </ul>
+</section>
+
+</body>
+</html>

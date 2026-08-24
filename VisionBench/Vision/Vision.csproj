@@ -8,7 +8,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Camera\" />
       <Folder Include="ImageProvider\" />
       <Folder Include="Libs\" />
     </ItemGroup>
@@ -17,6 +16,13 @@
       <Reference Include="halcondotnet">
         <HintPath>Libs\Halcon\halcondotnet.dll</HintPath>
       </Reference>
+      <Reference Include="MvCameraControl.Net">
+        <HintPath>C:\Program Files (x86)\MVS\Development\DotNet\win64\netstandard2.0\MvCameraControl.Net.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Commons\Commons.csproj" />
     </ItemGroup>
 
 </Project>

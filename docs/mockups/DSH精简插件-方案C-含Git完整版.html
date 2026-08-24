@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSH 精简插件 · 方案 C 完整版（含 Git 图与提交推送）</title>
+<style>
+:root{
+  --bg:#EEF1F6; --surface:#FFFFFF; --surface2:#F6F8FB; --surface3:#EDF1F6;
+  --border:#DDE4EE; --border2:#C6D2E0;
+  --text:#0F172A; --muted:#64748B; --dim:#94A3B8;
+  --accent:#2563EB; --accent-soft:#DBEAFE;
+  --ok:#059669; --ok-soft:#D1FAE5;
+  --warn:#D97706; --warn-soft:#FEF3C7;
+  --err:#DC2626; --err-soft:#FEE2E2;
+  --mono:Consolas,'Cascadia Mono','Courier New',monospace;
+  --font:'Segoe UI','Microsoft YaHei',system-ui,sans-serif;
+  --tr:150ms ease;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font);font-size:13px;color:var(--text);background:#CBD5E1;display:flex;flex-direction:column;align-items:center;gap:24px;padding:26px 20px 48px;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.page-head{width:min(1240px,100%);display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+.page-head h1{font-size:19px;font-weight:700;letter-spacing:.02em}
+.page-head p{color:var(--muted);font-size:12.5px;margin-top:4px;max-width:64em;line-height:1.6}
+.badge{font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-soft);padding:4px 10px;border-radius:999px}
+
+/* ============ 方案卡 ============ */
+.plan{width:min(1240px,100%);background:var(--surface);border:1px solid var(--border);box-shadow:0 10px 30px rgba(15,23,42,.06);overflow:hidden}
+.plan-h{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--surface2)}
+.plan-no{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:14px;color:#fff;flex:none;background:var(--warn)}
+.plan-t{flex:1;min-width:0}
+.plan-t b{font-size:15px;display:block}
+.plan-t span{font-size:11.5px;color:var(--muted)}
+.plan-tag{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;flex:none;color:var(--warn);background:var(--warn-soft)}
+.plan-body{padding:16px 18px;display:flex;flex-direction:column;gap:16px}
+
+/* ============ 窗口 ============ */
+.win{border:1px solid var(--border2);border-radius:10px;overflow:hidden;background:var(--surface);box-shadow:0 6px 20px rgba(15,23,42,.08);font-size:12px}
+.win-titlebar{height:26px;background:var(--surface3);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;padding:0 10px;font-size:10.5px;color:var(--dim)}
+.win-titlebar .dot{width:7px;height:7px;border-radius:50%}
+.win-titlebar .dot:nth-child(1){background:#f87171}
+.win-titlebar .dot:nth-child(2){background:#fbbf24}
+.win-titlebar .dot:nth-child(3){background:#34d399}
+.win-titlebar .t{flex:1;text-align:center;margin-right:28px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.win-body{display:grid;grid-template-columns:150px 1fr 330px;height:430px}
+.sidebar{background:var(--surface2);border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
+.s-h{height:30px;display:flex;align-items:center;padding:0 10px;font-size:10.5px;font-weight:700;color:var(--dim);letter-spacing:.04em;border-bottom:1px solid var(--border)}
+.s-item{display:flex;align-items:center;gap:7px;padding:6px 10px;font-size:11.5px;color:var(--muted);border-left:2px solid transparent}
+.s-item.on{background:var(--surface);color:var(--text);border-left-color:var(--accent);font-weight:600}
+.s-item .ico{width:14px;height:14px;border-radius:4px;background:var(--surface3);display:grid;place-items:center;font-size:9px;color:var(--dim);flex:none}
+.s-spacer{flex:1}
+.chat{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--surface)}
+.msgs{flex:1;overflow:hidden;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:88%;padding:7px 11px;border-radius:9px;font-size:11.5px;line-height:1.6}
+.msg.user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:3px}
+.msg.ai{align-self:flex-start;background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:3px}
+.composer{flex:none;padding:10px 14px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:7px}
+.composer .bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.composer .input{height:30px;border:1px solid var(--border2);border-radius:8px;background:var(--surface);display:flex;align-items:center;padding:0 10px;color:var(--dim);font-size:11.5px;flex:1}
+
+/* ============ 右侧工作台 ============ */
+.rp{display:flex;flex-direction:column;min-width:0;border-left:1px solid var(--border);background:var(--surface)}
+/* 计费卡 */
+.billcard{flex:none;margin:10px 10px 0;background:linear-gradient(135deg,#EFF6FF,#F8FAFF);border:1px solid #BFDBFE;border-radius:12px;padding:10px 12px}
+.billcard .bc-h{font-size:10px;font-weight:700;color:var(--dim);letter-spacing:.06em;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.billcard .bc-h .live{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:bk 1.2s infinite}
+@keyframes bk{50%{opacity:.35}}
+.billcard .bc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.billcard .bc-cell{background:rgba(255,255,255,.85);border:1px solid #DBEAFE;border-radius:8px;padding:6px 4px;text-align:center;cursor:pointer}
+.billcard .bc-cell:hover{border-color:var(--accent)}
+.billcard .bc-cell .k{font-size:8.5px;color:var(--dim);display:block}
+.billcard .bc-cell .v{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;display:block;margin-top:1px}
+.billcard .bc-cell.msg .v{color:var(--ok)}
+.billcard .bc-cell.sess .v{color:var(--accent)}
+.billcard .bc-cell.tot .v{color:var(--text)}
+.billcard .bc-sub{display:flex;justify-content:space-between;font-size:9px;color:var(--dim);margin-top:6px}
+.billcard .bc-sub .peak{color:var(--warn)}
+/* tab 头 */
+.rp-h{height:32px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;font-size:10.5px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface2);margin-top:8px}
+.rp-h .tabs{display:flex;gap:2px;margin-left:auto}
+.rp-h .tab{font-size:10px;font-weight:600;color:var(--dim);padding:4px 9px;border-radius:6px;cursor:pointer}
+.rp-h .tab:hover{color:var(--text)}
+.rp-h .tab.on{background:var(--surface);color:var(--accent);box-shadow:inset 0 0 0 1px var(--border)}
+.rp-h .tab .n{font-size:8.5px;background:var(--warn);color:#fff;border-radius:999px;padding:0 4px;line-height:12px;margin-left:3px;display:inline-block;vertical-align:1px}
+/* git 工具条 */
+.gitbar{flex:none;display:flex;align-items:center;gap:4px;padding:6px 10px;border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap}
+.gitbar .branch{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 9px;border:1px solid var(--border2);border-radius:7px;font-size:10px;font-weight:700;color:var(--text);background:var(--surface2);font-family:var(--mono)}
+.gitbar .gbtn{height:22px;padding:0 9px;border:1px solid var(--border);border-radius:7px;font-size:10px;font-weight:600;color:var(--muted);background:var(--surface)}
+.gitbar .gbtn:hover{background:var(--surface3);color:var(--text)}
+.gitbar .gbtn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.gitbar .gbtn.warn{background:var(--warn);border-color:var(--warn);color:#fff}
+.gitbar .gbtn:disabled{opacity:.4;cursor:default}
+.gitbar .gspacer{flex:1}
+.gitbar .ahead{font-size:9.5px;color:var(--warn);font-weight:700;white-space:nowrap}
+/* 内容区 */
+.rp-body{flex:1;min-height:0;overflow:hidden;position:relative}
+.pane{position:absolute;inset:0;display:none;flex-direction:column;min-height:0}
+.pane.on{display:flex}
+/* 树 */
+.r-tree{flex:1;overflow:hidden;padding:6px 4px;font-size:11px;color:var(--muted)}
+.trow{display:flex;align-items:center;gap:5px;padding:3px 6px;border-radius:5px;white-space:nowrap}
+.trow:hover{background:var(--surface3)}
+.trow.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.trow .ic{width:12px;height:12px;border-radius:3px;background:var(--surface3);border:1px solid var(--border);display:grid;place-items:center;font-size:8px;flex:none}
+.trow.dir .ic{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+.trow .st{width:6px;height:6px;border-radius:50%;margin-left:auto;flex:none}
+.trow .st.m{background:var(--warn)}
+.trow .st.a{background:var(--ok)}
+.trow .st.c{background:var(--border2)}
+/* 预览 */
+.preview{flex:1;overflow:hidden;padding:8px 10px;font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.75;background:var(--surface2)}
+.preview .hl{color:var(--accent);font-weight:700}
+.preview .cm{color:var(--dim)}
+/* 变更 */
+.chglist{flex:1;overflow:hidden;padding:6px 8px;font-size:10.5px;color:var(--muted)}
+.chg-sec{font-size:9px;font-weight:700;color:var(--dim);letter-spacing:.05em;padding:6px 4px 3px}
+.chg{display:flex;align-items:center;gap:5px;padding:4px 5px;border-radius:5px;white-space:nowrap}
+.chg:hover{background:var(--surface3)}
+.chg .tag{font-size:8.5px;font-weight:700;padding:0 5px;border-radius:4px;line-height:14px;flex:none}
+.chg .tag.m{background:var(--warn-soft);color:var(--warn)}
+.chg .tag.a{background:var(--ok-soft);color:var(--ok)}
+.chg .tag.d{background:var(--err-soft);color:var(--err)}
+.chg .act{margin-left:auto;display:none;gap:3px}
+.chg:hover .act{display:flex}
+.chg .act button{font-size:9px;padding:1px 6px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--muted)}
+.chg .act button:hover{color:var(--accent);border-color:var(--accent)}
+.commitbox{flex:none;border-top:1px solid var(--border);padding:8px 10px;background:var(--surface2);display:flex;flex-direction:column;gap:6px}
+.commitbox .cm-input{height:28px;border:1px solid var(--border2);border-radius:7px;padding:0 9px;font-size:10.5px;color:var(--dim);background:var(--surface);display:flex;align-items:center}
+.commitbox .cm-row{display:flex;gap:6px;align-items:center}
+.commitbox .cm-row .cnt{font-size:9.5px;color:var(--dim);flex:1}
+.commitbox .cm-btn{height:24px;padding:0 12px;border-radius:7px;font-size:10.5px;font-weight:700}
+.commitbox .cm-btn.commit{background:var(--ok);color:#fff}
+.commitbox .cm-btn.commit:disabled{background:var(--border2);cursor:default}
+.commitbox .cm-btn.more{background:var(--surface);border:1px solid var(--border);color:var(--muted)}
+/* git 图 */
+.gitgraph{flex:1;overflow:hidden;padding:6px 8px;font-family:var(--mono);font-size:10px}
+.grow{display:flex;align-items:center;height:26px;border-radius:5px;padding-right:6px;position:relative}
+.grow:hover{background:var(--surface3)}
+.grow .lanes{width:44px;height:100%;position:relative;flex:none}
+.grow .lanes .line{position:absolute;top:0;bottom:0;width:2px;border-radius:2px}
+.grow .lanes .l1{left:10px}
+.grow .lanes .l2{left:28px}
+.grow .lanes .dot{position:absolute;top:50%;width:8px;height:8px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid var(--surface);z-index:1}
+.grow .lanes .dot.d1{left:11px}
+.grow .lanes .dot.d2{left:29px}
+.grow .lanes .dot.head{outline:2px solid var(--accent-soft)}
+.grow .info{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-size:10px}
+.grow .info b{color:var(--text);font-weight:600}
+.grow .info .sha{color:var(--dim);margin-right:6px}
+.grow .refs{display:flex;gap:3px;flex:none}
+.grow .ref{font-size:8px;font-weight:700;padding:0 5px;border-radius:4px;line-height:13px;white-space:nowrap}
+.grow .ref.branch{background:var(--ok-soft);color:var(--ok)}
+.grow .ref.remote{background:var(--accent-soft);color:var(--accent)}
+.grow .ref.tag{background:var(--surface3);color:var(--dim);border:1px solid var(--border)}
+.grow .ref.head{background:#0F172A;color:#fff}
+.grow .when{flex:none;color:var(--dim);font-size:8.5px;margin-left:6px;width:44px;text-align:right}
+.gitgraph .sep-msg{font-size:9px;color:var(--dim);text-align:center;padding:4px 0;border-top:1px dashed var(--border);margin-top:4px}
+/* 状态条 */
+.rp-status{flex:none;padding:6px 10px;border-top:1px solid var(--border);font-size:9.5px;color:var(--dim);background:var(--surface2);display:flex;gap:10px;align-items:center;white-space:nowrap;overflow:hidden}
+.rp-status .br{font-family:var(--mono);font-weight:700;color:var(--text)}
+.rp-status b{color:var(--ok)}
+.rp-status .sync{color:var(--ok);font-weight:700}
+.rp-status .async{color:var(--warn);font-weight:700}
+
+/* ============ 特写区 ============ */
+.zoom{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.zoom-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.zoom-box .z-h{font-size:10.5px;font-weight:700;color:var(--dim);letter-spacing:.05em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.zoom-box .z-h .arrow{color:var(--warn)}
+.zoom-box .z-note{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.7}
+.zoom-box .z-note b{color:var(--text)}
+.zoom-box .z-note .ok{color:var(--ok)}
+.zoom-box .z-note .warn{color:var(--warn)}
+.zoom-box .z-note .err{color:var(--err)}
+@media(max-width:1000px){.zoom{grid-template-columns:1fr}}
+
+/* git 图特写 */
+.gg-zoom{border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface)}
+.gg-zoom .grow{height:30px}
+.common{width:min(1240px,100%);font-size:12.5px;color:var(--muted);line-height:1.7;background:var(--surface);border:1px solid var(--border);padding:14px 18px}
+.common b{color:var(--text)}
+.common ul{padding-left:1.2em;margin-top:6px}
+code{background:var(--surface3);padding:1px 6px;border-radius:4px;font-family:var(--mono);font-size:11px}
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <div>
+    <h1>DSH 精简插件 · 方案 C 完整版（含 Git 图 / 提交 / 推送 / 拉取）</h1>
+    <p>v3 修订:在方案 C 基础上补齐 git 能力——右侧工作台四 Tab(<b>树 / 预览 / 变更 / Git 图</b>),Git 图展示<b>提交历史拓扑、本地/远程分支、标签、HEAD、未推送数量</b>;工具条提供<b>拉取 / 推送 / 抓取 / 刷新</b>;变更页底部有<b>提交区(commit message + 提交按钮)</b>。下方 Tab 可点击切换体验。</p>
+  </div>
+  <span class="badge">docs/mockups · 方案 C · 待确认</span>
+</header>
+
+<section class="plan">
+  <div class="plan-h">
+    <span class="plan-no">C</span>
+    <div class="plan-t"><b>完整工作台 · 计费卡 + 四 Tab(树 / 预览 / 变更 / Git 图)+ Git 远程操作</b><span>你要的 git 树、提交、推送、拉取全部在这里</span></div>
+    <span class="plan-tag">最终确认版</span>
+  </div>
+  <div class="plan-body">
+
+    <div class="win">
+      <div class="win-titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="t">方案 C · 右侧四 Tab 工作台 · 点 Tab 切换体验</span></div>
+      <div class="win-body">
+        <div class="sidebar">
+          <div class="s-h">会话</div>
+          <div class="s-item on"><span class="ico">◈</span> VisionBench 设计</div>
+          <div class="s-item"><span class="ico">◈</span> 求职资料整理</div>
+          <div class="s-item"><span class="ico">◈</span> 插件开发讨论</div>
+          <div class="s-spacer"></div>
+        </div>
+        <div class="chat">
+          <div class="msgs">
+            <div class="msg user">git 要有提交历史树、远程分支,能提交推送拉取</div>
+            <div class="msg ai">好,右侧工作台加 Git 图 tab(拓扑+远程分支+标签),工具条加拉取/推送/抓取,变更页带提交框。</div>
+          </div>
+          <div class="composer">
+            <div class="bar">
+              <div class="input">输入消息…</div>
+              <button class="send" style="height:28px;padding:0 14px;background:var(--accent);color:#fff;border-radius:8px;font-weight:600;font-size:11.5px">发送</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="rp">
+          <!-- 计费卡 -->
+          <div class="billcard">
+            <div class="bc-h"><span class="live"></span> 本次会话计费</div>
+            <div class="bc-grid">
+              <div class="bc-cell msg"><span class="k">本消息</span><span class="v">¥0.0056</span></div>
+              <div class="bc-cell sess"><span class="k">本会话</span><span class="v">¥0.1382</span></div>
+              <div class="bc-cell tot"><span class="k">累计</span><span class="v">¥3.42</span></div>
+            </div>
+            <div class="bc-sub"><span>今日 ¥0.86</span><span class="peak">● 峰值时段</span><span>本月 ¥12.4</span></div>
+          </div>
+
+          <!-- tab 头 -->
+          <div class="rp-h">工作台
+            <div class="tabs">
+              <button class="tab on" data-pane="tree">树</button>
+              <button class="tab" data-pane="preview">预览</button>
+              <button class="tab" data-pane="changes">变更<span class="n">3</span></button>
+              <button class="tab" data-pane="graph">Git 图<span class="n">2</span></button>
+            </div>
+          </div>
+
+          <!-- git 工具条(全局) -->
+          <div class="gitbar">
+            <span class="branch">main ⇅ origin/main</span>
+            <button class="gbtn">拉取</button>
+            <button class="gbtn pri">推送</button>
+            <button class="gbtn">抓取</button>
+            <button class="gbtn">刷新</button>
+            <span class="gspacer"></span>
+            <span class="ahead">↑2 未推送</span>
+          </div>
+
+          <div class="rp-body">
+            <!-- 树 -->
+            <div class="pane on" id="pane-tree">
+              <div class="r-tree">
+                <div class="trow dir"><span class="ic">▸</span> VisionBench</div>
+                <div class="trow dir" style="padding-left:14px"><span class="ic">▸</span> MainApp</div>
+                <div class="trow dir" style="padding-left:26px"><span class="ic">▸</span> Views</div>
+                <div class="trow on" style="padding-left:36px"><span class="ic"></span> MainWindow.xaml <span class="st m"></span></div>
+                <div class="trow" style="padding-left:36px"><span class="ic"></span> MainWindow.xaml.cs</div>
+                <div class="trow dir" style="padding-left:26px"><span class="ic">▸</span> ViewModels</div>
+                <div class="trow" style="padding-left:36px"><span class="ic"></span> MainWindowViewModel.cs</div>
+                <div class="trow dir" style="padding-left:14px"><span class="ic">▸</span> docs</div>
+                <div class="trow" style="padding-left:26px"><span class="ic"></span> mockups.html <span class="st a"></span></div>
+                <div class="trow" style="padding-left:26px"><span class="ic"></span> report.md</div>
+              </div>
+            </div>
+            <!-- 预览 -->
+            <div class="pane" id="pane-preview">
+              <div class="preview">
+                <span class="hl">Grid</span> <span class="cm">&lt;!-- 主体 --&gt;</span><br>
+                <span class="hl">RowDefinitions</span> 30 / 50 / * / 0.6*<br>
+                <span class="cm">&lt;!-- 左 300 · 中 * · 右 400 --&gt;</span><br>
+                <span class="hl">ColumnDefinitions</span> 300 / * / 400<br>
+                <span class="cm">&lt;!-- 5 区域占位 --&gt;</span><br>
+                <span class="cm">… 12 行预览,点击树中文件切换 …</span>
+              </div>
+            </div>
+            <!-- 变更 -->
+            <div class="pane" id="pane-changes">
+              <div class="chglist">
+                <div class="chg-sec">已暂存(Staged)</div>
+                <div class="chg"><span class="tag a">A</span> docs/mockups.html <span class="act"><button>取消暂存</button></span></div>
+                <div class="chg-sec">未暂存(Modified)</div>
+                <div class="chg"><span class="tag m">M</span> MainWindow.xaml <span class="act"><button>暂存</button><button>还原</button></span></div>
+                <div class="chg"><span class="tag m">M</span> MainWindowViewModel.cs <span class="act"><button>暂存</button><button>还原</button></span></div>
+                <div class="chg-sec">未跟踪(Untracked)</div>
+                <div class="chg"><span class="tag d">D</span> legacy.txt <span class="act"><button>暂存</button></span></div>
+              </div>
+              <div class="commitbox">
+                <div class="cm-input">提交说明:添加计费面板与 git 图…</div>
+                <div class="cm-row">
+                  <span class="cnt">将提交 1 个文件 · 新增 2 · 删除 1</span>
+                  <button class="cm-btn more">▾</button>
+                  <button class="cm-btn commit">提交</button>
+                </div>
+              </div>
+            </div>
+            <!-- Git 图 -->
+            <div class="pane" id="pane-graph">
+              <div class="gitgraph">
+                <div class="grow"><div class="lanes"><span class="line l1" style="background:var(--accent)"></span><span class="dot d1 head" style="background:var(--accent)"></span></div><div class="info"><span class="sha">a1b2c3d</span><b>feat: 增加计费面板与 Git 图</b></div><div class="refs"><span class="ref head">HEAD</span><span class="ref branch">main</span></div><span class="when">刚刚</span></div>
+                <div class="grow"><div class="lanes"><span class="line l1" style="background:var(--accent)"></span><span class="line l2" style="background:var(--ok)"></span><span class="dot d1" style="background:var(--accent)"></span><span class="dot d2" style="background:var(--ok)"></span></div><div class="info"><span class="sha">e5f6a7b</span><b>fix: 修正峰谷计价时段</b></div><div class="refs"><span class="ref remote">origin/feature-billing</span></div><span class="when">2 小时前</span></div>
+                <div class="grow"><div class="lanes"><span class="line l1" style="background:var(--accent)"></span><span class="line l2" style="background:var(--ok)"></span><span class="dot d1" style="background:var(--accent)"></span></div><div class="info"><span class="sha">c9d0e1f</span><b>feat: 文件树与预览面板</b></div><div class="refs"><span class="ref remote">origin/main</span></div><span class="when">昨天</span></div>
+                <div class="grow"><div class="lanes"><span class="line l1" style="background:var(--accent)"></span><span class="line l2" style="background:var(--ok)"></span><span class="dot d2" style="background:var(--ok)"></span></div><div class="info"><span class="sha">b2c3d4e</span><b>feat: 计费账本持久化</b></div><div class="refs"><span class="ref tag">v0.1.0</span></div><span class="when">3 天前</span></div>
+                <div class="grow"><div class="lanes"><span class="line l1" style="background:var(--accent)"></span><span class="dot d1" style="background:var(--accent)"></span></div><div class="info"><span class="sha">f4e5d6c</span><b>init: 项目初始化</b></div><div class="refs"></div><span class="when">2 周前</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="rp-status"><span class="br">main</span> 分支已同步 <span class="sync">✓ 最新</span> · 工作区 3 处变更 · 最近提交 刚刚</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 特写区 -->
+    <div class="zoom">
+      <div class="zoom-box">
+        <div class="z-h"><span class="arrow">▶</span> Git 图特写（提交拓扑 / 分支 / 标签 / 未推送）</div>
+        <div class="gg-zoom">
+          <div class="grow"><div class="lanes"><span class="line l1" style="background:var(--accent)"></span><span class="dot d1 head" style="background:var(--accent)"></span></div><div class="info"><span class="sha">a1b2c3d</span><b>feat: 增加计费面板与 Git 图</b></div><div class="refs"><span class="ref head">HEAD</span><span class="ref branch">main</span></div><span class="when">刚刚</span></div>
+          <div class="grow"><div class="lanes"><span class="line l1" style="background:var(--accent)"></span><span class="line l2" style="background:var(--ok)"></span><span class="dot d1" style="background:var(--accent)"></span><span class="dot d2" style="background:var(--ok)"></span></div><div class="info"><span class="sha">e5f6a7b</span><b>fix: 修正峰谷计价时段</b></div><div class="refs"><span class="ref remote">origin/feature-billing</span></div><span class="when">2h</span></div>
+          <div class="grow"><div class="lanes"><span class="line l1" style="background:var(--accent)"></span><span class="line l2" style="background:var(--ok)"></span><span class="dot d1" style="background:var(--accent)"></span></div><div class="info"><span class="sha">c9d0e1f</span><b>feat: 文件树与预览面板</b></div><div class="refs"><span class="ref remote">origin/main</span></div><span class="when">昨天</span></div>
+          <div class="grow"><div class="lanes"><span class="line l1" style="background:var(--accent)"></span><span class="line l2" style="background:var(--ok)"></span><span class="dot d2" style="background:var(--ok)"></span></div><div class="info"><span class="sha">b2c3d4e</span><b>feat: 计费账本持久化</b></div><div class="refs"><span class="ref tag">v0.1.0</span></div><span class="when">3天</span></div>
+        </div>
+        <div class="z-note">
+          · 蓝线 = 本地分支(main),绿线 = 远端/特性分支,节点圆点带空心描边<br>
+          · 徽标:<span class="ok">main(本地绿)</span> / <span class="warn">origin/*(远端蓝)</span> / v0.1.0(标签) / HEAD(深色)<br>
+          · 工具条「↑2 未推送」:本地领先远端 2 个提交时显示,推送后消失<br>
+          · 拉取后若远端有更新:显示「↓N 可拉取」,自动快进或提示冲突
+        </div>
+      </div>
+      <div class="zoom-box">
+        <div class="z-h"><span class="arrow">▶</span> Git 操作交互说明（提交 / 推送 / 拉取 / 抓取）</div>
+        <div class="z-note">
+          <b>提交</b>:变更 tab 底部输入 commit message → 点「提交」→ 仅提交已暂存文件;提交成功后变更列表清空、Git 图刷新、账本不受影响<br><br>
+          <b>推送</b>:工具条「推送」→ 本地领先(↑2)时可用;成功 → 状态条「✓ 已推送」;失败(远端被他人更新)→ 提示先拉取,不覆盖<br><br>
+          <b>拉取</b>:默认 fast-forward;有分叉时弹确认:「合并(main 并入本地)」或「变基」二选一<br><br>
+          <b>抓取</b>:只更新远端引用(origin/* 线),不合并,刷新 Git 图即可见远端新提交<br><br>
+          <b>冲突</b>:拉取/合并冲突 → 冲突文件标红、Git 图显示 MERGING 状态,解决后继续提交<br><br>
+          <b>权限</b>:所有 git 写操作(提交/推送/拉取/抓取/暂存/还原)执行前都会弹确认,只读操作(树/预览/图)不需要
+        </div>
+      </div>
+    </div>
+
+    <div class="plan-meta" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;font-size:12px;color:var(--muted);line-height:1.65">
+      <div><b>功能清单</b><ul style="padding-left:1.1em;margin-top:4px">
+        <li>计费卡:本消息 / 本会话 / 累计 + 今日 / 本月 / 峰值时段</li>
+        <li>四 Tab:树 / 预览 / 变更(暂存/还原)/ Git 图</li>
+        <li>Git 图:提交拓扑、本地/远程分支、标签、HEAD、未推送计数</li>
+        <li>git 操作:提交 / 推送 / 拉取(合并或变基)/ 抓取 / 刷新</li>
+        <li>冲突处理提示、写操作二次确认</li>
+      </ul></div>
+      <div><b>工作量</b> <span style="color:var(--warn)">★★★★★</span> 约 5~6 天<br><br><b>技术要点</b><ul style="padding-left:1.1em;margin-top:4px"><li>host 侧调系统 git 命令(node child_process)</li><li>Git 图拓扑:git log --graph --all 解析</li><li>计费沿用 billing 记账核心(真实 usage)</li></ul></div>
+      <div><b>优点</b><ul class="pros" style="padding-left:1.1em;color:var(--ok);margin-top:4px"><li>git 日常操作完整闭环</li><li>计费与工作台一体化,无冗余</li></ul><br><b style="color:var(--err)">注意</b><ul style="padding-left:1.1em;margin-top:4px;color:var(--err)"><li>git 写操作有真实风险,确认弹窗不可省</li><li>远程仓库需本机已配置凭据(SSH key / credential)</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="common">
+  <b>最终确认要点</b>
+  <ul>
+    <li>计费:真实 usage + 官方定价(峰谷半价,人民币),持久化账本,重启不丢;主面板计费放<b>右侧面板顶部卡片</b>(方案 C 形态)</li>
+    <li>右侧工作台四 Tab:<b>树 / 预览 / 变更 / Git 图</b>,数据源 = 会话工作目录的真实文件系统 + 真实 git 仓库</li>
+    <li>git 写操作(提交/推送/拉取/抓取/暂存/还原/变基)统一弹确认;冲突场景有明确提示</li>
+    <li>卸载全家桶(dsh-web-ui-all 及 pet/皮肤/看板/SSH/梁神模式等),新插件独立于 <code>D:\Code\dsh-simple-billing</code>,零依赖全家桶</li>
+    <li>视觉:浅色明亮、圆角卡片、等宽数字、状态色克制(绿=OK 蓝=操作 琥珀=警告 红=冲突)</li>
+  </ul>
+</section>
+
+<script>
+document.querySelectorAll('.rp-h .tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.rp-h .tab').forEach(t => t.classList.remove('on'));
+    document.querySelectorAll('.pane').forEach(p => p.classList.remove('on'));
+    tab.classList.add('on');
+    document.getElementById('pane-' + tab.dataset.pane).classList.add('on');
+  });
+});
+</script>
+</body>
+</html>

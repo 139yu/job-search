@@ -24,4 +24,25 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <Style TargetType="RadioButton" x:Key="MenuButtonStyle">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="root" Padding="25,15" Background="Transparent">
+                        <ContentPresenter x:Name="txt" TextBlock.Foreground="{DynamicResource MenuFontBrush}"
+                                      TextBlock.FontWeight="ExtraBold"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="root" Property="Background"  Value="{DynamicResource MenuHoverBrush}"/>
+                            <Setter TargetName="txt" Property="TextBlock.Foreground" Value="{DynamicResource MenuHoverFontBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

@@ -9,6 +9,11 @@ public class BusinessException: Exception
         ErrorCode = errorCode;
         UserMessage = userMessage;
     }
+
+    public BusinessException(object errorCode)
+    {
+        
+    }
 }
 
 public class BusinessException<TErrorCode> : BusinessException where TErrorCode : Enum

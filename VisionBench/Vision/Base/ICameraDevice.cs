@@ -12,11 +12,6 @@ namespace Vision.Base;
 public interface ICameraDevice
 {
     /// <summary>
-    /// 相机是否已打开。
-    /// </summary>
-    bool IsOpen { get; }
-
-    /// <summary>
     /// 相机是否已初始化（参数已下发）。
     /// </summary>
     bool IsInitialized { get; }

@@ -1,4 +1,7 @@
 ﻿using System.Windows.Documents;
+using Commons.Base;
+using Commons.Enums;
+using Commons.Logging;
 using MvCameraControl;
 using Vision.Base;
 using Vision.Enums;
@@ -8,12 +11,13 @@ namespace Vision.Manager;
 
 public class HikVisionManager : ICameraManager
 {
-    readonly DeviceTLayerType enumTLayerType = DeviceTLayerType.MvGigEDevice | DeviceTLayerType.MvUsbDevice
+    private readonly DeviceTLayerType enumTLayerType = DeviceTLayerType.MvGigEDevice | DeviceTLayerType.MvUsbDevice
                                                                              | DeviceTLayerType.MvGenTLGigEDevice |
                                                                              DeviceTLayerType.MvGenTLCXPDevice |
                                                                              DeviceTLayerType.MvGenTLCameraLinkDevice |
                                                                              DeviceTLayerType.MvGenTLXoFDevice;
 
+    private static NLog.Logger _logger = Log.For<HikVisionManager>(LogModule.Camera);
 
     public List<CameraInfo> ListAvailable()
     {
@@ -21,7 +25,9 @@ public class HikVisionManager : ICameraManager
         int ret = DeviceEnumerator.EnumDevices(enumTLayerType, out deviceInfoList);
         if (ret != MvError.MV_OK)
         {
-            return null;
+            _logger.Error(VisionError.EnumDeviceFailure.GetMessage(ret.ToString()));
+            throw new BusinessException<VisionError>(VisionError.EnumDeviceFailure,
+                VisionError.EnumDeviceFailure.GetMessage(ret.ToString()));
         }
 
         List<CameraInfo> cameraInfos = new List<CameraInfo>();

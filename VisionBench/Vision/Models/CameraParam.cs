@@ -11,17 +11,17 @@ public class CameraParam
     /// <summary>
     /// 曝光时间（单位：微秒）。
     /// </summary>
-    public int ExposureTime { get; set; }
+    public float ExposureTime { get; set; } = 5000f;
 
     /// <summary>
     /// 增益值。
     /// </summary>
-    public int Gain { get; set; }
+    public float Gain { get; set; } = 1.0f;
 
     /// <summary>
     /// 像素格式（如 Mono8、Mono12 等）。
     /// </summary>
-    public PixelFormatEnum PixelFormat { get; set; }
+    public PixelFormatEnum PixelFormat { get; set; } = PixelFormatEnum.Mono8;
 
     /// <summary>
     /// 采集图像宽度（单位：像素）。
@@ -36,25 +36,35 @@ public class CameraParam
     /// <summary>
     /// 采集区域起点 X 坐标（相对感光芯片原点，单位：像素）。
     /// </summary>
-    public int StartX { get; set; }
+    public int StartX { get; set; } = 0;
 
     /// <summary>
     /// 采集区域起点 Y 坐标（相对感光芯片原点，单位：像素）。
     /// </summary>
-    public int StartY { get; set; }
+    public int StartY { get; set; } = 0;
 
     /// <summary>
     /// 采集区域终点 X 坐标（单位：像素）。
     /// </summary>
-    public int EndX { get; set; }
+    public int EndX { get; set; } = 2048;
 
     /// <summary>
     /// 采集区域终点 Y 坐标（单位：像素）。
     /// </summary>
-    public int EndY { get; set; }
+    public int EndY { get; set; } = 2048;
 
     /// <summary>
-    /// 触发模式（软件触发 / 硬件触发 / 自由运行）。
+    /// 采集超时时间，单位ms
     /// </summary>
-    public TriggerModeEnum TriggerMode { get; set; }
+    public int GrabTimeout { get; set; } = 1000;
+
+    /// <summary>
+    /// 水平翻转
+    /// </summary>
+    public bool ReverseX { get; set; } = true;
+
+    /// <summary>
+    /// 垂直翻转
+    /// </summary>
+    public bool ReverseY { get; set; } = true;
 }

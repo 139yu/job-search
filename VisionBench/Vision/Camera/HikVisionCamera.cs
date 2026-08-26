@@ -1,8 +1,10 @@
-﻿using Commons.Base;
+﻿using System.Threading.Channels;
+using Commons.Base;
 using Commons.Enums;
 using Commons.Logging;
 using MvCameraControl;
 using Vision.Base;
+using Vision.Enums;
 using Vision.Manager;
 using Vision.Models;
 
@@ -10,6 +12,7 @@ namespace Vision.Camera;
 
 public class HikVisionCamera : ICameraDevice
 {
+    private readonly object _lock = new object();
     readonly DeviceTLayerType enumTLayerType = DeviceTLayerType.MvGigEDevice 
                                                | DeviceTLayerType.MvUsbDevice
                                                | DeviceTLayerType.MvGenTLGigEDevice 
@@ -18,6 +21,10 @@ public class HikVisionCamera : ICameraDevice
                                                | DeviceTLayerType.MvGenTLXoFDevice;
 
     private static readonly NLog.Logger Logger = Log.For<HikVisionCamera>(LogModule.Camera);
+    private readonly Channel<object> channel = Channel.CreateBounded<object>(new  BoundedChannelOptions(10)
+    {
+        FullMode = BoundedChannelFullMode.DropOldest
+    });
     public HikVisionCamera(CameraInfo cameraInfo, CameraParam cameraParam)
     {
         IsInitialized = false;
@@ -37,32 +44,28 @@ public class HikVisionCamera : ICameraDevice
     {
         if (CameraInfo == null)
         {
-            Logger.Error(VisionError.InvalidParams.GetMessage("CameraInfo"));
             throw new BusinessException<VisionError>(VisionError.InvalidParams,
                 VisionError.InvalidParams.GetMessage("CameraInfo"));
         }
         if (IsConnected) return;
         var ret = 0;
         List<IDeviceInfo> deviceInfoList;
-        DeviceEnumerator.EnumDevices(enumTLayerType, out deviceInfoList);
+        ret = DeviceEnumerator.EnumDevices(enumTLayerType, out deviceInfoList);
         if (ret != MvError.MV_OK)
         {
-            Logger.Error(VisionError.EnumDeviceFailure.GetMessage(ret.ToString()));
             throw new BusinessException<VisionError>(VisionError.EnumDeviceFailure,
                 VisionError.EnumDeviceFailure.GetMessage(ret.ToString()));
         }
 
         if (deviceInfoList == null || deviceInfoList.Count == 0)
         {
-            Logger.Error(VisionError.DeviceNotFound.GetMessage());
-            throw new BusinessException<VisionError>(VisionError.EnumDeviceFailure,
-                VisionError.EnumDeviceFailure.GetMessage(ret.ToString()));
+            throw new BusinessException<VisionError>(VisionError.DeviceNotFound,
+                VisionError.DeviceNotFound.GetMessage(ret.ToString()));
         }
 
-        var target = deviceInfoList.FirstOrDefault(d => d.SerialNumber.Equals(CameraInfo.CameraName));
-        if (device == null)
+        var target = deviceInfoList.FirstOrDefault(d => d.SerialNumber.Equals(CameraInfo.SerialNum));
+        if (target == null)
         {
-            Logger.Error(VisionError.DeviceNotExits.GetMessage());
             throw new BusinessException<VisionError>(VisionError.DeviceNotExits,
                 VisionError.DeviceNotExits.GetMessage(CameraInfo.CameraName));
         }
@@ -70,7 +73,6 @@ public class HikVisionCamera : ICameraDevice
         ret = device.Open();
         if (ret != MvError.MV_OK)
         {
-            Logger.Error(VisionError.OpenFailed.GetMessage(ret.ToString()));
             throw new BusinessException<VisionError>(VisionError.OpenFailed,
                 VisionError.OpenFailed.GetMessage(ret.ToString()));
         }
@@ -84,7 +86,6 @@ public class HikVisionCamera : ICameraDevice
             ret = gigEDevice.GetOptimalPacketSize(out optionPacketSize);
             if (ret != MvError.MV_OK)
             {
-                Logger.Error(VisionError.SetPacketSizeFailed.GetMessage(ret.ToString()));
                 throw new BusinessException<VisionError>(VisionError.OpenFailed,
                     VisionError.SetPacketSizeFailed.GetMessage(ret.ToString()));
             }
@@ -93,7 +94,6 @@ public class HikVisionCamera : ICameraDevice
                 ret = device.Parameters.SetIntValue("GevSCPSPacketSize", (long)optionPacketSize);
                 if (ret != MvError.MV_OK)
                 {
-                    Logger.Error(VisionError.GetPacketSizeFailed.GetMessage(ret.ToString()));
                     throw new BusinessException<VisionError>(VisionError.OpenFailed,
                         VisionError.GetPacketSizeFailed.GetMessage(ret.ToString()));
                 }
@@ -105,12 +105,47 @@ public class HikVisionCamera : ICameraDevice
 
     public void Init()
     {
+        if (CameraParam == null)
+        {
+            throw new BusinessException<VisionError>(VisionError.InvalidParams,
+                VisionError.InvalidParams.GetMessage("CameraParam"));
+        }
+        if (!IsConnected)
+        {
+            throw new BusinessException<VisionError>(VisionError.InitFailed,
+                VisionError.InitFailed.GetMessage("相机未连接"));
+        }
+
+        if (IsInitialized) return;
+        device.Parameters.SetBoolValue("ReverseX",CameraParam.ReverseX);
+        device.Parameters.SetBoolValue("ReverseY",CameraParam.ReverseY);
+        // 关闭自动曝光
+        device.Parameters.SetEnumValue("ExposureAuto", 0);
+        // 关闭自动增益
+        device.Parameters.SetEnumValue("GainAuto", 0);
         
+        device.Parameters.SetFloatValue("Gain", CameraParam.Gain);
+        device.Parameters.SetFloatValue("ExposureTime", CameraParam.ExposureTime);
+        var ret = device.Parameters.SetEnumValueByString("TriggerMode", "Off");
+        if (ret != MvError.MV_OK)
+            throw new BusinessException(VisionError.SetCameraParamFailed,VisionError.SetCameraParamFailed.GetMessage("TriggerMode"));
+        device.StreamGrabber.SetImageNodeNum(5);
+        device.StreamGrabber.FrameGrabedEventEx += OnFrameGrabbed;
+        IsInitialized = true;
+    }
+
+    private void OnFrameGrabbed(object? sender, FrameGrabbedEventArgs e)
+    {
+        if(!IsConnected || !IsInitialized) return;
+        lock (_lock)
+        {
+            IsGrabbing = true;
+            
+        }
     }
 
     public void Close()
     {
-        
     }
 
     public void SetExposure(int exposure)
@@ -140,7 +175,7 @@ public class HikVisionCamera : ICameraDevice
 
     public bool TryGrabFrame()
     {
-        throw new NotImplementedException();
+        return false;
     }
 
     public bool TryGetFrame(out object frame)

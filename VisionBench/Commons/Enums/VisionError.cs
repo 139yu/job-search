@@ -10,5 +10,7 @@ public enum VisionError
     InvalidParams = 20006,
     SetPacketSizeFailed = 20007,
     GetPacketSizeFailed = 20008,
+    SetCameraParamFailed = 20009,
+    GetCameraParamFailed = 20010,
 }
 

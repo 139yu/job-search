@@ -26,7 +26,7 @@ public class CameraInfo
     /// <summary>
     /// 相机像元尺寸（单位：微米），用于像素与物理尺寸之间的换算。
     /// </summary>
-    public double PixelSize { get; set; }
+    public double PixelSize { get; set; } = 3.45;
 
     /// <summary>
     /// 相机型号。

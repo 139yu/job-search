@@ -16,6 +16,7 @@ public static class CameraMessageHelper
         { VisionError.SetPacketSizeFailed, "Set Packet Size failed!" },
         { VisionError.SetCameraParamFailed, "设置相机参数失败：{0}" },
         { VisionError.GetCameraParamFailed, "获取相机参数失败：{0}" },
+        { VisionError.StartGarbFailed, "开启采集失败：{0}" },
     };
 
     public static string GetMessage(this VisionError result)

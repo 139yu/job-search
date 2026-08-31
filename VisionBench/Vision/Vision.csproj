@@ -9,7 +9,6 @@
 
     <ItemGroup>
       <Folder Include="Helper\" />
-      <Folder Include="ImageProvider\" />
       <Folder Include="Libs\" />
     </ItemGroup>
 

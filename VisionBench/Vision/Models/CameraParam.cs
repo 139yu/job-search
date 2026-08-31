@@ -19,11 +19,6 @@ public class CameraParam
     public float Gain { get; set; } = 1.0f;
 
     /// <summary>
-    /// 像素格式（如 Mono8、Mono12 等）。
-    /// </summary>
-    public PixelFormatEnum PixelFormat { get; set; } = PixelFormatEnum.Mono8;
-
-    /// <summary>
     /// 采集图像宽度（单位：像素）。
     /// </summary>
     public int ImageWidth { get; set; }

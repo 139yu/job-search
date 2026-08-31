@@ -12,5 +12,7 @@ public enum VisionError
     GetPacketSizeFailed = 20008,
     SetCameraParamFailed = 20009,
     GetCameraParamFailed = 20010,
+    StartGarbFailed = 20011,
+    StopGarbFailed = 20012,
 }
 

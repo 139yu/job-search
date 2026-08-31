@@ -54,14 +54,12 @@ public interface ICameraDevice
     /// <summary>
     /// 设置曝光时间。失败抛异常。
     /// </summary>
-    /// <param name="exposure">曝光时间值（单位由具体相机决定，通常为微秒）。</param>
-    void SetExposure(int exposure);
+    void ApplyGain();
 
     /// <summary>
     /// 设置增益。失败抛异常。
     /// </summary>
-    /// <param name="gain">增益值。</param>
-    void SetGain(int gain);
+    void ApplyExposure();
 
     /// <summary>
     /// 开始图像采集。失败抛异常。
@@ -81,11 +79,11 @@ public interface ICameraDevice
     /// <summary>
     /// 尝试同步抓取一帧图像。失败（超时等）返回 false，不抛异常。
     /// </summary>
-    bool TryGrabFrame();
+    void StartSingleGarb();
 
     /// <summary>
-    /// 尝试获取最近抓取到的图像帧。失败返回 false，不抛异常。
+    /// 尝试获取最近抓取到的图像帧
     /// </summary>
-    /// <param name="frame">输出参数，抓取到的图像帧对象。</param>
-    bool TryGetFrame(out object frame);
+    /// <returns></returns>
+    CameraFrame TryGetFrame();
 }

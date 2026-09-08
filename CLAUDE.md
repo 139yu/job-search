@@ -66,5 +66,5 @@ Each script hardcodes a `TARGET` — a hex browser-tab ID (e.g. `"A00D84F6A9817D
 ## Reference files worth knowing
 
 - `market_report.md` — the finished analysis: final conclusions, target-company shortlist, and degree/work-schedule findings for the 深圳/东莞 C#/上位机 market.
-- `story_cards/*.md` — STAR-format interview stories tied to the  `` WPF codebase; their source paths point outside this repo.
-- `coding_drills.md` / `skill_improvement_plan.md` — the hands-on demo checklist and 7-week study plan; they reference `D:\Code\\...` and `D:\Code\Github\halcon_3d\...` source paths outside this repo.
+- `story_cards/*.md` — STAR-format interview stories tied to an external WPF codebase; their source paths point outside this repo.
+- `coding_drills.md` / `skill_improvement_plan.md` — the hands-on demo checklist and 7-week study plan; they reference source paths outside this repo.

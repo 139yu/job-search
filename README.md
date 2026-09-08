@@ -21,10 +21,10 @@
 
 ## Agent 规范
 
-协作与实现约定见 [PROJECT_STANDARDS.md](./PROJECT_STANDARDS.md)（从  规范抽取的通用子集）。`AGENTS.md` 只是入口索引。
+协作与实现约定见 [PROJECT_STANDARDS.md](./PROJECT_STANDARDS.md)（从既有项目规范抽取的通用子集）。`AGENTS.md` 只是入口索引。
 
 ## 说明
 
-- 目前没有找到安装量足够高的模拟面试技能，需要模拟面试时直接让 Codex 扮演面试官即可，素材可以用 `D:\Code\\Interview_Guide.md`
+- 目前没有找到安装量足够高的模拟面试技能，需要模拟面试时直接让 Codex 扮演面试官即可，素材可以用本地的面试指导文档
 - 技能内容以提示词为主，使用前建议人工浏览一遍；`salary-negotiation-prep` 被扫描为中等风险，注意不要向技能提供身份证号、银行卡号等敏感信息
 - `skills-lock.json` 记录了技能来源，换机器时可在本目录执行 `npx skills experimental_install` 恢复

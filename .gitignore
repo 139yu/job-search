@@ -12,3 +12,20 @@ obj/
 
 # Node
 node_modules/
+
+# 个人 / 求职 / 面试内容（本地保留，不提交仓库）
+/interview_script.md
+/oral_drills_v2.md
+/oral_drills_plan.md
+/rmi_project_interview_notes.md
+/halcon_cases_interview_notes.md
+/motion_control_interview_notes.md
+/coding_drills.md
+/skill_improvement_plan.md
+/skill_improvement_plan_v2.md
+/story_cards/
+/.agents/skills/
+/面试口播稿.docx
+/面试口播稿.pdf
+/docs/面试口播稿-手机版.html
+/docs/mockups/

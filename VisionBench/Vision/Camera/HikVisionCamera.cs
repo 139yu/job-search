@@ -5,6 +5,7 @@ using Commons.Logging;
 using MvCameraControl;
 using Vision.Base;
 using Vision.Enums;
+using Vision.Events;
 using Vision.Manager;
 using Vision.Models;
 
@@ -38,6 +39,21 @@ public class HikVisionCamera : ICameraDevice
     }
 
     private IDevice device = null;
+    private CameraStateEnum _state = CameraStateEnum.Disconnected;
+
+    public CameraStateEnum State
+    {
+        get => _state;
+        set
+        {
+            var oldState = _state;
+            _state = value;
+            var args = new StateChangedEventArgs(oldState,_state);
+            this.StateChanged?.Invoke(this, args);
+        }
+    }
+    public event EventHandler<StateChangedEventArgs>? StateChanged;
+    
     public bool IsInitialized { get; private set; }
     public bool IsGrabbing { get; private set; }
     public bool IsConnected { get; private set; }
@@ -52,7 +68,12 @@ public class HikVisionCamera : ICameraDevice
                 VisionError.InvalidParams.GetMessage("CameraInfo"));
         }
 
-        if (IsConnected) return;
+        if (IsConnected)
+        {
+            if(State == CameraStateEnum.Disconnected) 
+                State =  CameraStateEnum.Connected;
+            return;
+        }
         var ret = 0;
         List<IDeviceInfo> deviceInfoList;
         ret = DeviceEnumerator.EnumDevices(enumTLayerType, out deviceInfoList);
@@ -106,6 +127,7 @@ public class HikVisionCamera : ICameraDevice
             }
         }
         IsConnected = true;
+        State = CameraStateEnum.Connected;
     }
 
     public void Init()
@@ -139,6 +161,7 @@ public class HikVisionCamera : ICameraDevice
         device.StreamGrabber.SetImageNodeNum(5);
         device.StreamGrabber.FrameGrabedEventEx += OnFrameGrabbed;
         IsInitialized = true;
+        State = CameraStateEnum.Ready;
     }
 
     private void OnFrameGrabbed(object? sender, FrameGrabbedEventArgs e)
@@ -170,6 +193,7 @@ public class HikVisionCamera : ICameraDevice
             device.StreamGrabber.FrameGrabedEventEx -= OnFrameGrabbed;
             device.Close();
             device.Dispose();
+            State = CameraStateEnum.Disconnected;
         }
         catch (Exception e)
         {
@@ -197,10 +221,12 @@ public class HikVisionCamera : ICameraDevice
             if (ret != MvError.MV_OK)
                 throw new BusinessException(VisionError.StartGarbFailed, ret.ToString());
             IsGrabbing = true;
+            State = CameraStateEnum.Grabbing;
         }
         catch (Exception e)
         {
             IsGrabbing = false;
+            State = CameraStateEnum.Ready;
             throw;
         }
     }
@@ -213,6 +239,7 @@ public class HikVisionCamera : ICameraDevice
             if (ret != MvError.MV_OK)
                 throw new BusinessException(VisionError.StopGarbFailed, ret.ToString());
             IsGrabbing = false;
+            State = CameraStateEnum.Ready;
         }
     }
 

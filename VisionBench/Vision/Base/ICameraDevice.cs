@@ -1,4 +1,6 @@
-﻿using Vision.Models;
+﻿using Vision.Enums;
+using Vision.Events;
+using Vision.Models;
 
 namespace Vision.Base;
 
@@ -11,6 +13,8 @@ namespace Vision.Base;
 /// </summary>
 public interface ICameraDevice
 {
+    CameraStateEnum State { get; }
+    event EventHandler<StateChangedEventArgs> StateChanged; 
     /// <summary>
     /// 相机是否已初始化（参数已下发）。
     /// </summary>

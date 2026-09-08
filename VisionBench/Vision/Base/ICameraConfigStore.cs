@@ -4,6 +4,6 @@ namespace Vision.Base;
 
 public interface ICameraConfigStore
 {
-    List<CameraProfile> LoadProfiles();
-    void SaveProfiles(List<CameraProfile> profiles);
+    List<StationProfile> LoadStations();
+    void SaveStations(List<StationProfile> profiles);
 }

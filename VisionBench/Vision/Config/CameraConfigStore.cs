@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using Commons;
 using Commons.Helper;
 using Vision.Base;
@@ -10,15 +10,24 @@ public class CameraConfigStore : ICameraConfigStore
 {
     private string storePath = Path.Combine(AppConstants.ConfigPath,"CameraConfig.json");
     private readonly object _lock = new();
-    public List<CameraProfile> LoadProfiles()
+    public List<StationProfile> LoadStations()
     {
-        if(!File.Exists(storePath))
-            return new List<CameraProfile>();
-        var json = File.ReadAllText(storePath);
-        return JsonUtil.FromJson<List<CameraProfile>>(json);
+        try
+        {
+            if (!File.Exists(storePath))
+                return null;
+            var json = File.ReadAllText(storePath);
+            if (string.IsNullOrEmpty(json))
+                return null;
+            return JsonUtil.FromJson<List<StationProfile>>(json);
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
     }
 
-    public void SaveProfiles(List<CameraProfile> profiles)
+    public void SaveStations(List<StationProfile> profiles)
     {
         lock (_lock)
         {

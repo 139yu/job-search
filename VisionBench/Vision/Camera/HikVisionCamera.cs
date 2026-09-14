@@ -31,9 +31,6 @@ public class HikVisionCamera : ICameraDevice
 
     public HikVisionCamera(CameraInfo cameraInfo, CameraParam cameraParam)
     {
-        IsInitialized = false;
-        IsGrabbing = false;
-        IsConnected = false;
         CameraInfo = cameraInfo;
         CameraParam = cameraParam;
     }
@@ -44,8 +41,10 @@ public class HikVisionCamera : ICameraDevice
     public CameraStateEnum State
     {
         get => _state;
-        set
+        private set
         {
+            if (_state == value)
+                return;
             var oldState = _state;
             _state = value;
             var args = new StateChangedEventArgs(oldState,_state);
@@ -53,10 +52,7 @@ public class HikVisionCamera : ICameraDevice
         }
     }
     public event EventHandler<StateChangedEventArgs>? StateChanged;
-    
-    public bool IsInitialized { get; private set; }
-    public bool IsGrabbing { get; private set; }
-    public bool IsConnected { get; private set; }
+
     public CameraInfo CameraInfo { get; }
     public CameraParam CameraParam { get; }
 
@@ -68,12 +64,8 @@ public class HikVisionCamera : ICameraDevice
                 VisionError.InvalidParams.GetMessage("CameraInfo"));
         }
 
-        if (IsConnected)
-        {
-            if(State == CameraStateEnum.Disconnected) 
-                State =  CameraStateEnum.Connected;
+        if (State != CameraStateEnum.Disconnected)
             return;
-        }
         var ret = 0;
         List<IDeviceInfo> deviceInfoList;
         ret = DeviceEnumerator.EnumDevices(enumTLayerType, out deviceInfoList);
@@ -126,7 +118,6 @@ public class HikVisionCamera : ICameraDevice
                 }
             }
         }
-        IsConnected = true;
         State = CameraStateEnum.Connected;
     }
 
@@ -138,13 +129,13 @@ public class HikVisionCamera : ICameraDevice
                 VisionError.InvalidParams.GetMessage("CameraParam"));
         }
 
-        if (!IsConnected)
+        if (State == CameraStateEnum.Disconnected)
         {
             throw new BusinessException<VisionError>(VisionError.InitFailed,
                 VisionError.InitFailed.GetMessage("相机未连接"));
         }
 
-        if (IsInitialized) return;
+        if (State != CameraStateEnum.Connected) return;
         device.Parameters.SetBoolValue("ReverseX", CameraParam.ReverseX);
         device.Parameters.SetBoolValue("ReverseY", CameraParam.ReverseY);
         // 关闭自动曝光
@@ -160,26 +151,27 @@ public class HikVisionCamera : ICameraDevice
                 VisionError.SetCameraParamFailed.GetMessage("TriggerMode"));
         device.StreamGrabber.SetImageNodeNum(5);
         device.StreamGrabber.FrameGrabedEventEx += OnFrameGrabbed;
-        IsInitialized = true;
         State = CameraStateEnum.Ready;
     }
 
     private void OnFrameGrabbed(object? sender, FrameGrabbedEventArgs e)
     {
-        if (!IsConnected || !IsInitialized) return;
-        lock (_lock)
+        if (State is CameraStateEnum.Grabbing)
         {
-            try
+            lock (_lock)
             {
-                var frameOut = e.FrameOut;
-                var flag = TryBuildFrame(frameOut,out CameraFrame frame);
-                if(flag)
-                    channel.Writer.TryWrite(frame);
-                device.StreamGrabber.FreeImageBuffer(frameOut);
-            }
-            catch (Exception exception)
-            {
-                Logger.Error(exception.Message);
+                try
+                {
+                    var frameOut = e.FrameOut;
+                    var flag = TryBuildFrame(frameOut,out CameraFrame frame);
+                    if(flag)
+                        channel.Writer.TryWrite(frame);
+                    device.StreamGrabber.FreeImageBuffer(frameOut);
+                }
+                catch (Exception exception)
+                {
+                    Logger.Error(exception.Message);
+                }
             }
         }
     }
@@ -188,12 +180,13 @@ public class HikVisionCamera : ICameraDevice
     {
         try
         {
-            IsGrabbing = false;
-            IsConnected = false;
-            device.StreamGrabber.FrameGrabedEventEx -= OnFrameGrabbed;
-            device.Close();
-            device.Dispose();
             State = CameraStateEnum.Disconnected;
+            if (device != null)
+            {
+                device.StreamGrabber.FrameGrabedEventEx -= OnFrameGrabbed;
+                device.Close();
+                device.Dispose();
+            }
         }
         catch (Exception e)
         {
@@ -212,33 +205,22 @@ public class HikVisionCamera : ICameraDevice
 
     public void StartAcquisition()
     {
-        try
-        {
-            if (IsGrabbing) return;
-            if (!IsConnected || !IsInitialized)
-                throw new BusinessException(VisionError.StartGarbFailed, "相机未连接或初始化");
-            var ret = device.StreamGrabber.StartGrabbing();
-            if (ret != MvError.MV_OK)
-                throw new BusinessException(VisionError.StartGarbFailed, ret.ToString());
-            IsGrabbing = true;
-            State = CameraStateEnum.Grabbing;
-        }
-        catch (Exception e)
-        {
-            IsGrabbing = false;
-            State = CameraStateEnum.Ready;
-            throw;
-        }
+        if (State == CameraStateEnum.Grabbing) return;
+        if (State != CameraStateEnum.Ready)
+            throw new BusinessException(VisionError.StartGarbFailed, "相机未连接或初始化");
+        var ret = device.StreamGrabber.StartGrabbing();
+        if (ret != MvError.MV_OK)
+            throw new BusinessException(VisionError.StartGarbFailed, ret.ToString());
+        State = CameraStateEnum.Grabbing;
     }
 
     public void StopAcquisition()
     {
-        if (IsGrabbing)
+        if (State != CameraStateEnum.Grabbing) return;
         {
             var ret = device.StreamGrabber.StopGrabbing();
             if (ret != MvError.MV_OK)
                 throw new BusinessException(VisionError.StopGarbFailed, ret.ToString());
-            IsGrabbing = false;
             State = CameraStateEnum.Ready;
         }
     }
@@ -262,15 +244,8 @@ public class HikVisionCamera : ICameraDevice
 
     public CameraFrame TryGetFrame()
     {
-        try
-        {
-            channel.Reader.TryRead(out CameraFrame frame);
-            return frame;
-        }
-        catch (Exception e)
-        {
-            throw;
-        }
+        channel.Reader.TryRead(out CameraFrame frame);
+        return frame;
     }
 
     private bool TryBuildFrame(IFrameOut frameOut, out CameraFrame frame)

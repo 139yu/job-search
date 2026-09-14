@@ -15,20 +15,6 @@ public interface ICameraDevice
 {
     CameraStateEnum State { get; }
     event EventHandler<StateChangedEventArgs> StateChanged; 
-    /// <summary>
-    /// 相机是否已初始化（参数已下发）。
-    /// </summary>
-    bool IsInitialized { get; }
-
-    /// <summary>
-    /// 相机是否正在采集。
-    /// </summary>
-    bool IsGrabbing { get; }
-
-    /// <summary>
-    /// 相机连接是否有效。
-    /// </summary>
-    bool IsConnected { get; }
 
     /// <summary>
     /// 相机基本信息（品牌、型号、序列号等）。

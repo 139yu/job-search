@@ -9,5 +9,4 @@ public interface ICameraStationService
     IReadOnlyList<StationProfile> GetStations();
     void OpenCamera();
     void CloseCamera();
-    void Reload();
 }

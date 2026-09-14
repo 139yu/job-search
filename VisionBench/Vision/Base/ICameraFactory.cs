@@ -4,5 +4,5 @@ namespace Vision.Base;
 
 public interface ICameraFactory
 {
-    public ICameraDevice Create(CameraInfo cameraInfo,CameraParam cameraParam);
+    public ICameraDevice Create(CameraProfile profile);
 }

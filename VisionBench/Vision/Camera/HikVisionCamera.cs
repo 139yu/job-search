@@ -208,7 +208,10 @@ public class HikVisionCamera : ICameraDevice
         if (State == CameraStateEnum.Grabbing) return;
         if (State != CameraStateEnum.Ready)
             throw new BusinessException(VisionError.StartGarbFailed, "相机未连接或初始化");
-        var ret = device.StreamGrabber.StartGrabbing();
+        var ret =device.Parameters.SetEnumValueByString("AcquisitionMode", "Continuous");
+        if(ret != MvError.MV_OK)
+            throw new BusinessException<VisionError>(VisionError.StartGarbFailed, ret.ToString());
+        ret = device.StreamGrabber.StartGrabbing();
         if (ret != MvError.MV_OK)
             throw new BusinessException(VisionError.StartGarbFailed, ret.ToString());
         State = CameraStateEnum.Grabbing;
@@ -240,12 +243,23 @@ public class HikVisionCamera : ICameraDevice
 
     public void StartSingleGarb()
     {
+        if (State != CameraStateEnum.Grabbing && State != CameraStateEnum.Ready)
+        {
+            throw new BusinessException(VisionError.StartGarbFailed, "相机未初始化");
+        }
+
+        var ret = device.Parameters.SetEnumValueByString("AcquisitionMode", "Software");
+        if (ret != MvError.MV_OK)
+            throw new BusinessException(VisionError.StartGarbFailed, ret.ToString());
+        ret = device.Parameters.SetCommandValue("TriggerSoftware");
+        if (ret != MvError.MV_OK)
+            throw new BusinessException(VisionError.TriggerSoftwareFail, ret.ToString());
+        State = CameraStateEnum.Ready;
     }
 
-    public CameraFrame TryGetFrame()
+    public bool TryGetFrame(out CameraFrame frame)
     {
-        channel.Reader.TryRead(out CameraFrame frame);
-        return frame;
+        return channel.Reader.TryRead(out frame);
     }
 
     private bool TryBuildFrame(IFrameOut frameOut, out CameraFrame frame)

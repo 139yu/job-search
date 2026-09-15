@@ -8,6 +8,7 @@
 
     <!-- 表面 -->
     <Color x:Key="AppColor">#F4F6F9</Color>
+    <Color x:Key="PanelColor">#FAFBFC</Color>
     <Color x:Key="WinTitleColor">#CBD5E1</Color>
     <Color x:Key="WinButtonColor">#CBD5E1</Color>
     <Color x:Key="MenuContainerColor">#475569</Color>
@@ -48,6 +49,7 @@
 
     <!-- 画笔 -->
     <SolidColorBrush x:Key="AppBrush" Color="{StaticResource AppColor}"/>
+    <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource PanelColor}"/>
     <SolidColorBrush x:Key="WinTitleBrush" Color="{StaticResource WinTitleColor}"/>
     <SolidColorBrush x:Key="WindowTitleBrush" Color="{StaticResource WinTitleColor}"/>
     <SolidColorBrush x:Key="WindowButtonBrush" Color="{StaticResource WinButtonColor}"/>

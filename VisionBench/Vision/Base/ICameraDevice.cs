@@ -75,5 +75,5 @@ public interface ICameraDevice
     /// 尝试获取最近抓取到的图像帧
     /// </summary>
     /// <returns></returns>
-    CameraFrame TryGetFrame();
+    bool TryGetFrame(out CameraFrame frame);
 }

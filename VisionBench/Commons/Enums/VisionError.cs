@@ -14,5 +14,6 @@ public enum VisionError
     GetCameraParamFailed = 20010,
     StartGarbFailed = 20011,
     StopGarbFailed = 20012,
+    TriggerSoftwareFail = 20013,
 }
 

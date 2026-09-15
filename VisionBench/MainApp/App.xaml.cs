@@ -5,7 +5,11 @@ using System.Windows;
 using Commons;
 using CommonUI.Base;
 using MainApp.ViewModels;
+using MainApp.ViewModels.Menu;
 using NLog;
+using MainApp.Views.Menu;
+using Vision.Base;
+using Vision.Service;
 
 namespace MainApp
 {
@@ -31,6 +35,8 @@ namespace MainApp
 
             containerRegistry.RegisterDialogWindow<BaseDialog>();
             containerRegistry.RegisterDialog<CameraSettingDialog, CameraSettingDialogViewModel>();
+
+            containerRegistry.Register<ICameraStationService,CameraStationService>();
         }
 
         /// <summary>

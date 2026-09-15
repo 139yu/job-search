@@ -17,6 +17,8 @@ public static class CameraMessageHelper
         { VisionError.SetCameraParamFailed, "设置相机参数失败：{0}" },
         { VisionError.GetCameraParamFailed, "获取相机参数失败：{0}" },
         { VisionError.StartGarbFailed, "开启采集失败：{0}" },
+        { VisionError.StopGarbFailed, "停止采集失败：{0}" },
+        { VisionError.TriggerSoftwareFail, "单帧采集失败：{0}" },
     };
 
     public static string GetMessage(this VisionError result)

@@ -9,6 +9,9 @@
              mc:Ignorable="d"
              FontSize="{DynamicResource AppFontSize}"
              Width="900" Height="600">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="boolToVisibilityConverter"/>
+    </UserControl.Resources>
     <Grid Background="{DynamicResource AppBrush}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
@@ -46,8 +49,9 @@
                         <DataTemplate>
                             <Border Padding="10,5">
                                 <Grid>
-                                    <TextBlock/>
-                                    <TextBlock/>
+                                    <TextBlock Text="{Binding StationName}"/>
+                                    <TextBlock Text="已绑定"/>
+                                    <TextBlock Text="未绑定"/>
                                 </Grid>
                             </Border>
                         </DataTemplate>

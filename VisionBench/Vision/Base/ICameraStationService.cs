@@ -6,7 +6,7 @@ namespace Vision.Base;
 public interface ICameraStationService
 {
     ICameraDevice GetCamera(StationEnum station);
-    IReadOnlyList<StationProfile> GetStations();
+    IReadOnlyCollection<StationProfile> GetStations();
     void OpenCamera();
     void CloseCamera();
 }

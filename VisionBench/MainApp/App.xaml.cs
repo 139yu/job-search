@@ -1,15 +1,14 @@
 ﻿using MainApp.Views;
-using System.Configuration;
-using System.Data;
 using System.Windows;
 using Commons;
 using CommonUI.Base;
 using MainApp.ViewModels;
 using MainApp.ViewModels.Menu;
 using NLog;
-using MainApp.Views.Menu;
 using Vision.Base;
+using Vision.Config;
 using Vision.Service;
+using CameraSettingDialog = MainApp.Views.Menu.CameraSettingDialog;
 
 namespace MainApp
 {
@@ -36,6 +35,7 @@ namespace MainApp
             containerRegistry.RegisterDialogWindow<BaseDialog>();
             containerRegistry.RegisterDialog<CameraSettingDialog, CameraSettingDialogViewModel>();
 
+            containerRegistry.Register<ICameraConfigStore,CameraConfigStore>();
             containerRegistry.Register<ICameraStationService,CameraStationService>();
         }
 

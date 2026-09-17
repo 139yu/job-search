@@ -8,7 +8,7 @@ namespace MainApp.ViewModels.Menu;
 
 public class CameraSettingDialogViewModel : IBaseDialogAware
 {
-    public IReadOnlyCollection<StationProfile> StationList;
+    public IReadOnlyCollection<StationProfile> StationList { get; set; }
     private ICameraStationService _cameraStationService;
     public CameraSettingDialogViewModel(ICameraStationService cameraStationService)
     {

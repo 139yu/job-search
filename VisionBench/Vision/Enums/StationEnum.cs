@@ -2,5 +2,6 @@
 
 public enum StationEnum
 {
-    MainCamera
+    MainCamera,
+    TestCamera
 }

@@ -14,6 +14,8 @@
     <Color x:Key="MenuContainerColor">#475569</Color>
     <Color x:Key="MenuHoverColor">#DCE8F8</Color>
     <Color x:Key="IconButtonHoverColor">#DCE8F8</Color>
+    <Color x:Key="ItemMouseOverColor">#F1F4F8</Color>
+    <Color x:Key="ItemSelectedColor">#DBEAFE</Color>
 
     <!-- 边框 -->
     <Color x:Key="BorderColor">#D5DEE9</Color>
@@ -48,7 +50,9 @@
 
 
     <!-- 画笔 -->
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
     <SolidColorBrush x:Key="AppBrush" Color="{StaticResource AppColor}"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
     <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource PanelColor}"/>
     <SolidColorBrush x:Key="WinTitleBrush" Color="{StaticResource WinTitleColor}"/>
     <SolidColorBrush x:Key="WindowTitleBrush" Color="{StaticResource WinTitleColor}"/>
@@ -58,10 +62,16 @@
     <SolidColorBrush x:Key="WindowHoverBrush" Color="{StaticResource DangerColor}"/>
     <SolidColorBrush x:Key="WinTitleFontBrush" Color="{StaticResource TextSecondaryColor}"/>
     <SolidColorBrush x:Key="MenuContainerBrush" Color="{StaticResource MenuContainerColor}"/>
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+    <SolidColorBrush x:Key="UnbindBrush" Color="{StaticResource TextTertiaryColor}"/>
+    
     <SolidColorBrush x:Key="MenuFontBrush" Color="{StaticResource MenuFontColor}"/>
     <SolidColorBrush x:Key="MenuHoverBrush" Color="{StaticResource MenuHoverColor}"/>
     <SolidColorBrush x:Key="MenuHoverFontBrush" Color="{StaticResource MenuHoverFontColor}"/>
-    <SolidColorBrush x:Key="IconButtonHoverBrush" Color="{StaticResource IconButtonHoverColor}"/>
+    <SolidColorBrush x:Key="ItemMouseOverBrush" Color="{StaticResource ItemMouseOverColor}"/>
+    <SolidColorBrush x:Key="ItemSelectedBrush" Color="{StaticResource ItemSelectedColor}"/>
 
     <system:Double x:Key="AppFontSize">12</system:Double>
+    <system:Double x:Key="SecondaryFontSize">14</system:Double>
+    <system:Double x:Key="SmallFontSize">10</system:Double>
 </ResourceDictionary>

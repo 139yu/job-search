@@ -4,60 +4,143 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:prism="http://prismlibrary.com/"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
              xmlns:local="clr-namespace:MainApp.Views"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d"
              FontSize="{DynamicResource AppFontSize}"
              Width="900" Height="600">
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="boolToVisibilityConverter"/>
+        <BooleanToVisibilityConverter x:Key="boolToVisibilityConverter" />
     </UserControl.Resources>
     <Grid Background="{DynamicResource AppBrush}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="200" />
+            <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition Height="40"/>
+            <RowDefinition />
+            <RowDefinition Height="40" />
         </Grid.RowDefinitions>
         <Border Padding="10" Grid.Row="0" Background="{DynamicResource PanelBrush}">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="32"/>
-                    <RowDefinition/>
+                    <RowDefinition Height="32" />
+                    <RowDefinition />
                 </Grid.RowDefinitions>
-                <TextBlock Text="工位" Foreground="{DynamicResource WinTitleFontBrush}" VerticalAlignment="Center"/>
-                <ListBox Background="{DynamicResource PanelBrush}" 
+                <TextBlock Text="工位" Foreground="{DynamicResource WinTitleFontBrush}" VerticalAlignment="Center" />
+                <ListBox Background="{DynamicResource PanelBrush}"
                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
-                         ItemsSource="{Binding StationList}" 
+                         ItemsSource="{Binding StationList}"
                          Grid.Row="1" BorderThickness="0">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border HorizontalAlignment="Stretch" Padding="{TemplateBinding Padding}"
+                                                x:Name="root"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                Background="{TemplateBinding Background}"
+                                                CornerRadius="5"
+                                                BorderBrush="{TemplateBinding BorderBrush}">
+                                            <ContentPresenter x:Name="content" Grid.Column="1"
+                                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="root" Property="Background"
+                                                        Value="{DynamicResource ItemSelectedBrush}" />
+                                                <Setter TargetName="content" Property="TextBlock.FontWeight"
+                                                        Value="Bold" />
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="root" Property="Background"
+                                                        Value="{DynamicResource ItemMouseOverBrush}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
                     <ListBox.Template>
                         <ControlTemplate TargetType="ListBox">
-                            <Border Background="{TemplateBinding Background}" 
+                            <Border Background="{TemplateBinding Background}"
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     Padding="{TemplateBinding Padding}"
                                     BorderThickness="{TemplateBinding BorderThickness}">
                                 <ScrollViewer Focusable="False" CanContentScroll="True">
-                                    <ItemsPresenter/>
+                                    <ItemsPresenter />
                                 </ScrollViewer>
                             </Border>
                         </ControlTemplate>
                     </ListBox.Template>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Border Padding="10,5">
-                                <Grid>
-                                    <TextBlock Text="{Binding StationName}"/>
-                                    <TextBlock Text="已绑定"/>
-                                    <TextBlock Text="未绑定"/>
+                            <Border Padding="10" CornerRadius="5">
+                                <Grid HorizontalAlignment="Stretch">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border x:Name="icon" Margin="0,0,5,0"
+                                                Width="10" Height="10" 
+                                                CornerRadius="10" 
+                                                Background="{DynamicResource UnbindBrush}"/>
+                                        <TextBlock Text="{Binding StationName}"
+           VerticalAlignment="Center"
+           HorizontalAlignment="Left" />
+                                    </StackPanel>
+                                    <TextBlock x:Name="bindTxt" Visibility="Collapsed"
+                                               Foreground="{DynamicResource SuccessFontBrush}"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Right" Text="已绑定" />
+                                    <TextBlock x:Name="unBindTxt"
+                                               Visibility="Visible" FontSize="{DynamicResource SmallFontSize}"
+                                               Foreground="{DynamicResource TextTertiaryBrush}"
+                                               VerticalAlignment="Center" FontWeight="Normal"
+                                               HorizontalAlignment="Right" Text="未绑定" />
                                 </Grid>
                             </Border>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsBinding}" Value="True">
+                                    <Setter TargetName="bindTxt" Property="Visibility" Value="Visible" />
+                                    <Setter TargetName="icon" Property="Background" Value="{DynamicResource SuccessBrush}" />
+                                    <Setter TargetName="unBindTxt" Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
             </Grid>
         </Border>
+        <Grid Margin="10" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Border Padding="10" CornerRadius="5" BorderThickness="1" 
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    Background="{DynamicResource PanelBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
+                        <Border Width="3" Height="14" VerticalAlignment="Center" Margin="0,0,5,0"
+        Background="{DynamicResource AccentBrush}"/>
+                        <TextBlock Text="相机绑定" VerticalAlignment="Center" 
+                                   FontSize="{DynamicResource SecondaryFontSize}" 
+                                   FontWeight="Black"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Grid.Row="1" VerticalAlignment="Center">
+                        <hc:ComboBox hc:TitleElement.Title="品牌"/>
+                    </StackPanel>
+                </Grid> 
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

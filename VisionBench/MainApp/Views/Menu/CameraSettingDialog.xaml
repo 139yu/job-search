@@ -85,20 +85,20 @@
                                 <Grid HorizontalAlignment="Stretch">
                                     <StackPanel Orientation="Horizontal">
                                         <Border x:Name="icon" Margin="0,0,5,0"
-                                                Width="10" Height="10" 
-                                                CornerRadius="10" 
-                                                Background="{DynamicResource UnbindBrush}"/>
+                                                Width="10" Height="10"
+                                                CornerRadius="10"
+                                                Background="{DynamicResource UnbindBrush}" />
                                         <TextBlock Text="{Binding StationName}"
-           VerticalAlignment="Center"
-           HorizontalAlignment="Left" />
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Left" />
                                     </StackPanel>
                                     <TextBlock x:Name="bindTxt" Visibility="Collapsed"
-                                               Foreground="{DynamicResource SuccessFontBrush}"
+                                               Foreground="{DynamicResource SuccessBrush}"
                                                VerticalAlignment="Center"
                                                HorizontalAlignment="Right" Text="已绑定" />
                                     <TextBlock x:Name="unBindTxt"
                                                Visibility="Visible" FontSize="{DynamicResource SmallFontSize}"
-                                               Foreground="{DynamicResource TextTertiaryBrush}"
+                                               Foreground="{DynamicResource UnbindBrush}"
                                                VerticalAlignment="Center" FontWeight="Normal"
                                                HorizontalAlignment="Right" Text="未绑定" />
                                 </Grid>
@@ -106,7 +106,8 @@
                             <DataTemplate.Triggers>
                                 <DataTrigger Binding="{Binding IsBinding}" Value="True">
                                     <Setter TargetName="bindTxt" Property="Visibility" Value="Visible" />
-                                    <Setter TargetName="icon" Property="Background" Value="{DynamicResource SuccessBrush}" />
+                                    <Setter TargetName="icon" Property="Background"
+                                            Value="{DynamicResource SuccessBrush}" />
                                     <Setter TargetName="unBindTxt" Property="Visibility" Value="Collapsed" />
                                 </DataTrigger>
                             </DataTemplate.Triggers>
@@ -117,29 +118,29 @@
         </Border>
         <Grid Margin="10" Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
+                <RowDefinition />
+                <RowDefinition />
             </Grid.RowDefinitions>
-            <Border Padding="10" CornerRadius="5" BorderThickness="1" 
+            <Border Padding="10" CornerRadius="5" BorderThickness="1"
                     BorderBrush="{DynamicResource BorderBrush}"
                     Background="{DynamicResource PanelBrush}">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="30"/>
-                        <RowDefinition Height="30"/>
-                        <RowDefinition/>
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition />
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
                         <Border Width="3" Height="14" VerticalAlignment="Center" Margin="0,0,5,0"
-        Background="{DynamicResource AccentBrush}"/>
-                        <TextBlock Text="相机绑定" VerticalAlignment="Center" 
-                                   FontSize="{DynamicResource SecondaryFontSize}" 
-                                   FontWeight="Black"/>
+                                Background="{DynamicResource AccentBrush}" />
+                        <TextBlock Text="相机绑定" VerticalAlignment="Center"
+                                   FontSize="{DynamicResource SecondaryFontSize}"
+                                   FontWeight="Black" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Grid.Row="1" VerticalAlignment="Center">
-                        <hc:ComboBox hc:TitleElement.Title="品牌"/>
+                        <hc:ComboBox hc:TitleElement.Title="品牌" />
                     </StackPanel>
-                </Grid> 
+                </Grid>
             </Border>
         </Grid>
     </Grid>

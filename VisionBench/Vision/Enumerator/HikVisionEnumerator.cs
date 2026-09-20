@@ -9,7 +9,7 @@ using Vision.Models;
 
 namespace Vision.Manager;
 
-public class HikVisionManager : ICameraManager
+public class HikVisionEnumerator : ICameraEnumerator
 {
     private readonly DeviceTLayerType enumTLayerType = DeviceTLayerType.MvGigEDevice | DeviceTLayerType.MvUsbDevice
                                                                              | DeviceTLayerType.MvGenTLGigEDevice |
@@ -17,7 +17,7 @@ public class HikVisionManager : ICameraManager
                                                                              DeviceTLayerType.MvGenTLCameraLinkDevice |
                                                                              DeviceTLayerType.MvGenTLXoFDevice;
 
-    private static NLog.Logger _logger = Log.For<HikVisionManager>(LogModule.Camera);
+    private static NLog.Logger _logger = Log.For<HikVisionEnumerator>(LogModule.Camera);
 
     public List<CameraInfo> ListAvailable()
     {

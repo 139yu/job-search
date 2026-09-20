@@ -6,7 +6,7 @@ namespace Vision.Base;
 /// 相机管理器接口。
 /// 负责枚举系统上已连接/可用的相机设备。
 /// </summary>
-public interface ICameraManager
+public interface ICameraEnumerator
 {
     /// <summary>
     /// 枚举当前系统上所有可用的相机设备。

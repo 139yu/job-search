@@ -11,8 +11,12 @@
                 <ResourceDictionary>
                     <FontFamily x:Key="IconFont">Resources/Fonts/#iconfont</FontFamily>
                 </ResourceDictionary>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <BitmapImage x:Key="Logo" UriSource="/Resources/Images/tom.jpg"/>
+            
+            
         </ResourceDictionary>
     </Application.Resources>
 </prism:PrismApplication>

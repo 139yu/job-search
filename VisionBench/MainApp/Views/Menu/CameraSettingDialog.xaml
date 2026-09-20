@@ -127,7 +127,7 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30" />
-                        <RowDefinition Height="30" />
+                        <RowDefinition Height="32" />
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
@@ -138,7 +138,16 @@
                                    FontWeight="Black" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Grid.Row="1" VerticalAlignment="Center">
-                        <hc:ComboBox hc:TitleElement.Title="品牌" />
+                        <hc:ComboBox ItemsSource="{Binding CameraBrands}" 
+                                     VerticalAlignment="Center" 
+                                     DisplayMemberPath="CameraName"
+                                     SelectedItem="{Binding SelectedCameraBrand}"
+                                     hc:TitleElement.TitlePlacement="Left" 
+                                     hc:TitleElement.Title="品牌" Width="260" 
+                                     hc:TitleElement.TitleWidth="60" />
+                        <Button Content="枚举相机" 
+                                Command="{Binding}"
+                                Style="{StaticResource ButtonPrimary}" Margin="10,0"/>
                     </StackPanel>
                 </Grid>
             </Border>

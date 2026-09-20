@@ -1,11 +1,12 @@
 ﻿using Commons.Base;
 using Vision.Base;
+using Vision.Camera;
 using Vision.Enums;
 using Vision.Models;
 
-namespace Vision.Camera;
+namespace Vision.Factory;
 
-public class CameraFactory : ICameraFactory
+public class CameraFactory
 {
     public static readonly  CameraFactory Instance;
 

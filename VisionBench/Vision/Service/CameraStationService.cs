@@ -4,6 +4,7 @@ using Commons.Logging;
 using Vision.Base;
 using Vision.Camera;
 using Vision.Enums;
+using Vision.Factory;
 using Vision.Models;
 
 namespace Vision.Service;

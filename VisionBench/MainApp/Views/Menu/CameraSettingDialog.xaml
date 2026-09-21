@@ -141,12 +141,12 @@
                         <hc:ComboBox ItemsSource="{Binding CameraBrands}" 
                                      VerticalAlignment="Center" 
                                      DisplayMemberPath="CameraName"
-                                     SelectedItem="{Binding SelectedCameraBrand}"
+                                     SelectedItem="{Binding SelectedCameraBrand,Mode=TwoWay}"
                                      hc:TitleElement.TitlePlacement="Left" 
                                      hc:TitleElement.Title="品牌" Width="260" 
                                      hc:TitleElement.TitleWidth="60" />
                         <Button Content="枚举相机" 
-                                Command="{Binding}"
+                                Command="{Binding FindCameraCommand}"
                                 Style="{StaticResource ButtonPrimary}" Margin="10,0"/>
                     </StackPanel>
                 </Grid>

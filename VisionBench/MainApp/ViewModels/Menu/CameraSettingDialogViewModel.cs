@@ -1,5 +1,6 @@
 ﻿using Commons.Base;
 using CommonUI.Base;
+using CommonUI.Helper;
 using MainApp.Models;
 using Vision.Base;
 using Vision.Camera;
@@ -13,13 +14,17 @@ namespace MainApp.ViewModels.Menu;
 public class CameraSettingDialogViewModel : IBaseDialogAware
 {
     public List<CameraBrand> CameraBrands { get; set; } = new List<CameraBrand>();
-    private CameraBrand _selectedCameraBrand;
     public DelegateCommand FindCameraCommand { get; set; }
 
+    private CameraBrand _selectedCameraBrand;
     public CameraBrand SelectedCameraBrand
     {
         get => _selectedCameraBrand;
-        set { SetProperty(ref _selectedCameraBrand, value); }
+        set { 
+            SetProperty(ref _selectedCameraBrand, value); 
+            FindCameraCommand.RaiseCanExecuteChanged();
+            
+        }
     }
 
     public IReadOnlyCollection<StationProfile> StationList { get; set; }
@@ -28,7 +33,10 @@ public class CameraSettingDialogViewModel : IBaseDialogAware
     public List<CameraInfo> CameraList
     {
         get => _cameraList;
-        set { SetProperty(ref _cameraList, value); }
+        set
+        {
+            SetProperty(ref _cameraList, value);
+        }
     }
 
     private ICameraStationService _cameraStationService;
@@ -59,11 +67,11 @@ public class CameraSettingDialogViewModel : IBaseDialogAware
         {
             var cameraEnumerator = CameraEnumeratorFactory.Instance.GetCameraEnumerator(SelectedCameraBrand.CameraType);
             CameraList = cameraEnumerator.ListAvailable();
+            GrowlHelper.Success("枚举相机成功！");
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            throw;
+            GrowlHelper.Error(e.Message);
         }
     }
 }

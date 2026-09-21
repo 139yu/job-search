@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MainApp"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:prism="http://prismlibrary.com/"
         prism:ViewModelLocator.AutoWireViewModel="True"
         xmlns:commons="clr-namespace:Commons;assembly=Commons"
@@ -102,5 +103,15 @@
         <Grid Grid.Row="3" Grid.Column="1" Grid.RowSpan="1" Background="BlueViolet"></Grid>
         <!--右侧区域-->
         <Grid Grid.Row="2" Grid.Column="2" Grid.RowSpan="2" Background="DeepSkyBlue"></Grid>
+        <!--Handy Control Growl容器-->
+        <ScrollViewer Grid.Row="1" Grid.RowSpan="5" Grid.ColumnSpan="10" Panel.ZIndex="1000" 
+                      VerticalScrollBarVisibility="Hidden" 
+                      HorizontalScrollBarVisibility="Disabled" 
+                      IsHitTestVisible="False"
+                      Margin="0,10,0,0"
+                      HorizontalAlignment="Right" VerticalAlignment="Top">
+            <StackPanel Panel.ZIndex="9999"  hc:Growl.Token="MainTop" VerticalAlignment="Top"/>
+        </ScrollViewer>
+        
     </Grid>
 </Window>

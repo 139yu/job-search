@@ -1,18 +1,18 @@
 ﻿namespace Commons.Base;
 
-public abstract class IBaseDialogAware :BindableBase, IDialogAware
+public abstract class BaseDialogAware :BindableBase, IDialogAware
 {
     public string Title { get; set; }
-    public bool CanCloseDialog()
+    public virtual bool CanCloseDialog()
     {
         return true;
     }
 
-    public void OnDialogClosed()
+    public virtual void OnDialogClosed()
     {
     }
 
-    public void OnDialogOpened(IDialogParameters parameters)
+    public virtual void OnDialogOpened(IDialogParameters parameters)
     {
     }
 

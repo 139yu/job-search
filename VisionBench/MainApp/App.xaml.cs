@@ -2,6 +2,9 @@
 using System.Windows;
 using Commons;
 using CommonUI.Base;
+using CommonUI.Service;
+using CommonUI.ViewModels;
+using CommonUI.Views;
 using MainApp.ViewModels;
 using MainApp.ViewModels.Menu;
 using NLog;
@@ -33,10 +36,13 @@ namespace MainApp
             containerRegistry.RegisterForNavigation<MainMenuView, MainMenuViewModel>();
 
             containerRegistry.RegisterDialogWindow<BaseDialog>();
+            containerRegistry.RegisterDialog<MessageDialog,MessageDialogViewModel>();
             containerRegistry.RegisterDialog<CameraSettingDialog, CameraSettingDialogViewModel>();
 
             containerRegistry.Register<ICameraConfigStore,CameraConfigStore>();
             containerRegistry.Register<ICameraStationService,CameraStationService>();
+            
+            containerRegistry.Register<IMessageDialogService,MessageDialogService>();
         }
 
         /// <summary>

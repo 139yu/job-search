@@ -1,6 +1,7 @@
 ﻿using Commons.Base;
 using CommonUI.Base;
 using CommonUI.Helper;
+using CommonUI.Service;
 using MainApp.Models;
 using Vision.Base;
 using Vision.Camera;
@@ -11,11 +12,26 @@ using Vision.Service;
 
 namespace MainApp.ViewModels.Menu;
 
-public class CameraSettingDialogViewModel : IBaseDialogAware
+public class CameraSettingDialogViewModel : BaseDialogAware
 {
+    
+    private IMessageDialogService _messageDialogService;
+    private ICameraStationService _cameraStationService;
+
+    public CameraSettingDialogViewModel(ICameraStationService cameraStationService, IMessageDialogService messageDialogService)
+    {
+        _cameraStationService = cameraStationService;
+        _messageDialogService = messageDialogService;
+        StationList = _cameraStationService.GetStations();
+        Init();
+    }
+
+    public DelegateCommand DisposeDialogCommand { get; set; }
+    public string Title { get; set; } = "相机设置";
     public List<CameraBrand> CameraBrands { get; set; } = new List<CameraBrand>();
     public DelegateCommand FindCameraCommand { get; set; }
-
+    public DelegateCommand<CameraInfo> BindCameraCommand { get; set; }
+ 
     private CameraBrand _selectedCameraBrand;
     public CameraBrand SelectedCameraBrand
     {
@@ -23,7 +39,6 @@ public class CameraSettingDialogViewModel : IBaseDialogAware
         set { 
             SetProperty(ref _selectedCameraBrand, value); 
             FindCameraCommand.RaiseCanExecuteChanged();
-            
         }
     }
 
@@ -39,18 +54,6 @@ public class CameraSettingDialogViewModel : IBaseDialogAware
         }
     }
 
-    private ICameraStationService _cameraStationService;
-
-    public CameraSettingDialogViewModel(ICameraStationService cameraStationService)
-    {
-        _cameraStationService = cameraStationService;
-        StationList = _cameraStationService.GetStations();
-        Init();
-    }
-
-    public DelegateCommand DisposeDialogCommand { get; set; }
-    public string Title { get; set; } = "相机设置";
-
     private void Init()
     {
         CameraBrands.Add(new CameraBrand()
@@ -59,12 +62,23 @@ public class CameraSettingDialogViewModel : IBaseDialogAware
             CameraType = CameraEnum.HikVision
         });
         FindCameraCommand = new DelegateCommand(DoFindCamera, () => SelectedCameraBrand != null);
+        BindCameraCommand = new DelegateCommand<CameraInfo>(DoBindCameraCommand);
     }
 
-    private void DoFindCamera()
+    private void DoBindCameraCommand(CameraInfo obj)
+    {
+        
+    }
+
+    private async void DoFindCamera()
     {
         try
         {
+            var result = await _messageDialogService.ConfirmAsync("是否枚举相机？");
+            if (!result)
+            {
+                return;
+            }
             var cameraEnumerator = CameraEnumeratorFactory.Instance.GetCameraEnumerator(SelectedCameraBrand.CameraType);
             CameraList = cameraEnumerator.ListAvailable();
             GrowlHelper.Success("枚举相机成功！");

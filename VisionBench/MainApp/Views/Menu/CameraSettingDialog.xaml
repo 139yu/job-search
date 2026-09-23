@@ -8,10 +8,21 @@
              xmlns:local="clr-namespace:MainApp.Views"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d"
+             x:Name="win"
+             Foreground="{DynamicResource SecondaryTextBrush}"
              FontSize="{DynamicResource AppFontSize}"
              Width="900" Height="600">
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="boolToVisibilityConverter" />
+        <Style TargetType="TextBlock" x:Key="ListTitleTextStyle">
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryForeground}"/>
+            <Setter Property="FontSize" Value="{DynamicResource SecondaryFontSize}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="TextBlock" x:Key="ListItemTextStyle">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryForeground}"/>
+            <Setter Property="FontSize" Value="{DynamicResource AppFontSize}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
     </UserControl.Resources>
     <Grid Background="{DynamicResource AppBrush}">
         <Grid.ColumnDefinitions>
@@ -28,7 +39,7 @@
                     <RowDefinition Height="32" />
                     <RowDefinition />
                 </Grid.RowDefinitions>
-                <TextBlock Text="工位" Foreground="{DynamicResource WinTitleFontBrush}" VerticalAlignment="Center" />
+                <TextBlock Text="工位" Foreground="{DynamicResource SecondaryForeground}" VerticalAlignment="Center" />
                 <ListBox Background="{DynamicResource PanelBrush}"
                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -126,8 +137,8 @@
                     Background="{DynamicResource PanelBrush}">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="30" />
                         <RowDefinition Height="32" />
+                        <RowDefinition Height="36" />
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
@@ -148,6 +159,118 @@
                         <Button Content="枚举相机" 
                                 Command="{Binding FindCameraCommand}"
                                 Style="{StaticResource ButtonPrimary}" Margin="10,0"/>
+                    </StackPanel>
+                    <Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="32"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="60"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="序列号" Style="{StaticResource ListTitleTextStyle}"/>
+                            <TextBlock Grid.Column="1" Text="型号" Style="{StaticResource ListTitleTextStyle}"/>
+                            <TextBlock Grid.Column="2" Text="像元" Style="{StaticResource ListTitleTextStyle}"/>
+                            <TextBlock Grid.Column="3" Text="连接" Style="{StaticResource ListTitleTextStyle}"/>
+                            <TextBlock Grid.Column="4" Text="操作" Style="{StaticResource ListTitleTextStyle}"/>
+                            <Border Height="1" VerticalAlignment="Bottom" Grid.ColumnSpan="6" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource BorderBrush}"></Border>
+                        </Grid>
+                        <ItemsControl Grid.Row="1" ItemsSource="{Binding CameraList}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Height="36">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="60"/>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="60"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Style="{StaticResource ListItemTextStyle}" Text="{Binding SerialNum}"/>
+                                        <TextBlock Grid.Column="1" Style="{StaticResource ListItemTextStyle}" Text="{Binding TypeModel}"/>
+                                        <TextBlock Grid.Column="2" Style="{StaticResource ListItemTextStyle}" Text="{Binding PixelSize}"/>
+                                        <TextBlock Grid.Column="3" Style="{StaticResource ListItemTextStyle}" Text="{Binding InterfaceType}"/>
+                                        <Button Grid.Column="5" Content="绑定" 
+                                                Height="30"
+                                                Command="{Binding DataContext.BindCameraCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" 
+                                                Style="{StaticResource ButtonPrimary}" 
+                                                CommandParameter="{Binding}"></Button>
+                                        <Border Height="1" 
+                                                VerticalAlignment="Bottom" 
+                                                Grid.ColumnSpan="6" 
+                                                BorderThickness="0,0,0,1" 
+                                                BorderBrush="{DynamicResource BorderBrush}"></Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </Grid>
+            </Border>
+            <Border Margin="0,10,0,0" Grid.Row="1"  Padding="10" CornerRadius="5" BorderThickness="1"
+                    BorderBrush="{DynamicResource BorderBrush}"
+                    Background="{DynamicResource PanelBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Stretch">
+                        <Border Width="3" Height="14" VerticalAlignment="Center" Margin="0,0,5,0"
+                                Background="{DynamicResource AccentBrush}" />
+                        <TextBlock Text="相机参数" VerticalAlignment="Center"
+                                   FontSize="{DynamicResource SecondaryFontSize}"
+                                   FontWeight="Black" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal">
+                        <TextBlock Text="分辨率" Width="80" VerticalAlignment="Center"/>
+                        <hc:TextBox VerticalAlignment="Center" Width="60" Margin="0,0,5,0"/> 
+                        <TextBlock Text="×" VerticalAlignment="Center"/>
+                        <hc:TextBox VerticalAlignment="Center" Width="60" Margin="0,0,5,0"/> 
+                        <TextBlock Text="px" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal">
+                        <TextBlock Text="采集区域" Width="80" VerticalAlignment="Center"/>
+                        <TextBlock Text="起始 X" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                        <hc:TextBox VerticalAlignment="Center" Width="60" Margin="0,0,5,0"/> 
+                        <TextBlock Text="Y" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                        <hc:TextBox VerticalAlignment="Center" Width="60" Margin="0,0,20,0"/> 
+                        <TextBlock Text="结束 X" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                        <hc:TextBox VerticalAlignment="Center" Width="60" Margin="0,0,5,0"/> 
+                        <TextBlock Text="Y" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                        <hc:TextBox VerticalAlignment="Center" Width="60" Margin="0,0,5,0"/> 
+                    </StackPanel>
+                    <StackPanel Grid.Row="3" Orientation="Horizontal">
+                        <TextBlock Text="翻转" Width="80" VerticalAlignment="Center"/>
+                        <ToggleButton Content="水平翻转" Margin="0,0,10,0" Style="{StaticResource ToggleButtonSwitch}"/>
+                        <ToggleButton Content="垂直翻转" Style="{StaticResource ToggleButtonSwitch}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="4" Orientation="Horizontal">
+                        <TextBlock Text="曝光" Width="80" VerticalAlignment="Center"/>
+                        <hc:PreviewSlider Width="300" Value="0" Maximum="100000">
+                            <hc:PreviewSlider.PreviewContent>
+                                <Label Style="{StaticResource LabelPrimary}" Content="{Binding Path=(hc:PreviewSlider.PreviewPosition),RelativeSource={RelativeSource Self}}" ContentStringFormat="#0.00"/>
+                            </hc:PreviewSlider.PreviewContent>
+                        </hc:PreviewSlider>
+                        <hc:TextBox VerticalAlignment="Center" Width="60" Margin="10,0"/> 
+                    </StackPanel>
+                    <StackPanel Grid.Row="5" Orientation="Horizontal">
+                        <TextBlock Text="增益" Width="80" VerticalAlignment="Center"/>
+                        <hc:PreviewSlider Width="300" Value="0" Maximum="12">
+                            <hc:PreviewSlider.PreviewContent>
+                                <Label Style="{StaticResource LabelPrimary}" Content="{Binding Path=(hc:PreviewSlider.PreviewPosition),RelativeSource={RelativeSource Self}}" ContentStringFormat="#0.00"/>
+                            </hc:PreviewSlider.PreviewContent>
+                        </hc:PreviewSlider>
+                        <hc:TextBox VerticalAlignment="Center" Width="60" Margin="10,0"/> 
                     </StackPanel>
                 </Grid>
             </Border>

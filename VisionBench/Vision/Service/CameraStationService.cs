@@ -11,96 +11,60 @@ namespace Vision.Service;
 
 public class CameraStationService : ICameraStationService
 {
+    private static readonly NLog.Logger _logger = Log.For<CameraStationService>(LogModule.Camera);
     private ICameraConfigStore _cameraConfigStore;
-    private List<StationProfile> _stationProfiles;
-    private readonly Dictionary<StationEnum, ICameraDevice> cameraDict = new();
-    private static readonly NLog.Logger Logger = Log.For<CameraStationService>(LogModule.Camera);
-
-    public CameraStationService(ICameraConfigStore cameraConfigStore)
+    private List<StationProfile> _stationProfiles = new List<StationProfile>();
+    private Dictionary<CameraStateEnum,ICameraDevice> _cameraDevices = new Dictionary<CameraStateEnum,ICameraDevice>();
+    public CameraStationService(ICameraConfigStore  cameraConfigStore)
     {
-        _cameraConfigStore = cameraConfigStore;
+        _cameraConfigStore =  cameraConfigStore; 
+    }
+    public IReadOnlyCollection<StationProfile> LoadStations()
+    {
+        _stationProfiles = _cameraConfigStore.LoadStations() ?? new  List<StationProfile>();
+        foreach (StationEnum value in Enum.GetValues<StationEnum>())
+        {
+            if(_stationProfiles.All(x => x.StationName != value))
+                _stationProfiles.Add(new StationProfile()
+                {
+                    StationName = value
+                });
+        }
+        return _stationProfiles;
+    }
+
+    public void SaveStations()
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool OpenStation(StationEnum station)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void CloseStation(StationEnum station)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool IsStationOnline(StationEnum station)
+    {
+        throw new NotImplementedException();
     }
 
     public ICameraDevice GetCamera(StationEnum station)
     {
-        if (cameraDict.ContainsKey(station))
-        {
-            var cameraDevice = cameraDict[station];
-            if (cameraDevice == null || cameraDevice.State == CameraStateEnum.Disconnected)
-                throw new BusinessException("Cannot get camera for station " + station);
-            return cameraDevice;
-        }
-
-        throw new BusinessException("Cannot get camera for station " + station);
+        throw new NotImplementedException();
     }
 
-    public IReadOnlyCollection<StationProfile> GetStations()
+    public void BindStation(StationEnum station, CameraInfo cameraInfo)
     {
-        // 没有初始化设备功能，暂时代替
-        OpenCamera();
-        if (_stationProfiles != null && _stationProfiles.Any())
-        {
-            return _stationProfiles;
-        }
-        return new List<StationProfile>();
+        throw new NotImplementedException();
     }
 
-    public void OpenCamera()
+    public void UnBindStation(StationEnum station)
     {
-        CloseCamera();
-        _stationProfiles = _cameraConfigStore.LoadStations();
-        if (_stationProfiles == null || !_stationProfiles.Any())
-        {
-            _stationProfiles = new List<StationProfile>();
-            foreach (var value in Enum.GetValues(typeof(StationEnum)))
-            {
-                _stationProfiles.Add(new StationProfile()
-                {
-                    StationName = (StationEnum)value
-                });
-            }
-        }
-        else
-        {
-            foreach (var item in _stationProfiles)
-            {
-                if (item.Camera == null)
-                    continue;
-                var cameraProfile = item.Camera;
-
-                ICameraDevice cameraDevice = null;
-                try
-                {
-                    cameraDevice = CameraFactory.Instance.Create(cameraProfile);
-                    cameraDevice.Open();
-                    cameraDevice.Init();
-                    cameraDict[item.StationName] = cameraDevice;
-                }
-                catch (Exception e)
-                {
-                    Logger.Error(e, $"{item.StationName}打开失败：{e.Message}");
-                    if (cameraDevice != null)
-                    {
-                        cameraDevice.Close();
-                        cameraDevice = null;
-                    }
-                }
-            }
-        }
-    }
-
-    public void CloseCamera()
-    {
-        if (cameraDict.Any())
-        {
-            foreach (var item in cameraDict)
-            {
-                var cameraDevice = item.Value;
-                if (cameraDevice != null && cameraDevice.State != CameraStateEnum.Disconnected)
-                    cameraDevice.Close();
-            }
-        }
-
-        cameraDict.Clear();
+        throw new NotImplementedException();
     }
 }

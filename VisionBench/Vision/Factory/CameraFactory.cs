@@ -18,10 +18,8 @@ public class CameraFactory
     {
         
     }
-    public ICameraDevice Create(CameraProfile cameraProfile)
+    public ICameraDevice Create(CameraInfo cameraInfo,CameraParam cameraParam)
     {
-        var cameraInfo = cameraProfile.Info;
-        var cameraParam = cameraProfile.Param;
         if(cameraInfo == null || cameraParam == null)
             throw new BusinessException("No camera profile found");
         switch (cameraInfo.CameraType)

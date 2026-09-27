@@ -1,0 +1,68 @@
+﻿<Window x:Class="CommonUI.Views.WaitingDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:converter="clr-namespace:CommonUI.Converters"
+        xmlns:local="clr-namespace:CommonUI.Views"
+        xmlns:hc="https://handyorg.github.io/handycontrol"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        mc:Ignorable="d"
+        SizeToContent="WidthAndHeight"
+        FontSize="{DynamicResource AppFontSize}"
+        Title="WaitingDialog" MinHeight="100" MinWidth="380">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="Bool2V"/>
+    </Window.Resources>
+    <Border>
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" Opacity="0.5" Color="#000" RenderingBias="Performance"/>
+        </Border.Effect>
+        <Grid Margin="20">
+            <Border CornerRadius="10" Background="{DynamicResource AppBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="32"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="40"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Background="{DynamicResource WindowTitleBrush}">
+                        <Image Source="{DynamicResource Logo}" 
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               Width="30" Height="30">
+                            <Image.Clip>
+                                <EllipseGeometry Center="15,15" RadiusX="15" RadiusY="15"/>
+                            </Image.Clip>
+                        </Image>
+                        <TextBlock Text="{Binding Title}" 
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource SecondaryForeground}"/>
+                    </StackPanel>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0" Margin="20">
+                            <hc:LoadingCircle Visibility="{Binding IsIndeterminate,Converter={StaticResource Bool2V}}" Width="50" Height="50" VerticalAlignment="Center"/>
+                            <hc:CircleProgressBar Visibility="{Binding IsProgress,Converter={StaticResource Bool2V}}" Width="50" Value="{Binding Percent}" Height="50" VerticalAlignment="Center"/>
+                        </Grid>
+                        <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Message}" Margin="0,0,0,5" MaxHeight="32"/>
+                            <TextBlock Text="{Binding Detail}" MaxWidth="280" MaxHeight="64" TextWrapping="Wrap" Foreground="{DynamicResource TertiaryForeground}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Button Grid.Row="2" Command="{Binding CancelCommand}"
+                            Content="{Binding CancelText}" Width="80"
+                            Style="{StaticResource ButtonPrimary}"
+                            VerticalAlignment="Center" 
+                            HorizontalAlignment="Center"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

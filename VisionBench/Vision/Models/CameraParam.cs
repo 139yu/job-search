@@ -62,4 +62,9 @@ public class CameraParam
     /// 垂直翻转
     /// </summary>
     public bool ReverseY { get; set; } = true;
+    
+    /// <summary>
+    /// 相机像元尺寸（单位：微米），用于像素与物理尺寸之间的换算。
+    /// </summary>
+    public double? PixelSize { get; set; }
 }

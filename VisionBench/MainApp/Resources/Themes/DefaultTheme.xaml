@@ -60,9 +60,10 @@
     <SolidColorBrush x:Key="WindowButtonFontBrush" Color="{StaticResource WinButtonColor}"/>
     <SolidColorBrush x:Key="WindowButtonHoverFontBrush" Color="{StaticResource WinButtonColor}"/>
     <SolidColorBrush x:Key="WindowHoverBrush" Color="{StaticResource DangerColor}"/>
-    
+
     <SolidColorBrush x:Key="PrimaryForeground" Color="{StaticResource TextPrimaryColor}"/>
     <SolidColorBrush x:Key="SecondaryForeground" Color="{StaticResource TextSecondaryColor}"/>
+    <SolidColorBrush x:Key="TertiaryForeground" Color="{StaticResource TextTertiaryColor}"/>
     <SolidColorBrush x:Key="MenuContainerBrush" Color="{StaticResource MenuContainerColor}"/>
     
     <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>

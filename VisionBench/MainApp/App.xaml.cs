@@ -43,6 +43,7 @@ namespace MainApp
             containerRegistry.Register<ICameraStationService,CameraStationService>();
             
             containerRegistry.Register<IMessageDialogService,MessageDialogService>();
+            containerRegistry.Register<IBusyService,BusyService>();
         }
 
         /// <summary>

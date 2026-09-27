@@ -17,11 +17,12 @@ public class CameraSettingDialogViewModel : BaseDialogAware
     
     private IMessageDialogService _messageDialogService;
     private ICameraStationService _cameraStationService;
-
-    public CameraSettingDialogViewModel(ICameraStationService cameraStationService, IMessageDialogService messageDialogService)
+    private IBusyService _busyService;  
+    public CameraSettingDialogViewModel(ICameraStationService cameraStationService, IMessageDialogService messageDialogService,IBusyService busyService)
     {
         _cameraStationService = cameraStationService;
         _messageDialogService = messageDialogService;
+        _busyService =  busyService;
         StationList = _cameraStationService.GetStations();
         Init();
     }
@@ -80,7 +81,9 @@ public class CameraSettingDialogViewModel : BaseDialogAware
                 return;
             }
             var cameraEnumerator = CameraEnumeratorFactory.Instance.GetCameraEnumerator(SelectedCameraBrand.CameraType);
-            CameraList = cameraEnumerator.ListAvailable();
+            var list = await _busyService.RunAsync(BusyRequest.CancellableRequest("正在枚举相机设备..."), 
+                (progress,cts) => cameraEnumerator.ListAvailable());
+            CameraList = list;
             GrowlHelper.Success("枚举相机成功！");
         }
         catch (Exception e)

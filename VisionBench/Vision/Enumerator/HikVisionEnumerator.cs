@@ -21,6 +21,7 @@ public class HikVisionEnumerator : ICameraEnumerator
 
     public List<CameraInfo> ListAvailable()
     {
+        Thread.Sleep(2000);
         List<IDeviceInfo> deviceInfoList = new List<IDeviceInfo>();
         int ret = DeviceEnumerator.EnumDevices(enumTLayerType, out deviceInfoList);
         if (ret != MvError.MV_OK)
@@ -29,7 +30,7 @@ public class HikVisionEnumerator : ICameraEnumerator
             throw new BusinessException<VisionError>(VisionError.EnumDeviceFailure,
                 VisionError.EnumDeviceFailure.GetMessage(ret.ToString()));
         }
-
+        
         List<CameraInfo> cameraInfos = new List<CameraInfo>();
         foreach (var deviceInfo in deviceInfoList)
         {

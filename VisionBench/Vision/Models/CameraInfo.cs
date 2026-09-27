@@ -22,12 +22,6 @@ public class CameraInfo
     /// 相机序列号，用于唯一标识一台设备。
     /// </summary>
     public string SerialNum { get; set; }
-
-    /// <summary>
-    /// 相机像元尺寸（单位：微米），用于像素与物理尺寸之间的换算。
-    /// </summary>
-    public double PixelSize { get; set; } = 3.45;
-
     /// <summary>
     /// 相机型号。
     /// </summary>

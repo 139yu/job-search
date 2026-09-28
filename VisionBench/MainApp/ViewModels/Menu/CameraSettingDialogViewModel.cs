@@ -23,7 +23,6 @@ public class CameraSettingDialogViewModel : BaseDialogAware
         _cameraStationService = cameraStationService;
         _messageDialogService = messageDialogService;
         _busyService =  busyService;
-        StationList = _cameraStationService.GetStations();
         Init();
     }
 

@@ -16,7 +16,7 @@ public class CameraEnumeratorFactory
     {
         
     }
-    public ICameraEnumerator GetCameraEnumerator(CameraEnum cameraType)
+    public ICameraEnumerator GetCameraEnumerator(CameraEnum? cameraType)
     {
         switch (cameraType)
         {

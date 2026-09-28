@@ -13,15 +13,16 @@ public class CameraStationService : ICameraStationService
 {
     private static readonly NLog.Logger _logger = Log.For<CameraStationService>(LogModule.Camera);
     private ICameraConfigStore _cameraConfigStore;
-    private List<StationProfile> _stationProfiles = new List<StationProfile>();
-    private Dictionary<CameraStateEnum,ICameraDevice> _cameraDevices = new Dictionary<CameraStateEnum,ICameraDevice>();
+    private List<StationProfile> _stationProfiles = new();
+    private readonly Dictionary<StationEnum,ICameraDevice?> _cameraDict = new();
     public CameraStationService(ICameraConfigStore  cameraConfigStore)
     {
         _cameraConfigStore =  cameraConfigStore; 
     }
-    public IReadOnlyCollection<StationProfile> LoadStations()
+    public void LoadStations()
     {
-        _stationProfiles = _cameraConfigStore.LoadStations() ?? new  List<StationProfile>();
+        _stationProfiles = _cameraConfigStore.LoadStations() ?? new();
+        // 同步后续代码中新增的相机工位
         foreach (StationEnum value in Enum.GetValues<StationEnum>())
         {
             if(_stationProfiles.All(x => x.StationName != value))
@@ -30,41 +31,139 @@ public class CameraStationService : ICameraStationService
                     StationName = value
                 });
         }
-        return _stationProfiles;
+    }
+
+    public void Initialize()
+    {
+        LoadStations();
+        foreach (var keyValuePair in _cameraDict)
+        {
+            OpenStation(keyValuePair.Key);
+        }
     }
 
     public void SaveStations()
     {
-        throw new NotImplementedException();
+        _cameraConfigStore.SaveStations(_stationProfiles);
     }
 
-    public bool OpenStation(StationEnum station)
+    public StationConnectionState OpenStation(StationEnum station)
     {
-        throw new NotImplementedException();
+        CloseStation(station);
+        var profile = FindProfile(station);
+        if (profile is null || !profile.IsBound)
+            return StationConnectionState.Unbound;
+        ICameraDevice? device = null;
+        try
+        {
+            var cameraInfo = ResolveCameraInfo(profile);
+            if (cameraInfo is null)
+            {
+                _logger.Error($"{station}相机离线");
+                return StationConnectionState.Offline;
+            }
+
+            device = CameraFactory.Instance.Create(cameraInfo,profile.CameraParam);
+            device.Open();
+            device.Init();
+            _cameraDict[station] = device;
+            return StationConnectionState.Connected;
+        }
+        catch (Exception e)
+        {
+           CloseQuietly(device);
+           _cameraDict.Remove(station);
+           _logger.Error(e,$"打开工位[{station}]失败");
+           return StationConnectionState.Failed;
+        }
     }
 
     public void CloseStation(StationEnum station)
     {
-        throw new NotImplementedException();
+        var cameraDevice = _cameraDict[station];
+        if (cameraDevice is null)
+            return;
+        CloseQuietly(cameraDevice);
+        _cameraDict[station] = null;
     }
 
-    public bool IsStationOnline(StationEnum station)
+    public StationConnectionState GetStationState(StationEnum station)
     {
-        throw new NotImplementedException();
+        var profile = FindProfile(station);
+        if (profile is null || !profile.IsBound)
+            return StationConnectionState.Unbound;
+        if (!_cameraDict.TryGetValue(station, out ICameraDevice? device))
+        {
+            return StationConnectionState.Offline;
+        }
+        return device.State == CameraStateEnum.Disconnected ? StationConnectionState.Offline : StationConnectionState.Connected;
     }
 
     public ICameraDevice GetCamera(StationEnum station)
     {
-        throw new NotImplementedException();
+        var stationState = GetStationState(station);
+        if (stationState != StationConnectionState.Connected)
+        {
+            throw new BusinessException($"工位[{station}]未连接");
+        }
+        return _cameraDict[station];
     }
 
     public void BindStation(StationEnum station, CameraInfo cameraInfo)
     {
-        throw new NotImplementedException();
+        var profile = FindProfile(station);
+        if (profile is null)
+            throw new BusinessException($"工位[${station}]不存在");
+        UnBindStation(station);
+        profile.CameraType = cameraInfo.CameraType;
+        profile.SerialNum = cameraInfo.SerialNum;
+        SaveStations();
+        OpenStation(station);
     }
 
     public void UnBindStation(StationEnum station)
     {
-        throw new NotImplementedException();
+        var target  = FindProfile(station);
+        if(target is null)
+            throw new BusinessException($"工位[${station}]不存在");
+        CloseStation(station);
+        target.SerialNum = null;
+        target.CameraType = null;
+        SaveStations();
+    }
+
+    private StationProfile? FindProfile(StationEnum station)
+    {
+        return _stationProfiles?.FirstOrDefault(x => x.StationName == station);
+    }
+
+    private CameraInfo? ResolveCameraInfo(StationProfile profile)
+    {
+        if (profile.CameraType is null || profile.SerialNum is null)
+            return null;
+        var enumerator = CameraEnumeratorFactory.Instance.GetCameraEnumerator(profile.CameraType);
+        return enumerator
+            .ListAvailable()
+            .FirstOrDefault(c => c.SerialNum == profile.SerialNum);
+    }
+
+    private static void CloseQuietly(ICameraDevice? cameraDevice)
+    {
+        if (cameraDevice is null)
+            return;
+        try
+        {
+            if (cameraDevice.State != CameraStateEnum.Disconnected)
+            {
+                cameraDevice.Close();
+                cameraDevice = null;
+            }
+            
+            
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e,"关闭相机失败");
+        }
     }
 }

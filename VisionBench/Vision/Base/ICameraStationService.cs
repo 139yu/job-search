@@ -1,4 +1,5 @@
 ﻿using Vision.Camera;
+using Vision.Enums;
 using Vision.Models;
 
 namespace Vision.Base;
@@ -12,11 +13,13 @@ public interface ICameraStationService
     /// 加载工位配置。首次运行（配置文件不存在或为空）时会补齐全部默认工位。
     /// <para><b>本方法只处理配置，不碰任何设备。</b></para>
     /// </summary>
-    IReadOnlyCollection<StationProfile> LoadStations();
+    void LoadStations();
+
+    void Initialize();
     void SaveStations();
-    bool OpenStation(StationEnum station);
+    StationConnectionState OpenStation(StationEnum station);
     void CloseStation(StationEnum station);
-    bool IsStationOnline(StationEnum station);
+    StationConnectionState GetStationState(StationEnum station);
     ICameraDevice GetCamera(StationEnum station);
     void BindStation(StationEnum station,CameraInfo cameraInfo);
     void UnBindStation(StationEnum station);

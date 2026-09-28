@@ -36,9 +36,16 @@ public class CameraStationService : ICameraStationService
     public void Initialize()
     {
         LoadStations();
-        foreach (var keyValuePair in _cameraDict)
+        foreach (var profile in _stationProfiles.Where(p => p.IsBound))
         {
-            OpenStation(keyValuePair.Key);
+            try
+            {
+                OpenStation(profile.StationName);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e,$"初始化工位[{profile.StationName}]失败");
+            }
         }
     }
 
@@ -80,22 +87,19 @@ public class CameraStationService : ICameraStationService
 
     public void CloseStation(StationEnum station)
     {
-        var cameraDevice = _cameraDict[station];
-        if (cameraDevice is null)
+        if (!_cameraDict.TryGetValue(station, out var device))
             return;
-        CloseQuietly(cameraDevice);
-        _cameraDict[station] = null;
+        _cameraDict.Remove(station);
+        CloseQuietly(device);
     }
 
     public StationConnectionState GetStationState(StationEnum station)
     {
         var profile = FindProfile(station);
-        if (profile is null || !profile.IsBound)
+        if(profile is null || !profile.IsBound)
             return StationConnectionState.Unbound;
-        if (!_cameraDict.TryGetValue(station, out ICameraDevice? device))
-        {
+        if (!_cameraDict.TryGetValue(station, out var device) || device is null)
             return StationConnectionState.Offline;
-        }
         return device.State == CameraStateEnum.Disconnected ? StationConnectionState.Offline : StationConnectionState.Connected;
     }
 
@@ -113,8 +117,8 @@ public class CameraStationService : ICameraStationService
     {
         var profile = FindProfile(station);
         if (profile is null)
-            throw new BusinessException($"工位[${station}]不存在");
-        UnBindStation(station);
+            throw new BusinessException($"工位[{station}]不存在");
+        CloseStation(station);
         profile.CameraType = cameraInfo.CameraType;
         profile.SerialNum = cameraInfo.SerialNum;
         SaveStations();
@@ -156,9 +160,7 @@ public class CameraStationService : ICameraStationService
             if (cameraDevice.State != CameraStateEnum.Disconnected)
             {
                 cameraDevice.Close();
-                cameraDevice = null;
             }
-            
             
         }
         catch (Exception e)

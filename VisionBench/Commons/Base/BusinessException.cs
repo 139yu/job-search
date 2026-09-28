@@ -10,7 +10,7 @@ public class BusinessException: Exception
         UserMessage = userMessage;
     }
 
-    public BusinessException(object errorCode)
+    public BusinessException(string message):base(message)
     {
         
     }

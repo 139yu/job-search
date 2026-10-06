@@ -47,10 +47,11 @@ public class HikVisionCamera : ICameraDevice
                 return;
             var oldState = _state;
             _state = value;
-            var args = new StateChangedEventArgs(oldState,_state);
+            var args = new StateChangedEventArgs(oldState, _state);
             this.StateChanged?.Invoke(this, args);
         }
     }
+
     public event EventHandler<StateChangedEventArgs>? StateChanged;
 
     public CameraInfo CameraInfo { get; }
@@ -96,29 +97,39 @@ public class HikVisionCamera : ICameraDevice
                 VisionError.OpenFailed.GetMessage(ret.ToString()));
         }
 
-        if (device is IGigEDevice)
+        try
         {
-            IGigEDevice gigEDevice = device as IGigEDevice;
+            if (device is IGigEDevice)
+            {
+                IGigEDevice gigEDevice = device as IGigEDevice;
 
-            // ch:探测网络最佳包大小(只对GigE相机有效) | en:Detection network optimal package size(It only works for the GigE camera)
-            int optionPacketSize;
-            ret = gigEDevice.GetOptimalPacketSize(out optionPacketSize);
-            if (ret != MvError.MV_OK)
-            {
-                throw new BusinessException<VisionError>(VisionError.OpenFailed,
-                    VisionError.SetPacketSizeFailed.GetMessage(ret.ToString()));
-            }
-            else
-            {
-                ret = device.Parameters.SetIntValue("GevSCPSPacketSize", (long)optionPacketSize);
+                // ch:探测网络最佳包大小(只对GigE相机有效) | en:Detection network optimal package size(It only works for the GigE camera)
+                int optionPacketSize;
+                ret = gigEDevice.GetOptimalPacketSize(out optionPacketSize);
                 if (ret != MvError.MV_OK)
                 {
                     throw new BusinessException<VisionError>(VisionError.OpenFailed,
-                        VisionError.GetPacketSizeFailed.GetMessage(ret.ToString()));
+                        VisionError.SetPacketSizeFailed.GetMessage(ret.ToString()));
+                }
+                else
+                {
+                    ret = device.Parameters.SetIntValue("GevSCPSPacketSize", (long)optionPacketSize);
+                    if (ret != MvError.MV_OK)
+                    {
+                        throw new BusinessException<VisionError>(VisionError.OpenFailed,
+                            VisionError.GetPacketSizeFailed.GetMessage(ret.ToString()));
+                    }
                 }
             }
+            
+            State = CameraStateEnum.Connected;
         }
-        State = CameraStateEnum.Connected;
+        catch (Exception e)
+        {
+            Close();
+            throw;
+        }
+
     }
 
     public void Init()
@@ -163,8 +174,8 @@ public class HikVisionCamera : ICameraDevice
                 try
                 {
                     var frameOut = e.FrameOut;
-                    var flag = TryBuildFrame(frameOut,out CameraFrame frame);
-                    if(flag)
+                    var flag = TryBuildFrame(frameOut, out CameraFrame frame);
+                    if (flag)
                         channel.Writer.TryWrite(frame);
                     device.StreamGrabber.FreeImageBuffer(frameOut);
                 }
@@ -208,8 +219,8 @@ public class HikVisionCamera : ICameraDevice
         if (State == CameraStateEnum.Grabbing) return;
         if (State != CameraStateEnum.Ready)
             throw new BusinessException(VisionError.StartGarbFailed, "相机未连接或初始化");
-        var ret =device.Parameters.SetEnumValueByString("AcquisitionMode", "Continuous");
-        if(ret != MvError.MV_OK)
+        var ret = device.Parameters.SetEnumValueByString("AcquisitionMode", "Continuous");
+        if (ret != MvError.MV_OK)
             throw new BusinessException<VisionError>(VisionError.StartGarbFailed, ret.ToString());
         ret = device.StreamGrabber.StartGrabbing();
         if (ret != MvError.MV_OK)
@@ -308,12 +319,12 @@ public class HikVisionCamera : ICameraDevice
         return true;
     }
 
-    private byte[] ConvertPixelTo(IImage image,MvGvspPixelType destType)
+    private byte[] ConvertPixelTo(IImage image, MvGvspPixelType destType)
     {
         var conv = device.PixelTypeConverter;
         ulong size = conv.GetBufferSizeForConvert(destType, image.Width, image.Height);
         byte[] dest = new byte[size];
-        ulong actual ;
+        ulong actual;
         conv.ConvertPixelType(image, dest, out actual, destType);
         return dest;
     }

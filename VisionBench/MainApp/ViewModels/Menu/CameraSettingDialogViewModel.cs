@@ -14,15 +14,17 @@ namespace MainApp.ViewModels.Menu;
 
 public class CameraSettingDialogViewModel : BaseDialogAware
 {
-    
     private IMessageDialogService _messageDialogService;
     private ICameraStationService _cameraStationService;
-    private IBusyService _busyService;  
-    public CameraSettingDialogViewModel(ICameraStationService cameraStationService, IMessageDialogService messageDialogService,IBusyService busyService)
+    private IBusyService _busyService;
+
+    public CameraSettingDialogViewModel(ICameraStationService cameraStationService,
+        IMessageDialogService messageDialogService,
+        IBusyService busyService)
     {
         _cameraStationService = cameraStationService;
         _messageDialogService = messageDialogService;
-        _busyService =  busyService;
+        _busyService = busyService;
         Init();
     }
 
@@ -31,31 +33,48 @@ public class CameraSettingDialogViewModel : BaseDialogAware
     public List<CameraBrand> CameraBrands { get; set; } = new List<CameraBrand>();
     public DelegateCommand FindCameraCommand { get; set; }
     public DelegateCommand<CameraInfo> BindCameraCommand { get; set; }
- 
+
     private CameraBrand _selectedCameraBrand;
+
     public CameraBrand SelectedCameraBrand
     {
         get => _selectedCameraBrand;
-        set { 
-            SetProperty(ref _selectedCameraBrand, value); 
+        set
+        {
+            SetProperty(ref _selectedCameraBrand, value);
             FindCameraCommand.RaiseCanExecuteChanged();
         }
     }
 
-    public IReadOnlyCollection<StationProfile> StationList { get; set; }
-    private List<CameraInfo> _cameraList;
+    private StationProfile _selectedStation;
 
-    public List<CameraInfo> CameraList
+    public StationProfile SelectedStation
     {
-        get => _cameraList;
+        get => _selectedStation;
         set
         {
-            SetProperty(ref _cameraList, value);
+            SetProperty(ref _selectedStation, value);
+            RefreshRowStates();
         }
+    }
+
+    public IReadOnlyCollection<StationProfile> StationList { get; set; }
+    private List<CameraItem> _cameraItems;
+
+    public List<CameraItem> CameraItems
+    {
+        get
+        { 
+            if(_cameraItems is null)
+                _cameraItems = new List<CameraItem>();
+            return _cameraItems;
+        }
+        set { SetProperty(ref _cameraItems, value); }
     }
 
     private void Init()
     {
+        StationList = _cameraStationService.GetStations();
         CameraBrands.Add(new CameraBrand()
         {
             CameraName = "海康相机",
@@ -67,27 +86,36 @@ public class CameraSettingDialogViewModel : BaseDialogAware
 
     private void DoBindCameraCommand(CameraInfo obj)
     {
-        
     }
 
     private async void DoFindCamera()
     {
         try
         {
-            var result = await _messageDialogService.ConfirmAsync("是否枚举相机？");
-            if (!result)
-            {
-                return;
-            }
+
             var cameraEnumerator = CameraEnumeratorFactory.Instance.GetCameraEnumerator(SelectedCameraBrand.CameraType);
-            var list = await _busyService.RunAsync(BusyRequest.CancellableRequest("正在枚举相机设备..."), 
-                (progress,cts) => cameraEnumerator.ListAvailable());
-            CameraList = list;
+            var list = await _busyService.RunAsync(BusyRequest.CancellableRequest("正在枚举相机设备..."),
+                (progress, cts) => cameraEnumerator.ListAvailable());
+            foreach (var cameraInfo in list)
+            {
+                var cameraItem = new CameraItem(cameraInfo);
+                cameraItem.IsBoundToStation = SelectedStation is not null && cameraItem.Matches(SelectedStation);
+                CameraItems.Add(cameraItem);
+            }
+
             GrowlHelper.Success("枚举相机成功！");
         }
         catch (Exception e)
         {
             GrowlHelper.Error(e.Message);
+        }
+    }
+
+    private void RefreshRowStates()
+    {
+        foreach (var cameraItem in CameraItems)
+        {
+            cameraItem.IsBoundToStation = SelectedStation is not null && cameraItem.Matches(SelectedStation);
         }
     }
 }

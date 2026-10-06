@@ -33,6 +33,16 @@ public class CameraStationService : ICameraStationService
         }
     }
 
+    public List<StationProfile> GetStations()
+    {
+        if (_stationProfiles is null || _stationProfiles.Count == 0)
+        {
+            LoadStations();
+        }
+
+        return _stationProfiles;
+    }
+
     public void Initialize()
     {
         LoadStations();
@@ -129,7 +139,7 @@ public class CameraStationService : ICameraStationService
     {
         var target  = FindProfile(station);
         if(target is null)
-            throw new BusinessException($"工位[${station}]不存在");
+            throw new BusinessException($"工位[{station}]不存在");
         CloseStation(station);
         target.SerialNum = null;
         target.CameraType = null;

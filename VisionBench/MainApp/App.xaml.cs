@@ -39,11 +39,11 @@ namespace MainApp
             containerRegistry.RegisterDialog<MessageDialog,MessageDialogViewModel>();
             containerRegistry.RegisterDialog<CameraSettingDialog, CameraSettingDialogViewModel>();
 
-            containerRegistry.Register<ICameraConfigStore,CameraConfigStore>();
-            containerRegistry.Register<ICameraStationService,CameraStationService>();
+            containerRegistry.RegisterSingleton<ICameraConfigStore,CameraConfigStore>();
+            containerRegistry.RegisterSingleton<ICameraStationService,CameraStationService>();
             
             containerRegistry.Register<IMessageDialogService,MessageDialogService>();
-            containerRegistry.Register<IBusyService,BusyService>();
+            containerRegistry.RegisterSingleton<IBusyService,BusyService>();
         }
 
         /// <summary>

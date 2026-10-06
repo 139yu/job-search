@@ -48,7 +48,8 @@ public class BusyService: IBusyService
             };
             dialog.Loaded += (sender, args) =>
             {
-                worker.ContinueWith(_ => dialog.Dispatcher.BeginInvoke(new Action(dialog.CloseByService)),
+                worker.ContinueWith(_ => 
+                        dialog.Dispatcher.BeginInvoke(new Action(dialog.CloseByService)),
                     CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
             };
             dialog.ShowDialog();

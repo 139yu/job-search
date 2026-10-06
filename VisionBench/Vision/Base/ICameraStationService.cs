@@ -14,7 +14,7 @@ public interface ICameraStationService
     /// <para><b>本方法只处理配置，不碰任何设备。</b></para>
     /// </summary>
     void LoadStations();
-
+    List<StationProfile> GetStations();
     void Initialize();
     void SaveStations();
     StationConnectionState OpenStation(StationEnum station);

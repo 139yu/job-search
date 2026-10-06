@@ -21,7 +21,6 @@ public class HikVisionEnumerator : ICameraEnumerator
 
     public List<CameraInfo> ListAvailable()
     {
-        Thread.Sleep(2000);
         List<IDeviceInfo> deviceInfoList = new List<IDeviceInfo>();
         int ret = DeviceEnumerator.EnumDevices(enumTLayerType, out deviceInfoList);
         if (ret != MvError.MV_OK)

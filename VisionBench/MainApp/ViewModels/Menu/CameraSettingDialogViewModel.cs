@@ -1,4 +1,5 @@
-﻿using Commons.Base;
+﻿using System.Collections.ObjectModel;
+using Commons.Base;
 using CommonUI.Base;
 using CommonUI.Helper;
 using CommonUI.Service;
@@ -32,7 +33,7 @@ public class CameraSettingDialogViewModel : BaseDialogAware
     public string Title { get; set; } = "相机设置";
     public List<CameraBrand> CameraBrands { get; set; } = new List<CameraBrand>();
     public DelegateCommand FindCameraCommand { get; set; }
-    public DelegateCommand<CameraInfo> BindCameraCommand { get; set; }
+    public DelegateCommand<CameraItem> BindCameraCommand { get; set; }
 
     private CameraBrand _selectedCameraBrand;
 
@@ -59,17 +60,17 @@ public class CameraSettingDialogViewModel : BaseDialogAware
     }
 
     public IReadOnlyCollection<StationProfile> StationList { get; set; }
-    private List<CameraItem> _cameraItems;
+    private ObservableCollection<CameraItem> _cameraItems;
 
-    public List<CameraItem> CameraItems
+    public ObservableCollection<CameraItem> CameraItems
     {
         get
         { 
             if(_cameraItems is null)
-                _cameraItems = new List<CameraItem>();
+                _cameraItems = new ObservableCollection<CameraItem>();
             return _cameraItems;
         }
-        set { SetProperty(ref _cameraItems, value); }
+        set => SetProperty(ref _cameraItems, value);
     }
 
     private void Init()
@@ -81,10 +82,10 @@ public class CameraSettingDialogViewModel : BaseDialogAware
             CameraType = CameraEnum.HikVision
         });
         FindCameraCommand = new DelegateCommand(DoFindCamera, () => SelectedCameraBrand != null);
-        BindCameraCommand = new DelegateCommand<CameraInfo>(DoBindCameraCommand);
+        BindCameraCommand = new DelegateCommand<CameraItem>(DoBindCameraCommand);
     }
 
-    private void DoBindCameraCommand(CameraInfo obj)
+    private void DoBindCameraCommand(CameraItem obj)
     {
     }
 

@@ -17,11 +17,13 @@
             <Setter Property="Foreground" Value="{DynamicResource SecondaryForeground}"/>
             <Setter Property="FontSize" Value="{DynamicResource SecondaryFontSize}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
         </Style>
         <Style TargetType="TextBlock" x:Key="ListItemTextStyle">
             <Setter Property="Foreground" Value="{DynamicResource PrimaryForeground}"/>
             <Setter Property="FontSize" Value="{DynamicResource AppFontSize}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
         </Style>
     </UserControl.Resources>
     <Grid Background="{DynamicResource AppBrush}">
@@ -170,15 +172,13 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="1*"/>
                                 <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="100"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="序列号" Style="{StaticResource ListTitleTextStyle}"/>
                             <TextBlock Grid.Column="1" Text="型号" Style="{StaticResource ListTitleTextStyle}"/>
-                            <TextBlock Grid.Column="2" Text="像元" Style="{StaticResource ListTitleTextStyle}"/>
-                            <TextBlock Grid.Column="3" Text="连接" Style="{StaticResource ListTitleTextStyle}"/>
-                            <TextBlock Grid.Column="4" Text="操作" Style="{StaticResource ListTitleTextStyle}"/>
+                            <TextBlock Grid.Column="2" Text="连接" Style="{StaticResource ListTitleTextStyle}"/>
+                            <TextBlock Grid.Column="3" Text="操作" Style="{StaticResource ListTitleTextStyle}"/>
                             <Border Height="1" VerticalAlignment="Bottom" Grid.ColumnSpan="6" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource BorderBrush}"></Border>
                         </Grid>
                         <ItemsControl Grid.Row="1" ItemsSource="{Binding CameraItems}">
@@ -188,20 +188,18 @@
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="1*"/>
                                             <ColumnDefinition Width="1*"/>
-                                            <ColumnDefinition Width="60"/>
-                                            <ColumnDefinition Width="1*"/>
-                                            <ColumnDefinition Width="60"/>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="100"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Grid.Column="0" Style="{StaticResource ListItemTextStyle}" Text="{Binding Camera.SerialNum}"/>
                                         <TextBlock Grid.Column="1" Style="{StaticResource ListItemTextStyle}" Text="{Binding Camera.TypeModel}"/>
-                                        <TextBlock Grid.Column="2" Style="{StaticResource ListItemTextStyle}" Text="{Binding Camera.PixelSize}"/>
-                                        <TextBlock Grid.Column="3" Style="{StaticResource ListItemTextStyle}" Text="{Binding Camera.InterfaceType}"/>
-                                        <Button Grid.Column="5" Content="绑定" 
+                                        <TextBlock Grid.Column="2" Style="{StaticResource ListItemTextStyle}" Text="{Binding Camera.InterfaceType}"/>
+                                        <Button Grid.Column="3" Content="绑定"   HorizontalAlignment="Center"
                                                 Height="30" Visibility="{Binding ShowBindButton,Converter={StaticResource Boolean2VisibilityConverter}}"
                                                 Command="{Binding DataContext.BindCameraCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" 
                                                 Style="{StaticResource ButtonPrimary}" 
                                                 CommandParameter="{Binding}"/>
-                                        <Button Grid.Column="5" Content="解绑" 
+                                        <Button Grid.Column="3" Content="解绑" HorizontalAlignment="Center"
                                                 Height="30" Visibility="{Binding ShowUnBindButton,Converter={StaticResource Boolean2VisibilityConverter}}"
                                                 Command="{Binding DataContext.UnBindCameraCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" 
                                                 Style="{StaticResource ButtonPrimary}" 

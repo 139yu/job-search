@@ -6,7 +6,6 @@ using MvCameraControl;
 using Vision.Base;
 using Vision.Enums;
 using Vision.Events;
-using Vision.Manager;
 using Vision.Models;
 
 namespace Vision.Camera;

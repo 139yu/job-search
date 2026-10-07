@@ -22,7 +22,7 @@ public class CameraItem : BindableBase
         get => _isBoundToStation;
         set
         {
-            if (SetProperty(ref _isBoundToStation, value))
+            if (!SetProperty(ref _isBoundToStation, value))
                 return;
             RaisePropertyChanged(nameof(ShowBindButton));
             RaisePropertyChanged(nameof(ShowUnBindButton));

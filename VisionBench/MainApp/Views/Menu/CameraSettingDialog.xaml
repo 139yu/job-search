@@ -13,6 +13,7 @@
              FontSize="{DynamicResource AppFontSize}"
              Width="900" Height="600">
     <UserControl.Resources>
+        <BooleanToVisibilityConverter  x:Key="BoolToV"/>
         <Style TargetType="TextBlock" x:Key="ListTitleTextStyle">
             <Setter Property="Foreground" Value="{DynamicResource SecondaryForeground}"/>
             <Setter Property="FontSize" Value="{DynamicResource SecondaryFontSize}"/>
@@ -195,14 +196,16 @@
                                         <TextBlock Grid.Column="1" Style="{StaticResource ListItemTextStyle}" Text="{Binding Camera.TypeModel}"/>
                                         <TextBlock Grid.Column="2" Style="{StaticResource ListItemTextStyle}" Text="{Binding Camera.InterfaceType}"/>
                                         <Button Grid.Column="3" Content="绑定"   HorizontalAlignment="Center"
-                                                Height="30" Visibility="{Binding ShowBindButton,Converter={StaticResource Boolean2VisibilityConverter}}"
-                                                Command="{Binding DataContext.BindCameraCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" 
+                                                Height="30" Visibility="{Binding ShowBindButton,Converter={StaticResource BoolToV}}"
+                                                Command="{Binding DataContext.BindCameraCommand, 
+                                                RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" 
                                                 Style="{StaticResource ButtonPrimary}" 
                                                 CommandParameter="{Binding}"/>
                                         <Button Grid.Column="3" Content="解绑" HorizontalAlignment="Center"
-                                                Height="30" Visibility="{Binding ShowUnBindButton,Converter={StaticResource Boolean2VisibilityConverter}}"
-                                                Command="{Binding DataContext.UnBindCameraCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" 
-                                                Style="{StaticResource ButtonPrimary}" 
+                                                Height="30" Visibility="{Binding ShowUnBindButton,Converter={StaticResource BoolToV}}"
+                                                Command="{Binding DataContext.UnBindCameraCommand, 
+                                                RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" 
+                                                Style="{StaticResource ButtonInfo}" 
                                                 CommandParameter="{Binding}"/>
                                         <Border Height="1" 
                                                 VerticalAlignment="Bottom" 
@@ -237,48 +240,43 @@
                                    FontWeight="Black" />
                     </StackPanel>
                     <StackPanel Grid.Row="1" Orientation="Horizontal">
-                        <TextBlock Text="分辨率" Width="80" VerticalAlignment="Center"/>
-                        <hc:TextBox VerticalAlignment="Center" Width="60" Margin="0,0,5,0"/> 
-                        <TextBlock Text="×" VerticalAlignment="Center"/>
-                        <hc:TextBox VerticalAlignment="Center" Width="60" Margin="0,0,5,0"/> 
-                        <TextBlock Text="px" VerticalAlignment="Center"/>
+                        <TextBlock Text="翻转" Width="80" VerticalAlignment="Center"/>
+                        <ToggleButton IsChecked="{Binding SelectedStation.CameraParam.ReverseX}" 
+                                      Content="水平翻转" Margin="0,0,10,0" Style="{StaticResource ToggleButtonSwitch}"/>
+                        <ToggleButton IsChecked="{Binding SelectedStation.CameraParam.ReverseY}" 
+                                      Content="垂直翻转" Style="{StaticResource ToggleButtonSwitch}"/>
                     </StackPanel>
                     <StackPanel Grid.Row="2" Orientation="Horizontal">
-                        <TextBlock Text="采集区域" Width="80" VerticalAlignment="Center"/>
-                        <TextBlock Text="起始 X" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                        <hc:TextBox VerticalAlignment="Center" Width="60" Margin="0,0,5,0"/> 
-                        <TextBlock Text="Y" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                        <hc:TextBox VerticalAlignment="Center" Width="60" Margin="0,0,20,0"/> 
-                        <TextBlock Text="结束 X" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                        <hc:TextBox VerticalAlignment="Center" Width="60" Margin="0,0,5,0"/> 
-                        <TextBlock Text="Y" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                        <hc:TextBox VerticalAlignment="Center" Width="60" Margin="0,0,5,0"/> 
+                        <TextBlock Text="曝光" Width="80" VerticalAlignment="Center"/>
+                        <hc:PreviewSlider Value="{Binding SelectedStation.CameraParam.ExposureTime}" Width="300" Maximum="100000">
+                            <hc:PreviewSlider.PreviewContent>
+                                <Label Style="{StaticResource LabelPrimary}" Content="{Binding Path=(hc:PreviewSlider.PreviewPosition),RelativeSource={RelativeSource Self}}" ContentStringFormat="#0.00"/>
+                            </hc:PreviewSlider.PreviewContent>
+                        </hc:PreviewSlider>
+                        <hc:TextBox Text="{Binding SelectedStation.CameraParam.ExposureTime}" 
+                                    VerticalAlignment="Center" Width="60" Margin="10,0"/>
                     </StackPanel>
                     <StackPanel Grid.Row="3" Orientation="Horizontal">
-                        <TextBlock Text="翻转" Width="80" VerticalAlignment="Center"/>
-                        <ToggleButton Content="水平翻转" Margin="0,0,10,0" Style="{StaticResource ToggleButtonSwitch}"/>
-                        <ToggleButton Content="垂直翻转" Style="{StaticResource ToggleButtonSwitch}"/>
+                        <TextBlock Text="增益" Width="80" VerticalAlignment="Center"/>
+                        <hc:PreviewSlider Value="{Binding SelectedStation.CameraParam.Gain}" Width="300" Maximum="12">
+                            <hc:PreviewSlider.PreviewContent>
+                                <Label Style="{StaticResource LabelPrimary}" Content="{Binding Path=(hc:PreviewSlider.PreviewPosition),RelativeSource={RelativeSource Self}}" ContentStringFormat="#0.00"/>
+                            </hc:PreviewSlider.PreviewContent>
+                        </hc:PreviewSlider>
+                        <hc:TextBox Text="{Binding SelectedStation.CameraParam.Gain}" VerticalAlignment="Center" Width="60" Margin="10,0"/>
                     </StackPanel>
                     <StackPanel Grid.Row="4" Orientation="Horizontal">
-                        <TextBlock Text="曝光" Width="80" VerticalAlignment="Center"/>
-                        <hc:PreviewSlider Width="300" Value="0" Maximum="100000">
-                            <hc:PreviewSlider.PreviewContent>
-                                <Label Style="{StaticResource LabelPrimary}" Content="{Binding Path=(hc:PreviewSlider.PreviewPosition),RelativeSource={RelativeSource Self}}" ContentStringFormat="#0.00"/>
-                            </hc:PreviewSlider.PreviewContent>
-                        </hc:PreviewSlider>
-                        <hc:TextBox VerticalAlignment="Center" Width="60" Margin="10,0"/> 
-                    </StackPanel>
-                    <StackPanel Grid.Row="5" Orientation="Horizontal">
-                        <TextBlock Text="增益" Width="80" VerticalAlignment="Center"/>
-                        <hc:PreviewSlider Width="300" Value="0" Maximum="12">
-                            <hc:PreviewSlider.PreviewContent>
-                                <Label Style="{StaticResource LabelPrimary}" Content="{Binding Path=(hc:PreviewSlider.PreviewPosition),RelativeSource={RelativeSource Self}}" ContentStringFormat="#0.00"/>
-                            </hc:PreviewSlider.PreviewContent>
-                        </hc:PreviewSlider>
-                        <hc:TextBox VerticalAlignment="Center" Width="60" Margin="10,0"/> 
+                        <TextBlock Text="像元尺寸" Width="80" VerticalAlignment="Center"/>
+                        <hc:TextBox VerticalAlignment="Center" Text="{Binding SelectedStation.CameraParam.PixelSize}" Width="60" Margin="0,0,5,0"/>
+                        <TextBlock Text="μm" Width="80" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Grid>
             </Border>
+        </Grid>
+        <Grid Grid.Row="1" Grid.ColumnSpan="2" Background="{DynamicResource PanelBrush}">
+            <Button Style="{StaticResource ButtonPrimary}" Content="保存" 
+                    VerticalAlignment="Center" Margin="0,0,20,0"
+                    HorizontalAlignment="Right"/>
         </Grid>
     </Grid>
 </UserControl>

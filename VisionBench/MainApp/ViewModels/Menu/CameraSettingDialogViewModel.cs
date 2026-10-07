@@ -1,5 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using Commons.Base;
+using Commons.Enums;
+using Commons.Logging;
 using CommonUI.Base;
 using CommonUI.Helper;
 using CommonUI.Service;
@@ -15,9 +17,15 @@ namespace MainApp.ViewModels.Menu;
 
 public class CameraSettingDialogViewModel : BaseDialogAware
 {
+    private static NLog.Logger _logger = Log.For<CameraSettingDialogViewModel>(LogModule.App);
     private IMessageDialogService _messageDialogService;
     private ICameraStationService _cameraStationService;
     private IBusyService _busyService;
+    
+    
+    public DelegateCommand FindCameraCommand { get; set; }
+    public DelegateCommand<CameraItem> BindCameraCommand { get; set; }
+    public DelegateCommand<CameraItem> UnBindCameraCommand { get; set; }
 
     public CameraSettingDialogViewModel(ICameraStationService cameraStationService,
         IMessageDialogService messageDialogService,
@@ -32,12 +40,10 @@ public class CameraSettingDialogViewModel : BaseDialogAware
     public DelegateCommand DisposeDialogCommand { get; set; }
     public string Title { get; set; } = "相机设置";
     public List<CameraBrand> CameraBrands { get; set; } = new List<CameraBrand>();
-    public DelegateCommand FindCameraCommand { get; set; }
-    public DelegateCommand<CameraItem> BindCameraCommand { get; set; }
 
-    private CameraBrand _selectedCameraBrand;
+    private CameraBrand? _selectedCameraBrand;
 
-    public CameraBrand SelectedCameraBrand
+    public CameraBrand? SelectedCameraBrand
     {
         get => _selectedCameraBrand;
         set
@@ -47,19 +53,32 @@ public class CameraSettingDialogViewModel : BaseDialogAware
         }
     }
 
-    private StationProfile _selectedStation;
+    private StationProfile? _selectedStation;
 
-    public StationProfile SelectedStation
+    public StationProfile? SelectedStation
     {
         get => _selectedStation;
         set
         {
             SetProperty(ref _selectedStation, value);
             RefreshRowStates();
+            BindCameraCommand.RaiseCanExecuteChanged();
         }
     }
+    
+    private ObservableCollection<StationProfile> _stationList;
 
-    public IReadOnlyCollection<StationProfile> StationList { get; set; }
+    public ObservableCollection<StationProfile> StationList
+    {
+        get
+        {
+            if (_stationList is null)
+                _stationList = new ObservableCollection<StationProfile>();
+            return _stationList;
+        }
+        set => SetProperty(ref _stationList, value);
+        
+    }
     private ObservableCollection<CameraItem> _cameraItems;
 
     public ObservableCollection<CameraItem> CameraItems
@@ -75,18 +94,54 @@ public class CameraSettingDialogViewModel : BaseDialogAware
 
     private void Init()
     {
-        StationList = _cameraStationService.GetStations();
+        StationList = new ObservableCollection<StationProfile>(_cameraStationService.GetStations());
         CameraBrands.Add(new CameraBrand()
         {
             CameraName = "海康相机",
             CameraType = CameraEnum.HikVision
         });
         FindCameraCommand = new DelegateCommand(DoFindCamera, () => SelectedCameraBrand != null);
-        BindCameraCommand = new DelegateCommand<CameraItem>(DoBindCameraCommand);
+        BindCameraCommand = new DelegateCommand<CameraItem>((arg) => _ = DoBindCameraCommand(arg),
+            (arg) => SelectedStation != null);
+        UnBindCameraCommand = new DelegateCommand<CameraItem>( (obj) =>  _ = DoUnBindCameraCommand(obj));
     }
 
-    private void DoBindCameraCommand(CameraItem obj)
+    private async Task DoBindCameraCommand(CameraItem obj)
     {
+        try
+        {
+            if (SelectedStation is null)
+                return;
+            //当前工位已绑定
+            if (SelectedStation.IsBound)
+            {
+                var res = await _messageDialogService.ConfirmAsync("当前工位已绑定相机，是否覆盖？");
+                if (!res)
+                    return;
+                _cameraStationService.UnBindStation(SelectedStation.StationName);
+            }
+
+            //当前相机已被绑定
+            var bindTarget = StationList.FirstOrDefault(s => s.IsBound && s.SerialNum == obj.Camera.SerialNum);
+            if (bindTarget is not null)
+            {
+                var res = await _messageDialogService.ConfirmAsync($"当前相机已绑工位:{bindTarget.StationName}，是否替换？");
+                if (!res)
+                    return;
+                _cameraStationService.UnBindStation(bindTarget.StationName);
+            }
+
+            _cameraStationService.BindStation(SelectedStation.StationName, obj.Camera);
+            GrowlHelper.Success("绑定成功");
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e,"绑定相机失败");
+            await _messageDialogService.ErrorAsync(e.Message);
+        }
+
+        ReLoadStations();
+        RefreshRowStates();
     }
 
     private async void DoFindCamera()
@@ -117,6 +172,36 @@ public class CameraSettingDialogViewModel : BaseDialogAware
         foreach (var cameraItem in CameraItems)
         {
             cameraItem.IsBoundToStation = SelectedStation is not null && cameraItem.Matches(SelectedStation);
+        }
+    }
+
+    private async Task DoUnBindCameraCommand(CameraItem obj)
+    {
+        try
+        {
+            if (SelectedStation is null || !SelectedStation.IsBound)
+                return;
+            var res = await _messageDialogService.ConfirmAsync($"是否确认解除工位[{SelectedStation.StationName}]相机绑定？");
+            if (!res)
+                return;
+            _cameraStationService.UnBindStation(SelectedStation.StationName);
+            ReLoadStations();
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e,"解除绑定失败！");
+            await _messageDialogService.ErrorAsync(e.Message);
+        }
+    }
+
+    private void ReLoadStations()
+    {
+        StationList = new ObservableCollection<StationProfile>(_cameraStationService.GetStations());
+        if (SelectedStation != null && StationList.Count > 0)
+        {
+            var target = StationList.FirstOrDefault(s => s.SerialNum != null &&
+                s.SerialNum.Equals(SelectedStation.SerialNum) && s.CameraType == SelectedStation.CameraType);
+            SelectedStation = target;
         }
     }
 }

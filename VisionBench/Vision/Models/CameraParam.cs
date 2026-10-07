@@ -21,37 +21,37 @@ public class CameraParam
     /// <summary>
     /// 采集图像宽度（单位：像素）。
     /// </summary>
-    public int ImageWidth { get; set; }
+    public int? ImageWidth { get; set; }
 
     /// <summary>
     /// 采集图像高度（单位：像素）。
     /// </summary>
-    public int ImageHeight { get; set; }
+    public int? ImageHeight { get; set; }
 
     /// <summary>
     /// 采集区域起点 X 坐标（相对感光芯片原点，单位：像素）。
     /// </summary>
-    public int StartX { get; set; } = 0;
+    public int? StartX { get; set; } = 0;
 
     /// <summary>
     /// 采集区域起点 Y 坐标（相对感光芯片原点，单位：像素）。
     /// </summary>
-    public int StartY { get; set; } = 0;
+    public int? StartY { get; set; } = 0;
 
     /// <summary>
     /// 采集区域终点 X 坐标（单位：像素）。
     /// </summary>
-    public int EndX { get; set; } = 2048;
+    public int? EndX { get; set; } = 2048;
 
     /// <summary>
     /// 采集区域终点 Y 坐标（单位：像素）。
     /// </summary>
-    public int EndY { get; set; } = 2048;
+    public int? EndY { get; set; } = 2048;
 
     /// <summary>
     /// 采集超时时间，单位ms
     /// </summary>
-    public int GrabTimeout { get; set; } = 1000;
+    public int? GrabTimeout { get; set; } = 1000;
 
     /// <summary>
     /// 水平翻转

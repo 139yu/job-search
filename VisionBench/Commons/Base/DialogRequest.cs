@@ -38,5 +38,18 @@ public sealed class DialogRequest
             }
         };
     }
+
+    public static DialogRequest Error(string message,string title = "错误")
+    {
+        return new DialogRequest()
+        {
+            Title = title,
+            Message = message,
+            Buttons = new[]
+            {
+                new DialogButtonModel(){Content = "确认",Result = ButtonResult.OK,Semantic = DialogButtonSemantic.Primary,IsDefault = true}
+            }
+        };
+    }
     
 }

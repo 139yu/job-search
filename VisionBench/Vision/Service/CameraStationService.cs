@@ -131,7 +131,6 @@ public class CameraStationService : ICameraStationService
         CloseStation(station);
         profile.CameraType = cameraInfo.CameraType;
         profile.SerialNum = cameraInfo.SerialNum;
-        SaveStations();
         OpenStation(station);
     }
 
@@ -143,7 +142,6 @@ public class CameraStationService : ICameraStationService
         CloseStation(station);
         target.SerialNum = null;
         target.CameraType = null;
-        SaveStations();
     }
 
     private StationProfile? FindProfile(StationEnum station)

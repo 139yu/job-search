@@ -56,7 +56,7 @@
                         </Border>
                         <TextBlock Margin="10,0,0,0" Grid.Column="1"
                            VerticalAlignment="Center"
-                           Text="{Binding DataContext.Title}" />
+                           Text="{Binding Title}" />
                         <Button Grid.Column="2" Style="{StaticResource WinTitleButtonStyle}" Click="MinimizeClick">
                             <Button.Content>
                                 <Viewbox Width="30" Height="30">

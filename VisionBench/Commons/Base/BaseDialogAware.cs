@@ -2,7 +2,13 @@
 
 public abstract class BaseDialogAware :BindableBase, IDialogAware
 {
-    public string Title { get; set; }
+    private string _title;
+
+    public string Title
+    {
+        get => _title;
+        set => SetProperty(ref _title, value);
+    }
     public virtual bool CanCloseDialog()
     {
         return true;

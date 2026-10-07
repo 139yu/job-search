@@ -152,9 +152,9 @@ public class HikVisionCamera : ICameraDevice
         device.Parameters.SetEnumValue("ExposureAuto", 0);
         // 关闭自动增益
         device.Parameters.SetEnumValue("GainAuto", 0);
-
         device.Parameters.SetFloatValue("Gain", CameraParam.Gain);
         device.Parameters.SetFloatValue("ExposureTime", CameraParam.ExposureTime);
+       
         var ret = device.Parameters.SetEnumValueByString("TriggerMode", "Off");
         if (ret != MvError.MV_OK)
             throw new BusinessException(VisionError.SetCameraParamFailed,

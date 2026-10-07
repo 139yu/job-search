@@ -32,4 +32,10 @@ public class MessageDialogService : IMessageDialogService
         var outcome = await ShowAsync(DialogRequest.Confirm(message, title));
         return outcome.Is(ButtonResult.OK);
     }
+
+    public async Task ErrorAsync(string message)
+    {
+        var outcome = await  ShowAsync(DialogRequest.Error(message));
+        outcome.Is(ButtonResult.OK);
+    }
 }

@@ -37,7 +37,7 @@ public class CameraConfigStore : ICameraConfigStore
             var tmp = storePath + ".tmp";
             var json = JsonUtil.ToJson(profiles);
             File.WriteAllText(tmp,json);
-            File.Move(tmp, storePath);
+            File.Move(tmp, storePath,true);
         }
     }
 

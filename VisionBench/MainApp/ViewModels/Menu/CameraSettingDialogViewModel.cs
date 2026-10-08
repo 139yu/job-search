@@ -26,6 +26,7 @@ public class CameraSettingDialogViewModel : BaseDialogAware
     public DelegateCommand FindCameraCommand { get; set; }
     public DelegateCommand<CameraItem> BindCameraCommand { get; set; }
     public DelegateCommand<CameraItem> UnBindCameraCommand { get; set; }
+    public DelegateCommand SaveCommand { get; set; }
 
     public CameraSettingDialogViewModel(ICameraStationService cameraStationService,
         IMessageDialogService messageDialogService,
@@ -37,7 +38,6 @@ public class CameraSettingDialogViewModel : BaseDialogAware
         Init();
     }
 
-    public DelegateCommand DisposeDialogCommand { get; set; }
     public string Title { get; set; } = "相机设置";
     public List<CameraBrand> CameraBrands { get; set; } = new List<CameraBrand>();
 
@@ -104,6 +104,21 @@ public class CameraSettingDialogViewModel : BaseDialogAware
         BindCameraCommand = new DelegateCommand<CameraItem>((arg) => _ = DoBindCameraCommand(arg),
             (arg) => SelectedStation != null);
         UnBindCameraCommand = new DelegateCommand<CameraItem>( (obj) =>  _ = DoUnBindCameraCommand(obj));
+        SaveCommand = new DelegateCommand(DoSaveCommand);
+    }
+
+    private void DoSaveCommand()
+    {
+        try
+        {
+            _cameraStationService.SaveStations();
+            GrowlHelper.Success("保存成功");
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e,"保存失败");
+            GrowlHelper.Error(e.Message);
+        }
     }
 
     private async Task DoBindCameraCommand(CameraItem obj)
@@ -132,6 +147,7 @@ public class CameraSettingDialogViewModel : BaseDialogAware
             }
 
             _cameraStationService.BindStation(SelectedStation.StationName, obj.Camera);
+            _cameraStationService.ApplyCameraParams(SelectedStation.StationName,SelectedStation.CameraParam);
             GrowlHelper.Success("绑定成功");
         }
         catch (Exception e)
@@ -204,4 +220,6 @@ public class CameraSettingDialogViewModel : BaseDialogAware
             SelectedStation = target;
         }
     }
+    
+    
 }

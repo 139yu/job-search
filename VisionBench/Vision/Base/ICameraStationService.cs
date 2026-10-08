@@ -23,4 +23,6 @@ public interface ICameraStationService
     ICameraDevice GetCamera(StationEnum station);
     void BindStation(StationEnum station,CameraInfo cameraInfo);
     void UnBindStation(StationEnum station);
+    void ApplyCameraParams(StationEnum station,CameraParam cameraParam);
+    void ApplyCameraLiveParams(StationEnum station,CameraParam cameraParam);
 }

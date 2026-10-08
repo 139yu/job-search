@@ -28,10 +28,9 @@ public class HikVisionCamera : ICameraDevice
         FullMode = BoundedChannelFullMode.DropOldest
     });
 
-    public HikVisionCamera(CameraInfo cameraInfo, CameraParam cameraParam)
+    public HikVisionCamera(CameraInfo cameraInfo)
     {
         CameraInfo = cameraInfo;
-        CameraParam = cameraParam;
     }
 
     private IDevice device = null;
@@ -54,7 +53,7 @@ public class HikVisionCamera : ICameraDevice
     public event EventHandler<StateChangedEventArgs>? StateChanged;
 
     public CameraInfo CameraInfo { get; }
-    public CameraParam CameraParam { get; }
+
 
     public void Open()
     {
@@ -120,7 +119,7 @@ public class HikVisionCamera : ICameraDevice
                     }
                 }
             }
-            
+
             State = CameraStateEnum.Connected;
         }
         catch (Exception e)
@@ -128,17 +127,10 @@ public class HikVisionCamera : ICameraDevice
             Close();
             throw;
         }
-
     }
 
     public void Init()
     {
-        if (CameraParam == null)
-        {
-            throw new BusinessException<VisionError>(VisionError.InvalidParams,
-                VisionError.InvalidParams.GetMessage("CameraParam"));
-        }
-
         if (State == CameraStateEnum.Disconnected)
         {
             throw new BusinessException<VisionError>(VisionError.InitFailed,
@@ -146,15 +138,7 @@ public class HikVisionCamera : ICameraDevice
         }
 
         if (State != CameraStateEnum.Connected) return;
-        device.Parameters.SetBoolValue("ReverseX", CameraParam.ReverseX);
-        device.Parameters.SetBoolValue("ReverseY", CameraParam.ReverseY);
-        // 关闭自动曝光
-        device.Parameters.SetEnumValue("ExposureAuto", 0);
-        // 关闭自动增益
-        device.Parameters.SetEnumValue("GainAuto", 0);
-        device.Parameters.SetFloatValue("Gain", CameraParam.Gain);
-        device.Parameters.SetFloatValue("ExposureTime", CameraParam.ExposureTime);
-       
+
         var ret = device.Parameters.SetEnumValueByString("TriggerMode", "Off");
         if (ret != MvError.MV_OK)
             throw new BusinessException(VisionError.SetCameraParamFailed,
@@ -201,16 +185,6 @@ public class HikVisionCamera : ICameraDevice
         catch (Exception e)
         {
         }
-    }
-
-    public void ApplyExposure()
-    {
-        device.Parameters.SetFloatValue("ExposureTime", CameraParam.ExposureTime);
-    }
-
-    public void ApplyGain()
-    {
-        device.Parameters.SetFloatValue("Gain", CameraParam.Gain);
     }
 
     public void StartAcquisition()
@@ -272,6 +246,36 @@ public class HikVisionCamera : ICameraDevice
         return channel.Reader.TryRead(out frame);
     }
 
+    public void ApplyParams(CameraParam? p)
+    {
+        if (p == null)
+            return;
+        try
+        {
+            var grabFlag = State == CameraStateEnum.Grabbing;
+            if (grabFlag)
+                throw new BusinessException(VisionError.InvalidState, "相机采集中，不可更改参数");
+            SetIfWritable("ReverseX", p.ReverseX);
+            SetIfWritable("ReverseY", p.ReverseY);
+            ApplyLiveParams(p);
+        }
+        catch (Exception e)
+        {
+            Logger.Error(e,"下发相机参数失败！");
+            throw;
+        }
+    }
+
+    public void ApplyLiveParams(CameraParam? p)
+    {
+        if (p == null)
+            return;
+        SetIfWritable("ExposureAuto", 0);
+        SetIfWritable("GainAuto", 0);
+        SetIfWritable("Gain", p.Gain);
+        SetIfWritable("ExposureTime", p.ExposureTime);
+    }
+
     private bool TryBuildFrame(IFrameOut frameOut, out CameraFrame frame)
     {
         ImageLayoutEnum imageLayout;
@@ -326,5 +330,53 @@ public class HikVisionCamera : ICameraDevice
         ulong actual;
         conv.ConvertPixelType(image, dest, out actual, destType);
         return dest;
+    }
+
+    private bool CanWrite(string node)
+    {
+        if (device.Parameters.GetNodeAccessMode(node, out var mode) != MvError.MV_OK)
+            return false;
+        return mode is XmlAccessMode.RW or XmlAccessMode.WO;
+    }
+
+    private void SetIfWritable(string node, bool value)
+    {
+        if (!CanWrite(node))
+        {
+            Logger.Warn($"节点[{node}]当前不可写，已跳过");
+            return;
+        }
+
+        device.Parameters.SetBoolValue(node, value);
+    }
+    private void SetIfWritable(string node, float value)
+    {
+        if (!CanWrite(node))
+        {
+            Logger.Warn($"节点[{node}]当前不可写，已跳过");
+            return;
+        }
+
+        device.Parameters.SetFloatValue(node, value);
+    }
+    private void SetIfWritable(string node, int value)
+    {
+        if (!CanWrite(node))
+        {
+            Logger.Warn($"节点[{node}]当前不可写，已跳过");
+            return;
+        }
+
+        device.Parameters.SetIntValue(node, value);
+    }
+    private void SetIfWritable(string node, string value)
+    {
+        if (!CanWrite(node))
+        {
+            Logger.Warn($"节点[{node}]当前不可写，已跳过");
+            return;
+        }
+
+        device.Parameters.SetStringValue(node, value);
     }
 }

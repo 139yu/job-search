@@ -15,5 +15,6 @@ public enum VisionError
     StartGarbFailed = 20011,
     StopGarbFailed = 20012,
     TriggerSoftwareFail = 20013,
+    InvalidState = 20014,
 }
 

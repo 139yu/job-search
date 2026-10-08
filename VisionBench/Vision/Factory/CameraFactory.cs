@@ -18,14 +18,14 @@ public class CameraFactory
     {
         
     }
-    public ICameraDevice Create(CameraInfo cameraInfo,CameraParam cameraParam)
+    public ICameraDevice Create(CameraInfo cameraInfo)
     {
-        if(cameraInfo == null || cameraParam == null)
+        if(cameraInfo == null)
             throw new BusinessException("No camera profile found");
         switch (cameraInfo.CameraType)
         {
             case CameraEnum.HikVision:
-                return new HikVisionCamera(cameraInfo, cameraParam);
+                return new HikVisionCamera(cameraInfo);
             default:
                 throw new BusinessException("Unknown camera type");
         }

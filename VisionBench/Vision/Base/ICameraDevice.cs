@@ -22,11 +22,6 @@ public interface ICameraDevice
     CameraInfo CameraInfo { get; }
 
     /// <summary>
-    /// 相机运行参数（曝光、增益、像素格式、触发模式等）。
-    /// </summary>
-    CameraParam CameraParam { get; }
-
-    /// <summary>
     /// 打开相机设备，建立与相机的连接。失败抛异常。
     /// </summary>
     void Open();
@@ -40,16 +35,6 @@ public interface ICameraDevice
     /// 关闭相机设备，释放相关资源。失败抛异常。
     /// </summary>
     void Close();
-
-    /// <summary>
-    /// 设置曝光时间。失败抛异常。
-    /// </summary>
-    void ApplyGain();
-
-    /// <summary>
-    /// 设置增益。失败抛异常。
-    /// </summary>
-    void ApplyExposure();
 
     /// <summary>
     /// 开始图像采集。失败抛异常。
@@ -76,4 +61,7 @@ public interface ICameraDevice
     /// </summary>
     /// <returns></returns>
     bool TryGetFrame(out CameraFrame frame);
+
+    void ApplyParams(CameraParam? cameraParam);
+    void ApplyLiveParams(CameraParam? cameraParam);
 }

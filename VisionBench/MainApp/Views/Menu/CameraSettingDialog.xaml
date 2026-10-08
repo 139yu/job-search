@@ -274,7 +274,7 @@
             </Border>
         </Grid>
         <Grid Grid.Row="1" Grid.ColumnSpan="2" Background="{DynamicResource PanelBrush}">
-            <Button Style="{StaticResource ButtonPrimary}" Content="保存" 
+            <Button Style="{StaticResource ButtonPrimary}" Command="{Binding SaveCommand}" Width="80" Content="保存" 
                     VerticalAlignment="Center" Margin="0,0,20,0"
                     HorizontalAlignment="Right"/>
         </Grid>

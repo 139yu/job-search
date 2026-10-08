@@ -80,9 +80,10 @@ public class CameraStationService : ICameraStationService
                 return StationConnectionState.Offline;
             }
 
-            device = CameraFactory.Instance.Create(cameraInfo,profile.CameraParam);
+            device = CameraFactory.Instance.Create(cameraInfo);
             device.Open();
             device.Init();
+            device.ApplyParams(profile.CameraParam);
             _cameraDict[station] = device;
             return StationConnectionState.Connected;
         }
@@ -142,6 +143,18 @@ public class CameraStationService : ICameraStationService
         CloseStation(station);
         target.SerialNum = null;
         target.CameraType = null;
+    }
+
+    public void ApplyCameraParams(StationEnum station, CameraParam cameraParam)
+    {
+        var cameraDevice = GetCamera(station);
+        cameraDevice.ApplyParams(cameraParam);
+    }
+
+    public void ApplyCameraLiveParams(StationEnum station, CameraParam cameraParam)
+    {
+        var cameraDevice = GetCamera(station);
+        cameraDevice.ApplyLiveParams(cameraParam);
     }
 
     private StationProfile? FindProfile(StationEnum station)

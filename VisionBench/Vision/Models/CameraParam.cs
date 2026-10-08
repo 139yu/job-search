@@ -6,17 +6,30 @@ namespace Vision.Models;
 /// 相机运行参数模型。
 /// 保存相机的采集相关参数配置，可在采集前设置并下发到相机。
 /// </summary>
-public class CameraParam
+public class CameraParam: BindableBase
 {
     /// <summary>
     /// 曝光时间（单位：微秒）。
     /// </summary>
-    public float ExposureTime { get; set; } = 5000f;
+    private float _exposureTime = 5000f;
+
+    public float ExposureTime
+    {
+        get  => _exposureTime;
+        set => SetProperty(ref _exposureTime, value);
+    }
+    
 
     /// <summary>
     /// 增益值。
     /// </summary>
-    public float Gain { get; set; } = 1.0f;
+    private float _gain = 1.0f;
+
+    public float Gain
+    {
+        get => _gain;
+        set => SetProperty(ref _gain, value);
+    }
 
     /// <summary>
     /// 采集图像宽度（单位：像素）。
@@ -56,15 +69,33 @@ public class CameraParam
     /// <summary>
     /// 水平翻转
     /// </summary>
-    public bool ReverseX { get; set; } = true;
+    private bool _reverseX = true;
+
+    public bool ReverseX
+    {
+        get => _reverseX;
+        set => SetProperty(ref _reverseX, value);
+    }
 
     /// <summary>
     /// 垂直翻转
     /// </summary>
-    public bool ReverseY { get; set; } = true;
+    private bool _reverseY = true;
+
+    public bool ReverseY
+    {
+        get => _reverseY;
+        set => SetProperty(ref _reverseY, value);
+    }
     
     /// <summary>
     /// 相机像元尺寸（单位：微米），用于像素与物理尺寸之间的换算。
     /// </summary>
-    public double? PixelSize { get; set; }
+    private double? _pixelSize;
+
+    public double? PixelSize
+    {
+        get => _pixelSize;
+        set => SetProperty(ref _pixelSize, value);
+    }
 }

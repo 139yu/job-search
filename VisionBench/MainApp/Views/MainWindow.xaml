@@ -95,7 +95,35 @@
             <ContentControl prism:RegionManager.RegionName="{x:Static commons:RegionConstants.MainMenuRegion}"/>
         </Border>
         <!--左侧区域-->
-        <Grid Grid.Row="2" Grid.Column="0" Grid.RowSpan="2" Background="Aqua"></Grid>
+        <Grid Grid.Row="2" Grid.Column="0" Grid.RowSpan="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="32"/>
+                <RowDefinition Height="100"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Background="{DynamicResource WindowTitleBrush}"
+                        Orientation="Horizontal" 
+                        HorizontalAlignment="Stretch">
+                <Border Width="3" Height="14" VerticalAlignment="Center" Margin="10,0,5,0"
+                        Background="{DynamicResource AccentBrush}" />
+                <TextBlock Text="相机绑定" VerticalAlignment="Center"
+                        FontSize="{DynamicResource SecondaryFontSize}"
+                        FontWeight="Black" />
+            </StackPanel>
+            <Border Margin="10" Grid.Row="1" Background="{DynamicResource PanelBrush}"
+                    BorderThickness="1" 
+                    BorderBrush="{DynamicResource BorderBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="10" Height="10" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
         <!--Halcon 窗口-->
         <ContentControl  Grid.Row="2" Grid.Column="1" prism:RegionManager.RegionName="{x:Static commons:RegionConstants.HalconRegion}"/>
         

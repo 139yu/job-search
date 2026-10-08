@@ -112,6 +112,8 @@ public class CameraSettingDialogViewModel : BaseDialogAware
         try
         {
             _cameraStationService.SaveStations();
+            if(SelectedStation != null)
+                _cameraStationService.ApplyCameraParams(SelectedStation.StationName, SelectedStation.CameraParam);
             GrowlHelper.Success("保存成功");
         }
         catch (Exception e)
@@ -147,7 +149,8 @@ public class CameraSettingDialogViewModel : BaseDialogAware
             }
 
             _cameraStationService.BindStation(SelectedStation.StationName, obj.Camera);
-            _cameraStationService.ApplyCameraParams(SelectedStation.StationName,SelectedStation.CameraParam);
+            _cameraStationService.ReadCameraParams(SelectedStation.StationName,out var cameraParam);
+            SelectedStation.CameraParam = cameraParam;
             GrowlHelper.Success("绑定成功");
         }
         catch (Exception e)

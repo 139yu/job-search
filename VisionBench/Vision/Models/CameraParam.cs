@@ -31,15 +31,24 @@ public class CameraParam: BindableBase
         set => SetProperty(ref _gain, value);
     }
 
+    private int? _imageWidth;
     /// <summary>
     /// 采集图像宽度（单位：像素）。
     /// </summary>
-    public int? ImageWidth { get; set; }
-
+    public int? ImageWidth
+    {
+        get => _imageWidth;
+        set => SetProperty(ref _imageWidth, value);
+    }
+    public int? _imageHeight;
     /// <summary>
     /// 采集图像高度（单位：像素）。
     /// </summary>
-    public int? ImageHeight { get; set; }
+    public int? ImageHeight
+    {
+        get => _imageHeight;
+        set => SetProperty(ref _imageHeight, value);
+    }
 
     /// <summary>
     /// 采集区域起点 X 坐标（相对感光芯片原点，单位：像素）。

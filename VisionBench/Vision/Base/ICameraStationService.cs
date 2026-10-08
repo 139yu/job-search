@@ -15,6 +15,7 @@ public interface ICameraStationService
     /// </summary>
     void LoadStations();
     List<StationProfile> GetStations();
+    StationProfile GetStation(StationEnum station);
     void Initialize();
     void SaveStations();
     StationConnectionState OpenStation(StationEnum station);
@@ -25,4 +26,5 @@ public interface ICameraStationService
     void UnBindStation(StationEnum station);
     void ApplyCameraParams(StationEnum station,CameraParam cameraParam);
     void ApplyCameraLiveParams(StationEnum station,CameraParam cameraParam);
+    void ReadCameraParams(StationEnum station, out CameraParam cameraParam);
 }

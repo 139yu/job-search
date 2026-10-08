@@ -1,6 +1,7 @@
 ﻿using Vision.Enums;
 using Vision.Events;
 using Vision.Models;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Vision.Base;
 
@@ -64,4 +65,5 @@ public interface ICameraDevice
 
     void ApplyParams(CameraParam? cameraParam);
     void ApplyLiveParams(CameraParam? cameraParam);
+    void ReadCameraParams(CameraParam? cameraParam);
 }

@@ -338,7 +338,12 @@ public class HikVisionCamera : ICameraDevice
             return false;
         return mode is XmlAccessMode.RW or XmlAccessMode.WO;
     }
-
+    private bool CanRead(string node)
+    {
+        if (device.Parameters.GetNodeAccessMode(node, out var mode) != MvError.MV_OK)
+            return false;
+        return mode is XmlAccessMode.RW or XmlAccessMode.RO;
+    }
     private void SetIfWritable(string node, bool value)
     {
         if (!CanWrite(node))
@@ -378,5 +383,76 @@ public class HikVisionCamera : ICameraDevice
         }
 
         device.Parameters.SetStringValue(node, value);
+    }
+    private bool ReadBool(string node)
+    {
+        try
+        {
+            if (!CanRead(node))
+                throw new BusinessException(VisionError.InvalidParams, $"节点[{node}]当前不可读");
+            device.Parameters.GetBoolValue(node, out var value);
+            return value;
+        }
+        catch (Exception e)
+        {
+            Logger.Warn(e,$"读取节点[{node}]失败");
+            return false;
+        }
+    }
+    private int ReadInt(string node)
+    {
+        try
+        {
+            if (!CanRead(node))
+                throw new BusinessException(VisionError.InvalidParams, $"节点[{node}]当前不可读");
+            device.Parameters.GetIntValue(node, out var value);
+            return (int)value.CurValue;
+        }
+        catch (Exception e)
+        {
+            Logger.Warn(e, $"读取节点[{node}]失败");
+            return -1;
+        }
+    }
+    private string ReadString(string node)
+    {
+        try
+        {
+            if (!CanRead(node))
+                throw new BusinessException(VisionError.InvalidParams, $"节点[{node}]当前不可读");
+            device.Parameters.GetStringValue(node, out var value);
+            return value.CurValue;
+        }
+        catch (Exception e)
+        {
+            Logger.Warn(e, $"读取节点[{node}]失败");
+            return string.Empty;
+        }
+    }
+    private float ReadFloat(string node)
+    {
+        try
+        {
+            if (!CanRead(node))
+                throw new BusinessException(VisionError.InvalidParams, $"节点[{node}]当前不可读");
+            device.Parameters.GetFloatValue(node, out var value);
+            return (float)value.CurValue;
+        }
+        catch (Exception e)
+        {
+            Logger.Warn(e, $"读取节点[{node}]失败");
+            return -1;
+        }
+    }
+    public void ReadCameraParams(CameraParam? cameraParam)
+    {
+        if (cameraParam == null)
+            cameraParam = new CameraParam();
+        cameraParam.ExposureTime = ReadInt("ExposureTime");
+        cameraParam.Gain = ReadFloat("Gain");
+        cameraParam.ReverseX = ReadBool("ReverseX");
+        cameraParam.ReverseY = ReadBool("ReverseY");
+        cameraParam.ImageWidth = ReadInt("Width");
+        cameraParam.ImageHeight = ReadInt("Height");
     }
 }

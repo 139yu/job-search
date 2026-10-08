@@ -266,6 +266,14 @@
                         <hc:TextBox Text="{Binding SelectedStation.CameraParam.Gain}" VerticalAlignment="Center" Width="60" Margin="10,0"/>
                     </StackPanel>
                     <StackPanel Grid.Row="4" Orientation="Horizontal">
+                        <TextBlock Text="分辨率" Width="80" VerticalAlignment="Center"/>
+                        <hc:TextBox Width="60" VerticalAlignment="Center"/>
+                        <TextBlock Text="×" VerticalAlignment="Center" Margin="5,0"/>
+                        <hc:TextBox Width="60" VerticalAlignment="Center"/>
+                        <TextBlock Text="宽×高" VerticalAlignment="Center" FontSize="{DynamicResource SmallFontSize}"
+                                   Foreground="{DynamicResource ThirdlyTextBrush}" Margin="5,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="5" Orientation="Horizontal">
                         <TextBlock Text="像元尺寸" Width="80" VerticalAlignment="Center"/>
                         <hc:TextBox VerticalAlignment="Center" Text="{Binding SelectedStation.CameraParam.PixelSize}" Width="60" Margin="0,0,5,0"/>
                         <TextBlock Text="μm" Width="80" VerticalAlignment="Center"/>

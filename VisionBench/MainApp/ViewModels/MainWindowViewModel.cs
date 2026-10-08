@@ -1,4 +1,9 @@
-﻿using MainApp.Models;
+﻿using Commons;
+using Commons.Base;
+using Commons.Enums;
+using Commons.Logging;
+using MainApp.Models;
+using MainApp.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -6,11 +11,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using Commons;
-using Commons.Base;
-using Commons.Enums;
-using Commons.Logging;
-using MainApp.Views;
+using Vision.Base;
+using Vision.Camera;
+using Vision.Models;
+using Vision.Service;
 
 namespace MainApp.ViewModels
 {
@@ -19,13 +23,20 @@ namespace MainApp.ViewModels
         private static readonly NLog.Logger _logger = Log.For<MainWindowViewModel>(LogModule.App);
         private IRegionManager _regionManager;
         private IEventAggregator _eventAggregator;
-        public MainWindowViewModel(IRegionManager regionManager,IEventAggregator  eventAggregator)
+        private ICameraStationService _cameraStationService;
+        public StationProfile MainStation { get; set; }
+        public MainWindowViewModel(IRegionManager regionManager,
+            ICameraStationService cameraStationService,
+            IEventAggregator  eventAggregator)
         {
             _logger.Debug("程序启动");
             _regionManager = regionManager;
             _eventAggregator = eventAggregator;
+            _cameraStationService = cameraStationService;
             CloseCommand = new DelegateCommand(DoCloseCommand);
             _eventAggregator.GetEvent<AppLoadedEvent>().Subscribe(AppLoaded);
+
+            MainStation = _cameraStationService.GetStation(StationEnum.MainCamera);
         }
 
 

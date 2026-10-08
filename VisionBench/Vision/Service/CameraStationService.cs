@@ -189,4 +189,14 @@ public class CameraStationService : ICameraStationService
             _logger.Error(e,"关闭相机失败");
         }
     }
+
+    public void ReadCameraParams(StationEnum station, out CameraParam cameraParam)
+    {
+        var camera = GetCamera(station);
+        cameraParam = new CameraParam();
+        camera.ReadCameraParams(cameraParam);
+    }
+
+    public StationProfile GetStation(StationEnum station) => 
+        _stationProfiles.FirstOrDefault(x => x.StationName == station);
 }

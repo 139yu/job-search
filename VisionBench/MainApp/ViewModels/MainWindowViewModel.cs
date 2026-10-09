@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using Vision.Base;
 using Vision.Camera;
+using Vision.Enums;
+using Vision.Events;
 using Vision.Models;
 using Vision.Service;
 
@@ -25,6 +27,7 @@ namespace MainApp.ViewModels
         private IEventAggregator _eventAggregator;
         private ICameraStationService _cameraStationService;
         public StationProfile MainStation { get; set; }
+       
         public MainWindowViewModel(IRegionManager regionManager,
             ICameraStationService cameraStationService,
             IEventAggregator  eventAggregator)
@@ -35,12 +38,24 @@ namespace MainApp.ViewModels
             _cameraStationService = cameraStationService;
             CloseCommand = new DelegateCommand(DoCloseCommand);
             _eventAggregator.GetEvent<AppLoadedEvent>().Subscribe(AppLoaded);
-
+            _cameraStationService.StationStateChanged += OnCameraStateChanged;
             MainStation = _cameraStationService.GetStation(StationEnum.MainCamera);
         }
 
-
-   
+        private bool _cameraConnected = false;
+        public bool CameraConnected
+        {
+            get => _cameraConnected;
+            set
+            {
+                SetProperty(ref _cameraConnected, value);
+                RaisePropertyChanged(nameof(ConnectionStateText));
+            }
+        }
+        public string ConnectionStateText
+        {
+            get => CameraConnected ? "已连接" : "未连接";
+        }
         private string title = "Nobody";
 
         public string Title
@@ -57,8 +72,14 @@ namespace MainApp.ViewModels
             Application.Current.MainWindow.Close();
         }
 
-        
-        
+
+        private void OnCameraStateChanged(object? sender, StationStateChangedEventArgs e)
+        {
+            if(e.StationName == StationEnum.MainCamera)
+            {
+                CameraConnected = e.NewState == StationConnectionState.Connected;
+            }
+        }
         private void AppLoaded()
         {
             _regionManager.RequestNavigate(RegionConstants.HalconRegion, "HwView");

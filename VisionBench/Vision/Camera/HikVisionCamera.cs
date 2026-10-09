@@ -120,6 +120,7 @@ public class HikVisionCamera : ICameraDevice
                 }
             }
 
+            device.DeviceExceptionEvent += OnDeviceException;
             State = CameraStateEnum.Connected;
         }
         catch (Exception e)
@@ -127,6 +128,14 @@ public class HikVisionCamera : ICameraDevice
             Close();
             throw;
         }
+    }
+
+    private void OnDeviceException(object? sender, DeviceExceptionArgs e)
+    {
+        if (e.MsgType != DeviceExceptionType.DisConnect)
+            return;
+        Logger.Error($"相机断开连接：{CameraInfo.SerialNum}");
+        State = CameraStateEnum.Disconnected;
     }
 
     public void Init()
@@ -178,6 +187,7 @@ public class HikVisionCamera : ICameraDevice
             if (device != null)
             {
                 device.StreamGrabber.FrameGrabedEventEx -= OnFrameGrabbed;
+                device.DeviceExceptionEvent -= OnDeviceException;
                 device.Close();
                 device.Dispose();
             }
@@ -257,6 +267,7 @@ public class HikVisionCamera : ICameraDevice
                 throw new BusinessException(VisionError.InvalidState, "相机采集中，不可更改参数");
             SetIfWritable("ReverseX", p.ReverseX);
             SetIfWritable("ReverseY", p.ReverseY);
+            SetIfWritable("AcquisitionFrameRate", p.Fps);
             ApplyLiveParams(p);
         }
         catch (Exception e)
@@ -454,5 +465,6 @@ public class HikVisionCamera : ICameraDevice
         cameraParam.ReverseY = ReadBool("ReverseY");
         cameraParam.ImageWidth = ReadInt("Width");
         cameraParam.ImageHeight = ReadInt("Height");
+        cameraParam.Fps = ReadFloat("AcquisitionFrameRate");
     }
 }

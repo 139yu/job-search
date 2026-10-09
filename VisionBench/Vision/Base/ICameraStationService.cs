@@ -1,5 +1,6 @@
 ﻿using Vision.Camera;
 using Vision.Enums;
+using Vision.Events;
 using Vision.Models;
 
 namespace Vision.Base;
@@ -9,6 +10,8 @@ namespace Vision.Base;
 /// </summary>
 public interface ICameraStationService
 {
+    event EventHandler<StationStateChangedEventArgs> StationStateChanged;
+    List<CameraInfo> ListAvailable(CameraEnum cameraType);
     /// <summary>
     /// 加载工位配置。首次运行（配置文件不存在或为空）时会补齐全部默认工位。
     /// <para><b>本方法只处理配置，不碰任何设备。</b></para>

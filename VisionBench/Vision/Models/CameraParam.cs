@@ -75,6 +75,13 @@ public class CameraParam: BindableBase
     /// </summary>
     public int? GrabTimeout { get; set; } = 1000;
 
+    private float _fps;
+
+    public float Fps
+    {
+        get => _fps;
+        set => SetProperty(ref _fps, value);
+    }
     /// <summary>
     /// 水平翻转
     /// </summary>

@@ -49,6 +49,10 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Converter\" />
+  </ItemGroup>
+
   <!-- HALCON 原生运行时：构建后强制拷贝到输出目录（CopyToOutputDirectory 在 WPF 项目不可靠） -->
   <Target Name="CopyHalconNativeToOutput" AfterTargets="Build">
     <ItemGroup>

@@ -267,9 +267,9 @@
                     </StackPanel>
                     <StackPanel Grid.Row="4" Orientation="Horizontal">
                         <TextBlock Text="分辨率" Width="80" VerticalAlignment="Center"/>
-                        <hc:TextBox Width="60" VerticalAlignment="Center"/>
+                        <hc:TextBox Width="60" Text="{Binding SelectedStation.CameraParam.ImageWidth}" VerticalAlignment="Center"/>
                         <TextBlock Text="×" VerticalAlignment="Center" Margin="5,0"/>
-                        <hc:TextBox Width="60" VerticalAlignment="Center"/>
+                        <hc:TextBox Width="60" Text="{Binding SelectedStation.CameraParam.ImageHeight}" VerticalAlignment="Center"/>
                         <TextBlock Text="宽×高" VerticalAlignment="Center" FontSize="{DynamicResource SmallFontSize}"
                                    Foreground="{DynamicResource ThirdlyTextBrush}" Margin="5,0"/>
                     </StackPanel>

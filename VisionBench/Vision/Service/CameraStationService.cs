@@ -98,7 +98,7 @@ public class CameraStationService : ICameraStationService
             device = CameraFactory.Instance.Create(cameraInfo);
             device.Open();
             device.Init();
-            device.ApplyParams(profile.CameraParam);
+            device.ReadCameraParams(profile.CameraParam);
             device.StateChanged += OnDeviceStateChanged;
             _cameraDict[station] = device;
             return SetState(station, StationConnectionState.Connected);

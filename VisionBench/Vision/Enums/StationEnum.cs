@@ -1,4 +1,4 @@
-﻿namespace Vision.Camera;
+﻿namespace Vision.Enums;
 
 public enum StationEnum
 {

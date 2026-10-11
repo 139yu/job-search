@@ -1,15 +1,14 @@
-﻿using Vision.Camera;
-using Vision.Enums;
+﻿using Vision.Enums;
 
 namespace Vision.Events;
 
 public class StationStateChangedEventArgs : EventArgs
 {
     public StationEnum StationName { get; set; }
-    public StationConnectionState OldState { get; set; }
-    public StationConnectionState NewState { get; set; }
+    public StationStateEnum OldState { get; set; }
+    public StationStateEnum NewState { get; set; }
 
-    public StationStateChangedEventArgs(StationEnum stationName, StationConnectionState oldState, StationConnectionState newState)
+    public StationStateChangedEventArgs(StationEnum stationName, StationStateEnum oldState, StationStateEnum newState)
     {
         this.StationName = stationName;
         this.OldState = oldState;

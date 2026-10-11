@@ -1,6 +1,9 @@
-﻿using System.Text;
+﻿using Commons.Base;
+using MainApp.ViewModels;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -8,7 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Commons.Base;
+using Commons.Events;
 
 namespace MainApp.Views
 {
@@ -44,6 +47,13 @@ namespace MainApp.Views
             this.WindowState = WindowState.Normal;
             this.MaxBtn.Visibility = Visibility.Visible;
             this.NormalBtn.Visibility = Visibility.Collapsed;
+        }
+        private void OnLiveParamDragCompleted(object sender, DragCompletedEventArgs e)
+        {
+            if(DataContext is MainWindowViewModel vm)
+            {
+                vm.ApplyLiveParams();
+            }
         }
     }
 }

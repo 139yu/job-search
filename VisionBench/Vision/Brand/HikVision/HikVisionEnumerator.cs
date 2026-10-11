@@ -1,5 +1,4 @@
-﻿using System.Windows.Documents;
-using Commons.Base;
+﻿using Commons.Base;
 using Commons.Enums;
 using Commons.Logging;
 using MvCameraControl;
@@ -7,7 +6,7 @@ using Vision.Base;
 using Vision.Enums;
 using Vision.Models;
 
-namespace Vision.Manager;
+namespace Vision.Brand.HikVision;
 
 public class HikVisionEnumerator : ICameraEnumerator
 {

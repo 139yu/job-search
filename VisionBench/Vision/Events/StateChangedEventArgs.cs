@@ -1,5 +1,4 @@
-﻿using Vision.Camera;
-using Vision.Enums;
+﻿using Vision.Enums;
 
 namespace Vision.Events;
 

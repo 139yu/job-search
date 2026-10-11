@@ -153,10 +153,10 @@
                                    FontWeight="Black" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Grid.Row="1" VerticalAlignment="Center">
-                        <hc:ComboBox ItemsSource="{Binding CameraBrands}" 
+                        <hc:ComboBox ItemsSource="{Binding CameraProviders}" 
                                      VerticalAlignment="Center" 
-                                     DisplayMemberPath="CameraName"
-                                     SelectedItem="{Binding SelectedCameraBrand,Mode=TwoWay}"
+                                     DisplayMemberPath="DisplayName"
+                                     SelectedItem="{Binding CameraProvider,Mode=TwoWay}"
                                      hc:TitleElement.TitlePlacement="Left" 
                                      hc:TitleElement.Title="品牌" Width="260" 
                                      hc:TitleElement.TitleWidth="60" />
@@ -248,7 +248,9 @@
                     </StackPanel>
                     <StackPanel Grid.Row="2" Orientation="Horizontal">
                         <TextBlock Text="曝光" Width="80" VerticalAlignment="Center"/>
-                        <hc:PreviewSlider Value="{Binding SelectedStation.CameraParam.ExposureTime}" Width="300" Maximum="100000">
+                        <hc:PreviewSlider Value="{Binding SelectedStation.CameraParam.ExposureTime}" 
+                                          Width="300" TickFrequency="1" IsSnapToTickEnabled="True"
+                                          Maximum="100000">
                             <hc:PreviewSlider.PreviewContent>
                                 <Label Style="{StaticResource LabelPrimary}" Content="{Binding Path=(hc:PreviewSlider.PreviewPosition),RelativeSource={RelativeSource Self}}" ContentStringFormat="#0.00"/>
                             </hc:PreviewSlider.PreviewContent>
@@ -258,7 +260,7 @@
                     </StackPanel>
                     <StackPanel Grid.Row="3" Orientation="Horizontal">
                         <TextBlock Text="增益" Width="80" VerticalAlignment="Center"/>
-                        <hc:PreviewSlider Value="{Binding SelectedStation.CameraParam.Gain}" Width="300" Maximum="12">
+                        <hc:PreviewSlider TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding SelectedStation.CameraParam.Gain}" Width="300" Maximum="12">
                             <hc:PreviewSlider.PreviewContent>
                                 <Label Style="{StaticResource LabelPrimary}" Content="{Binding Path=(hc:PreviewSlider.PreviewPosition),RelativeSource={RelativeSource Self}}" ContentStringFormat="#0.00"/>
                             </hc:PreviewSlider.PreviewContent>

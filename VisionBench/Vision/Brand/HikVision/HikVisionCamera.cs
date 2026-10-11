@@ -8,7 +8,7 @@ using Vision.Enums;
 using Vision.Events;
 using Vision.Models;
 
-namespace Vision.Camera;
+namespace Vision.Brand.HikVision;
 
 public class HikVisionCamera : ICameraDevice
 {
@@ -33,7 +33,7 @@ public class HikVisionCamera : ICameraDevice
         CameraInfo = cameraInfo;
     }
 
-    private IDevice device = null;
+    private IDevice? device = null;
     private CameraStateEnum _state = CameraStateEnum.Disconnected;
 
     public CameraStateEnum State
@@ -154,7 +154,6 @@ public class HikVisionCamera : ICameraDevice
                 VisionError.SetCameraParamFailed.GetMessage("TriggerMode"));
         device.StreamGrabber.SetImageNodeNum(5);
         device.StreamGrabber.FrameGrabedEventEx += OnFrameGrabbed;
-        State = CameraStateEnum.Ready;
     }
 
     private void OnFrameGrabbed(object? sender, FrameGrabbedEventArgs e)
@@ -169,7 +168,7 @@ public class HikVisionCamera : ICameraDevice
                     var flag = TryBuildFrame(frameOut, out CameraFrame frame);
                     if (flag)
                         channel.Writer.TryWrite(frame);
-                    device.StreamGrabber.FreeImageBuffer(frameOut);
+                    device?.StreamGrabber.FreeImageBuffer(frameOut);
                 }
                 catch (Exception exception)
                 {
@@ -190,22 +189,24 @@ public class HikVisionCamera : ICameraDevice
                 device.DeviceExceptionEvent -= OnDeviceException;
                 device.Close();
                 device.Dispose();
+                device = null;
             }
         }
         catch (Exception e)
         {
+            Logger.Error(e, $"关闭相机[{CameraInfo.SerialNum}]失败");
         }
     }
 
     public void StartAcquisition()
     {
         if (State == CameraStateEnum.Grabbing) return;
-        if (State != CameraStateEnum.Ready)
+        if (State != CameraStateEnum.Connected)
             throw new BusinessException(VisionError.StartGarbFailed, "相机未连接或初始化");
-        var ret = device.Parameters.SetEnumValueByString("AcquisitionMode", "Continuous");
+        var ret = device?.Parameters.SetEnumValueByString("AcquisitionMode", "Continuous");
         if (ret != MvError.MV_OK)
             throw new BusinessException<VisionError>(VisionError.StartGarbFailed, ret.ToString());
-        ret = device.StreamGrabber.StartGrabbing();
+        ret = device?.StreamGrabber.StartGrabbing();
         if (ret != MvError.MV_OK)
             throw new BusinessException(VisionError.StartGarbFailed, ret.ToString());
         State = CameraStateEnum.Grabbing;
@@ -218,7 +219,7 @@ public class HikVisionCamera : ICameraDevice
             var ret = device.StreamGrabber.StopGrabbing();
             if (ret != MvError.MV_OK)
                 throw new BusinessException(VisionError.StopGarbFailed, ret.ToString());
-            State = CameraStateEnum.Ready;
+            State = CameraStateEnum.Connected;
         }
     }
 
@@ -232,12 +233,13 @@ public class HikVisionCamera : ICameraDevice
         }
         catch (Exception e)
         {
+            Logger.Warn(e, "清空帧缓存失败");
         }
     }
 
     public void StartSingleGarb()
     {
-        if (State != CameraStateEnum.Grabbing && State != CameraStateEnum.Ready)
+        if (State != CameraStateEnum.Grabbing && State != CameraStateEnum.Connected)
         {
             throw new BusinessException(VisionError.StartGarbFailed, "相机未初始化");
         }
@@ -248,7 +250,7 @@ public class HikVisionCamera : ICameraDevice
         ret = device.Parameters.SetCommandValue("TriggerSoftware");
         if (ret != MvError.MV_OK)
             throw new BusinessException(VisionError.TriggerSoftwareFail, ret.ToString());
-        State = CameraStateEnum.Ready;
+        State = CameraStateEnum.Connected;
     }
 
     public bool TryGetFrame(out CameraFrame frame)
@@ -351,7 +353,7 @@ public class HikVisionCamera : ICameraDevice
     }
     private bool CanRead(string node)
     {
-        if (device.Parameters.GetNodeAccessMode(node, out var mode) != MvError.MV_OK)
+        if (device?.Parameters.GetNodeAccessMode(node, out var mode) != MvError.MV_OK)
             return false;
         return mode is XmlAccessMode.RW or XmlAccessMode.RO;
     }
@@ -363,7 +365,7 @@ public class HikVisionCamera : ICameraDevice
             return;
         }
 
-        device.Parameters.SetBoolValue(node, value);
+        device?.Parameters.SetBoolValue(node, value);
     }
     private void SetIfWritable(string node, float value)
     {
@@ -373,7 +375,7 @@ public class HikVisionCamera : ICameraDevice
             return;
         }
 
-        device.Parameters.SetFloatValue(node, value);
+        device?.Parameters.SetFloatValue(node, value);
     }
     private void SetIfWritable(string node, int value)
     {
@@ -383,7 +385,7 @@ public class HikVisionCamera : ICameraDevice
             return;
         }
 
-        device.Parameters.SetIntValue(node, value);
+        device?.Parameters.SetIntValue(node, value);
     }
     private void SetIfWritable(string node, string value)
     {
@@ -393,7 +395,7 @@ public class HikVisionCamera : ICameraDevice
             return;
         }
 
-        device.Parameters.SetStringValue(node, value);
+        device?.Parameters.SetStringValue(node, value);
     }
     private bool ReadBool(string node)
     {
@@ -459,7 +461,7 @@ public class HikVisionCamera : ICameraDevice
     {
         if (cameraParam == null)
             cameraParam = new CameraParam();
-        cameraParam.ExposureTime = ReadInt("ExposureTime");
+        cameraParam.ExposureTime = ReadFloat("ExposureTime");
         cameraParam.Gain = ReadFloat("Gain");
         cameraParam.ReverseX = ReadBool("ReverseX");
         cameraParam.ReverseY = ReadBool("ReverseY");

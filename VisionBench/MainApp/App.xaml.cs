@@ -9,7 +9,9 @@ using MainApp.ViewModels;
 using MainApp.ViewModels.Menu;
 using NLog;
 using Vision.Base;
+using Vision.Brand.HikVision;
 using Vision.Config;
+using Vision.Factory;
 using Vision.Service;
 using CameraSettingDialog = MainApp.Views.Menu.CameraSettingDialog;
 
@@ -23,6 +25,12 @@ namespace MainApp
         protected override Window CreateShell()
         {
             return Container.Resolve<MainWindow>();
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            base.OnExit(e);
+            Container.Resolve<ICameraStationService>().Dispose();
         }
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
@@ -44,6 +52,7 @@ namespace MainApp
             
             containerRegistry.Register<IMessageDialogService,MessageDialogService>();
             containerRegistry.RegisterSingleton<IBusyService,BusyService>();
+            CameraRegistry.Instance.Register(new HikVisionProvider());
         }
 
         /// <summary>

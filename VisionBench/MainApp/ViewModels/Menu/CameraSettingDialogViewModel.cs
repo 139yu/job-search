@@ -1,13 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using Commons.Base;
 using Commons.Enums;
+using Commons.Events;
 using Commons.Logging;
 using CommonUI.Base;
 using CommonUI.Helper;
 using CommonUI.Service;
 using MainApp.Models;
 using Vision.Base;
-using Vision.Camera;
 using Vision.Enums;
 using Vision.Factory;
 using Vision.Models;
@@ -39,16 +39,15 @@ public class CameraSettingDialogViewModel : BaseDialogAware
     }
 
     public string Title { get; set; } = "相机设置";
-    public List<CameraBrand> CameraBrands { get; set; } = new List<CameraBrand>();
+    public IReadOnlyList<ICameraProvider> CameraProviders { get; set; }
+    private ICameraProvider? _cameraProvider;
 
-    private CameraBrand? _selectedCameraBrand;
-
-    public CameraBrand? SelectedCameraBrand
+    public ICameraProvider? CameraProvider
     {
-        get => _selectedCameraBrand;
+        get => _cameraProvider;
         set
         {
-            SetProperty(ref _selectedCameraBrand, value);
+            SetProperty(ref _cameraProvider, value);
             FindCameraCommand.RaiseCanExecuteChanged();
         }
     }
@@ -95,12 +94,8 @@ public class CameraSettingDialogViewModel : BaseDialogAware
     private void Init()
     {
         StationList = new ObservableCollection<StationProfile>(_cameraStationService.GetStations());
-        CameraBrands.Add(new CameraBrand()
-        {
-            CameraName = "海康相机",
-            CameraType = CameraEnum.HikVision
-        });
-        FindCameraCommand = new DelegateCommand(DoFindCamera, () => SelectedCameraBrand != null);
+        CameraProviders = _cameraStationService.GetAvailableBrands();
+        FindCameraCommand = new DelegateCommand(DoFindCamera, () => CameraProvider != null);
         BindCameraCommand = new DelegateCommand<CameraItem>((arg) => _ = DoBindCameraCommand(arg),
             (arg) => SelectedStation != null);
         UnBindCameraCommand = new DelegateCommand<CameraItem>( (obj) =>  _ = DoUnBindCameraCommand(obj));
@@ -112,14 +107,29 @@ public class CameraSettingDialogViewModel : BaseDialogAware
         try
         {
             _cameraStationService.SaveStations();
-            if(SelectedStation != null)
-                _cameraStationService.ApplyCameraParams(SelectedStation.StationName, SelectedStation.CameraParam);
+            
             GrowlHelper.Success("保存成功");
         }
         catch (Exception e)
         {
             _logger.Error(e,"保存失败");
             GrowlHelper.Error(e.Message);
+        }
+        if (SelectedStation is null)
+            return;
+        if (_cameraStationService.GetStationState(SelectedStation.StationName)
+            is not (StationStateEnum.Connected or StationStateEnum.Grabbing))
+            return;
+
+        try
+        {
+            _cameraStationService.ApplyCameraParams(SelectedStation.StationName,
+                SelectedStation.CameraParam);
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e, $"下发工位[{SelectedStation.StationName}]参数失败");
+            GrowlHelper.Warning($"配置已保存，但参数下发失败：{e.Message}");
         }
     }
 
@@ -149,8 +159,12 @@ public class CameraSettingDialogViewModel : BaseDialogAware
             }
 
             _cameraStationService.BindStation(SelectedStation.StationName, obj.Camera);
-            _cameraStationService.ReadCameraParams(SelectedStation.StationName,out var cameraParam);
-            SelectedStation.CameraParam = cameraParam;
+            if (_cameraStationService.GetStationState(SelectedStation.StationName) is StationStateEnum.Connected
+                or StationStateEnum.Grabbing)
+            {
+                _cameraStationService.ReadCameraParams(SelectedStation.StationName,out var cameraParam);
+                SelectedStation.CameraParam = cameraParam;
+            }
             GrowlHelper.Success("绑定成功");
         }
         catch (Exception e)
@@ -159,7 +173,6 @@ public class CameraSettingDialogViewModel : BaseDialogAware
             await _messageDialogService.ErrorAsync(e.Message);
         }
 
-        ReLoadStations();
         RefreshRowStates();
     }
 
@@ -167,21 +180,22 @@ public class CameraSettingDialogViewModel : BaseDialogAware
     {
         try
         {
-
-            var cameraEnumerator = CameraEnumeratorFactory.Instance.GetCameraEnumerator(SelectedCameraBrand.CameraType);
-            var list = await _busyService.RunAsync(BusyRequest.CancellableRequest("正在枚举相机设备..."),
-                (progress, cts) => cameraEnumerator.ListAvailable());
-            foreach (var cameraInfo in list)
+            if (CameraProvider is null)
+                return;
+            var cameraInfos = _cameraStationService.ListAvailable(CameraProvider.Brand);
+            foreach (var cameraInfo in cameraInfos)
             {
-                var cameraItem = new CameraItem(cameraInfo);
-                cameraItem.IsBoundToStation = SelectedStation is not null && cameraItem.Matches(SelectedStation);
-                CameraItems.Add(cameraItem);
+                CameraItems.Add(new CameraItem(cameraInfo));
             }
-
-            GrowlHelper.Success("枚举相机成功！");
+            RefreshRowStates();
+            if(CameraItems.Count == 0)
+                GrowlHelper.Info("未找到相机设备");
+            else
+                GrowlHelper.Success($"找到{CameraItems.Count}台相机");
         }
         catch (Exception e)
         {
+            _logger.Error(e,"枚举相机失败");
             GrowlHelper.Error(e.Message);
         }
     }
@@ -204,7 +218,6 @@ public class CameraSettingDialogViewModel : BaseDialogAware
             if (!res)
                 return;
             _cameraStationService.UnBindStation(SelectedStation.StationName);
-            ReLoadStations();
         }
         catch (Exception e)
         {
@@ -213,16 +226,5 @@ public class CameraSettingDialogViewModel : BaseDialogAware
         }
     }
 
-    private void ReLoadStations()
-    {
-        StationList = new ObservableCollection<StationProfile>(_cameraStationService.GetStations());
-        if (SelectedStation != null && StationList.Count > 0)
-        {
-            var target = StationList.FirstOrDefault(s => s.SerialNum != null &&
-                s.SerialNum.Equals(SelectedStation.SerialNum) && s.CameraType == SelectedStation.CameraType);
-            SelectedStation = target;
-        }
-    }
-    
     
 }

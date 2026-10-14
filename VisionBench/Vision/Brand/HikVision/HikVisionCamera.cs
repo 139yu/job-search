@@ -22,6 +22,7 @@ public class HikVisionCamera : ICameraDevice
                                                | DeviceTLayerType.MvGenTLXoFDevice;
 
     private static readonly NLog.Logger Logger = Log.For<HikVisionCamera>(LogModule.Camera);
+    private volatile bool _singleShotPending;
 
     private readonly Channel<CameraFrame> channel = Channel.CreateBounded<CameraFrame>(new BoundedChannelOptions(10)
     {
@@ -158,22 +159,22 @@ public class HikVisionCamera : ICameraDevice
 
     private void OnFrameGrabbed(object? sender, FrameGrabbedEventArgs e)
     {
-        if (State is CameraStateEnum.Grabbing)
+        if (State is not CameraStateEnum.Grabbing && !_singleShotPending)
+            return;
+        _singleShotPending = false;
+        lock (_lock)
         {
-            lock (_lock)
+            try
             {
-                try
-                {
-                    var frameOut = e.FrameOut;
-                    var flag = TryBuildFrame(frameOut, out CameraFrame frame);
-                    if (flag)
-                        channel.Writer.TryWrite(frame);
-                    device?.StreamGrabber.FreeImageBuffer(frameOut);
-                }
-                catch (Exception exception)
-                {
-                    Logger.Error(exception.Message);
-                }
+                var frameOut = e.FrameOut;
+                var flag = TryBuildFrame(frameOut, out CameraFrame frame);
+                if (flag)
+                    channel.Writer.TryWrite(frame);
+                device?.StreamGrabber.FreeImageBuffer(frameOut);
+            }
+            catch (Exception exception)
+            {
+                Logger.Error(exception.Message);
             }
         }
     }
@@ -214,6 +215,7 @@ public class HikVisionCamera : ICameraDevice
 
     public void StopAcquisition()
     {
+        _singleShotPending = false;
         if (State != CameraStateEnum.Grabbing) return;
         {
             var ret = device.StreamGrabber.StopGrabbing();
@@ -247,9 +249,14 @@ public class HikVisionCamera : ICameraDevice
         var ret = device.Parameters.SetEnumValueByString("AcquisitionMode", "Software");
         if (ret != MvError.MV_OK)
             throw new BusinessException(VisionError.StartGarbFailed, ret.ToString());
+        _singleShotPending = true;
         ret = device.Parameters.SetCommandValue("TriggerSoftware");
         if (ret != MvError.MV_OK)
+        {
+            _singleShotPending = false;
             throw new BusinessException(VisionError.TriggerSoftwareFail, ret.ToString());
+        }
+
         State = CameraStateEnum.Connected;
     }
 
@@ -274,7 +281,7 @@ public class HikVisionCamera : ICameraDevice
         }
         catch (Exception e)
         {
-            Logger.Error(e,"下发相机参数失败！");
+            Logger.Error(e, "下发相机参数失败！");
             throw;
         }
     }
@@ -351,12 +358,14 @@ public class HikVisionCamera : ICameraDevice
             return false;
         return mode is XmlAccessMode.RW or XmlAccessMode.WO;
     }
+
     private bool CanRead(string node)
     {
         if (device?.Parameters.GetNodeAccessMode(node, out var mode) != MvError.MV_OK)
             return false;
         return mode is XmlAccessMode.RW or XmlAccessMode.RO;
     }
+
     private void SetIfWritable(string node, bool value)
     {
         if (!CanWrite(node))
@@ -367,6 +376,7 @@ public class HikVisionCamera : ICameraDevice
 
         device?.Parameters.SetBoolValue(node, value);
     }
+
     private void SetIfWritable(string node, float value)
     {
         if (!CanWrite(node))
@@ -377,6 +387,7 @@ public class HikVisionCamera : ICameraDevice
 
         device?.Parameters.SetFloatValue(node, value);
     }
+
     private void SetIfWritable(string node, int value)
     {
         if (!CanWrite(node))
@@ -387,6 +398,7 @@ public class HikVisionCamera : ICameraDevice
 
         device?.Parameters.SetIntValue(node, value);
     }
+
     private void SetIfWritable(string node, string value)
     {
         if (!CanWrite(node))
@@ -397,6 +409,7 @@ public class HikVisionCamera : ICameraDevice
 
         device?.Parameters.SetStringValue(node, value);
     }
+
     private bool ReadBool(string node)
     {
         try
@@ -408,10 +421,11 @@ public class HikVisionCamera : ICameraDevice
         }
         catch (Exception e)
         {
-            Logger.Warn(e,$"读取节点[{node}]失败");
+            Logger.Warn(e, $"读取节点[{node}]失败");
             return false;
         }
     }
+
     private int ReadInt(string node)
     {
         try
@@ -427,6 +441,7 @@ public class HikVisionCamera : ICameraDevice
             return -1;
         }
     }
+
     private string ReadString(string node)
     {
         try
@@ -442,6 +457,7 @@ public class HikVisionCamera : ICameraDevice
             return string.Empty;
         }
     }
+
     private float ReadFloat(string node)
     {
         try
@@ -457,6 +473,7 @@ public class HikVisionCamera : ICameraDevice
             return -1;
         }
     }
+
     public void ReadCameraParams(CameraParam? cameraParam)
     {
         if (cameraParam == null)

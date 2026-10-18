@@ -13,7 +13,7 @@
         WindowStartupLocation="CenterScreen" FontSize="{DynamicResource AppFontSize}"
         WindowStyle="None" SnapsToDevicePixels="True"
         Background="{DynamicResource AppBrush}"
-        Title="{Binding Title}" Height="900" Width="1600">
+        Title="{Binding Title}" Height="1200" Width="1800">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToV"></BooleanToVisibilityConverter>
     </Window.Resources>
@@ -183,6 +183,7 @@
                             Content="停止采集" Command="{Binding StopGrabCommand}"
                             Style="{StaticResource ButtonPrimary}"/>
                     <Button Grid.Row="1" HorizontalAlignment="Stretch"
+                            Command="{Binding SingleGrabCommand}"
                             Margin="0,10" Content="单帧采集"
                             Style="{StaticResource ButtonDefault}"/>
                     <TextBlock VerticalAlignment="Center" Grid.Row="2">
@@ -254,7 +255,8 @@
                     Style="{StaticResource ButtonPrimary}"/>
         </Grid>
         <!--Halcon 窗口-->
-        <ContentControl  Grid.Row="2" Grid.Column="1" prism:RegionManager.RegionName="{x:Static commons:RegionConstants.HalconRegion}"/>
+        <ContentControl  Grid.Row="2" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                         prism:RegionManager.RegionName="{x:Static commons:RegionConstants.HalconRegion}"/>
         
         <!--motion区域-->
         <Grid Grid.Row="3" Grid.Column="1" Grid.RowSpan="1" Background="BlueViolet"></Grid>

@@ -1,5 +1,6 @@
 ﻿using Vision.Enums;
 using Vision.Events;
+using Vision.ImageProvider;
 using Vision.Models;
 
 namespace Vision.Base;
@@ -20,6 +21,24 @@ public interface ICameraStationService : IDisposable
 {
     /// <summary>工位状态变化的唯一通知出口。所有变化都会在这里发出，且保证不重复。</summary>
     event EventHandler<StationStateChangedEventArgs> StationStateChanged;
+
+    /// <summary>
+    /// 取该工位的图像来源。
+    /// <para>
+    /// 工位未连接时拿到的提供器不会产帧，连上后会自动开始推送——
+    /// <b>订阅关系不需要在重连后重建</b>，订阅一次即可。
+    /// </para>
+    /// <para>
+    /// 需要图像（显示、算法）的模块一律走这里，不要用 <see cref="GetCamera"/> 取设备自行轮询。
+    /// </para>
+    /// </summary>
+    CameraImageProvider GetImageProvider(StationEnum station);
+
+    /// <summary>
+    /// 触发一次单帧采集。图像仍由 <see cref="GetImageProvider"/> 推送，本方法不返回图像。
+    /// <para>连续采集进行中调用会把采集模式切到软触发，界面应在采集中禁用此操作。</para>
+    /// </summary>
+    void StartSingleGrab(StationEnum station);
 
     /// <summary>已注册的相机品牌，供 UI 展示。新增品牌后此列表自动生效。</summary>
     IReadOnlyList<ICameraProvider> GetAvailableBrands();

@@ -154,7 +154,7 @@ public class HikVisionCamera : ICameraDevice
             throw new BusinessException(VisionError.SetCameraParamFailed,
                 VisionError.SetCameraParamFailed.GetMessage("TriggerMode"));
         device.StreamGrabber.SetImageNodeNum(5);
-        device.StreamGrabber.FrameGrabedEventEx += OnFrameGrabbed;
+        device.StreamGrabber.FrameGrabedEvent += OnFrameGrabbed;
     }
 
     private void OnFrameGrabbed(object? sender, FrameGrabbedEventArgs e)
@@ -186,7 +186,7 @@ public class HikVisionCamera : ICameraDevice
             State = CameraStateEnum.Disconnected;
             if (device != null)
             {
-                device.StreamGrabber.FrameGrabedEventEx -= OnFrameGrabbed;
+                device.StreamGrabber.FrameGrabedEvent -= OnFrameGrabbed;
                 device.DeviceExceptionEvent -= OnDeviceException;
                 device.Close();
                 device.Dispose();
@@ -276,6 +276,8 @@ public class HikVisionCamera : ICameraDevice
                 throw new BusinessException(VisionError.InvalidState, "相机采集中，不可更改参数");
             SetIfWritable("ReverseX", p.ReverseX);
             SetIfWritable("ReverseY", p.ReverseY);
+            SetIfWritable("Width", (int)p.ImageWidth);
+            SetIfWritable("Height", (int)p.ImageHeight);
             SetIfWritable("AcquisitionFrameRate", p.Fps);
             ApplyLiveParams(p);
         }

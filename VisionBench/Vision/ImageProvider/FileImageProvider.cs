@@ -29,7 +29,7 @@ public sealed class FileImageProvider: IImageProvider
     /// </summary>
     public bool IsRunning { get; } = false;
 
-    private void Open(string filePath)
+    public void Open(string filePath)
     {
         if (string.IsNullOrWhiteSpace(FilePath))
             throw new BusinessException("请选择图片文件");

@@ -49,6 +49,7 @@ namespace MainApp
 
             containerRegistry.RegisterSingleton<ICameraConfigStore,CameraConfigStore>();
             containerRegistry.RegisterSingleton<ICameraStationService,CameraStationService>();
+            containerRegistry.Register<IFilePickerService,FilePickerService>();
             
             containerRegistry.Register<IMessageDialogService,MessageDialogService>();
             containerRegistry.RegisterSingleton<IBusyService,BusyService>();

@@ -5,6 +5,7 @@ using Vision.Base;
 using Vision.Enums;
 using Vision.Events;
 using Vision.Factory;
+using Vision.ImageProvider;
 using Vision.Models;
 
 namespace Vision.Service;
@@ -26,12 +27,17 @@ public class CameraStationService : ICameraStationService
     }
 
     private List<StationProfile> _stationProfiles = new();
+    private readonly Dictionary<StationEnum, CameraImageProvider> _providers = new();
     private readonly Dictionary<StationEnum, StationRuntime> _runtime = new();
     public event EventHandler<StationStateChangedEventArgs>? StationStateChanged;
 
     public CameraStationService(ICameraConfigStore cameraConfigStore)
     {
         _cameraConfigStore = cameraConfigStore;
+        foreach (StationEnum station in Enum.GetValues(typeof(StationEnum)))
+        {
+            _providers.Add(station, new CameraImageProvider());
+        }
     }
 
 
@@ -141,11 +147,19 @@ public class CameraStationService : ICameraStationService
         return Runtime(station).Device ?? throw new BusinessException($"工位{station}未连接");
     }
 
+    public CameraImageProvider GetImageProvider(StationEnum station) => Provider(station);
+    private CameraImageProvider Provider(StationEnum station) => _providers[station];
     public void BindStation(StationEnum station, CameraInfo cameraInfo)
     {
         var profile = FindProfile(station);
         if (profile is null)
             throw new BusinessException($"工位[{station}]不存在");
+        var occupied = _stationProfiles.FirstOrDefault(p => p.StationName != station 
+                                                                        && p.IsBound 
+                                                                        && p.CameraType == cameraInfo.CameraType 
+                                                                        && p.SerialNum == cameraInfo.SerialNum);
+        if (occupied != null)
+            throw new BusinessException($"该相机已绑定工位[{occupied.StationName}]！");
         DetachDevice(station, StationStateEnum.Unbound);
         profile.CameraType = cameraInfo.CameraType;
         profile.SerialNum = cameraInfo.SerialNum;
@@ -206,9 +220,17 @@ public class CameraStationService : ICameraStationService
     private StationStateEnum AttachDevice(StationEnum station, ICameraDevice device)
     {
         Runtime(station).Device = device;
+        Provider(station).Attach(device);
         return SetState(station, StationStateEnum.Connected);
     }
 
+        
+    
+
+    public void StartSingleGrab(StationEnum station)
+    {
+        GetCamera(station).StartSingleGarb();
+    }
     /// <summary>
     /// 摘除设备并把状态落到 <paramref name="nextState"/>。
     /// <para>
@@ -225,6 +247,7 @@ public class CameraStationService : ICameraStationService
         var runtime = Runtime(station);
         var device = runtime.Device;
         runtime.Device = null;
+        Provider(station).Detach();
         if (device is not null)
         {
             device.StateChanged -= OnDeviceStateChanged;
@@ -286,18 +309,19 @@ public class CameraStationService : ICameraStationService
             .ListAvailable()
             .FirstOrDefault(c => c.SerialNum == profile.SerialNum);
     }
+
     private static void CloseQuietly(ICameraDevice? device)
     {
         if (device is null)
             return;
         try
         {
-            if(device.State != CameraStateEnum.Disconnected)
+            if (device.State != CameraStateEnum.Disconnected)
                 device.Close();
         }
         catch (Exception e)
         {
-            _logger.Error(e,"关闭相机失败");
+            _logger.Error(e, "关闭相机失败");
         }
     }
 

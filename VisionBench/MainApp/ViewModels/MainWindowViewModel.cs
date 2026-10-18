@@ -4,6 +4,7 @@ using Commons.Logging;
 using System.Windows;
 using Commons.Events;
 using CommonUI.Helper;
+using CommonUI.Service;
 using Vision.Base;
 using Vision.Enums;
 using Vision.Events;
@@ -17,35 +18,44 @@ namespace MainApp.ViewModels
         private IRegionManager _regionManager;
         private IEventAggregator _eventAggregator;
         private ICameraStationService _cameraStationService;
+        private IMessageDialogService _messageDialogService;
+        private readonly IImageProvider _cameraImageProvider;
+
         public DelegateCommand CloseCommand { get; set; }
         public DelegateCommand ApplyParamsCommand { get; set; }
         public DelegateCommand StartGrabCommand { get; set; }
+        public DelegateCommand SingleGrabCommand { get; set; }
         public DelegateCommand StopGrabCommand { get; set; }
 
         public MainWindowViewModel(IRegionManager regionManager,
             ICameraStationService cameraStationService,
+            IMessageDialogService messageDialogService,
             IEventAggregator eventAggregator)
         {
             _logger.Debug("程序启动");
             _regionManager = regionManager;
             _eventAggregator = eventAggregator;
             _cameraStationService = cameraStationService;
-
+            _messageDialogService = messageDialogService;
             _cameraStationService.StationStateChanged += OnStationStateChanged;
 
             CloseCommand = new DelegateCommand(DoCloseCommand);
             ApplyParamsCommand = new DelegateCommand(DoApplyParamsCommand, () => CanStartGrab);
             StartGrabCommand = new DelegateCommand(DoStartGrabCommand, () => CanStartGrab);
             StopGrabCommand = new DelegateCommand(DoStopGrabCommand, () => CanStopGrab);
+            SingleGrabCommand = new DelegateCommand(DoSingleGrabCommand, () => CanSingleGrab);
             _cameraStationService.Initialize();
+            _cameraImageProvider = _cameraStationService.GetImageProvider(StationEnum.MainCamera);
             _eventAggregator.GetEvent<AppLoadedEvent>().Subscribe(AppLoaded);
 
             MainStation = _cameraStationService.GetStation(StationEnum.MainCamera);
         }
 
 
+
         public bool CanStartGrab => StationState == StationStateEnum.Connected;
         public bool CanStopGrab => StationState == StationStateEnum.Grabbing;
+        public bool CanSingleGrab => StationState == StationStateEnum.Connected;
 
         private StationProfile _mainStation;
 
@@ -67,13 +77,15 @@ namespace MainApp.ViewModels
                 RaisePropertyChanged(nameof(IsCameraConnected));
                 RaisePropertyChanged(nameof(CanStartGrab));
                 RaisePropertyChanged(nameof(CanStopGrab));
+                RaisePropertyChanged(nameof(CanSingleGrab));
                 StartGrabCommand.RaiseCanExecuteChanged();
                 StopGrabCommand.RaiseCanExecuteChanged();
                 ApplyParamsCommand.RaiseCanExecuteChanged();
             }
         }
 
-        public bool IsCameraConnected => StationState == StationStateEnum.Connected || StationState == StationStateEnum.Grabbing;
+        public bool IsCameraConnected =>
+            StationState == StationStateEnum.Connected || StationState == StationStateEnum.Grabbing;
 
         public string ConnectionStateText
         {
@@ -99,6 +111,7 @@ namespace MainApp.ViewModels
 
         private void DoCloseCommand()
         {
+            _cameraStationService.SaveStations();
             if (Application.Current.MainWindow != null) Application.Current.MainWindow.Close();
         }
 
@@ -126,46 +139,43 @@ namespace MainApp.ViewModels
 
         private void DoStartGrabCommand()
         {
-            if (StationState == StationStateEnum.Grabbing)
+            try
             {
-                GrowlHelper.Success("已开启实时采集");
-                return;
+                _cameraImageProvider.Start();
+                GrowlHelper.Success("开启实时采集");
             }
-
-            if (StationState == StationStateEnum.Connected)
+            catch (Exception e)
             {
-                try
-                {
-                    var device = _cameraStationService.GetCamera(MainStation.StationName);
-                    device.StartAcquisition();
-                    GrowlHelper.Success("开启实时采集");
-                }
-                catch (Exception e)
-                {
-                    GrowlHelper.Error(e.Message);
-                    _logger.Error(e, "开启采集失败");
-                }
+                _logger.Error(e,"开启采集失败");
+                _messageDialogService.ErrorAsync("开采集失败");
+            }
+        }
+        
+        private void DoSingleGrabCommand()
+        {
+            try
+            {
+                _cameraStationService.StartSingleGrab(StationEnum.MainCamera);
+                GrowlHelper.Success("单帧采集成功");
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e,"单帧采集失败");
+                _messageDialogService.ErrorAsync("单帧集失败");
             }
         }
 
         private void DoStopGrabCommand()
         {
-            if (StationState != StationStateEnum.Grabbing)
-            {
-                GrowlHelper.Success("相机未在采集中");
-                return;
-            }
-
             try
             {
-                var device = _cameraStationService.GetCamera(MainStation.StationName);
-                device.StopAcquisition();
-                GrowlHelper.Success("实时采集已关闭");
+                _cameraImageProvider.Stop();
+                GrowlHelper.Success("停止采集成功");
             }
             catch (Exception e)
             {
-                GrowlHelper.Error(e.Message);
-                _logger.Error(e, "关闭采集失败");
+                _logger.Error(e,"停止采集失败");
+                _messageDialogService.ErrorAsync("停止集失败");
             }
         }
 

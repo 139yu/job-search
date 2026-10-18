@@ -17,13 +17,16 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0">
-            <components:IconButton Height="50" Content="打开图片" 
+            <components:IconButton Height="50" Command="{Binding OpenImageCommand}" 
+                                   Content="打开图片" 
                                  IconCode="&#xe621;" 
                                  IconSize="16"/>
-            <components:IconButton Height="50" Content="保存图片" 
+            <components:IconButton Height="50" Command="{Binding SaveImageCommand}" 
+                                   Content="保存图片" 
                                    IconCode="&#xec09;" 
                                    IconSize="16"/>
         </StackPanel>
-        <halcon:HSmartWindowControlWPF Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <halcon:HSmartWindowControlWPF AutomationProperties.AutomationId="btn" Grid.Column="1" x:Name="HalconWindow"
+                                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
     </Grid>
 </UserControl>

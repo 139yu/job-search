@@ -4,7 +4,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-协作、动手闸门、UI 通用原则、Git 与验证以 **[PROJECT_STANDARDS.md](./PROJECT_STANDARDS.md)** 为准（`AGENTS.md` 与 `.cursor/rules/project-standards.mdc` 仅索引）。本文件只说明本仓库是什么、脚本怎么跑。
+协作、动手闸门、架构总则、UI 通用原则、Git 与验证以 **[PROJECT_STANDARDS.md](./PROJECT_STANDARDS.md)** 为准（`AGENTS.md` 与 `.cursor/rules/project-standards.mdc` 仅索引）。本文件只说明本仓库是什么、脚本怎么跑。
 
 ## What this repo is
 

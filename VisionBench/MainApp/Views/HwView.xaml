@@ -10,6 +10,7 @@
              xmlns:components="clr-namespace:CommonUI.Components;assembly=CommonUI"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d"
+             FontSize="{DynamicResource AppFontSize}"
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -28,5 +29,24 @@
         </StackPanel>
         <halcon:HSmartWindowControlWPF AutomationProperties.AutomationId="btn" Grid.Column="1" x:Name="HalconWindow"
                                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10">
+            <Border BorderThickness="1" Background="#0F000000"
+                    BorderBrush="{DynamicResource BorderBrush}" 
+                    CornerRadius="5" IsHitTestVisible="False" Padding="8,4">
+                <StackPanel Orientation="Horizontal" TextBlock.Foreground="{DynamicResource HalconToolForeground}">
+                    <TextBlock VerticalAlignment="Center" Text="X:"/>
+                    <TextBlock VerticalAlignment="Center" Width="40" Text="-"/>
+                    <TextBlock VerticalAlignment="Center" Text="Y:"/>
+                    <TextBlock VerticalAlignment="Center" Width="40" Text="-"/>
+                    <TextBlock VerticalAlignment="Center" Text="Gray:"/>
+                    <TextBlock VerticalAlignment="Center" Width="40" Text="-"/>
+                </StackPanel>
+            </Border>
+            <components:IconButton BorderThickness="1" 
+                                   BorderBrush="{DynamicResource BorderBrush}" 
+                                   Foreground="{DynamicResource HalconToolForeground}"
+                                   Margin="10,0,0,0" Height="32" Width="32" IconSize="16" 
+                                   IconCode="&#xe657;"/>
+        </StackPanel>
     </Grid>
 </UserControl>

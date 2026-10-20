@@ -29,6 +29,7 @@
     <Color x:Key="WinTitleFontColor">#0F172A</Color>
     <Color x:Key="MenuFontColor">#EEF2F7</Color>
     <Color x:Key="MenuHoverFontColor">#2B6CB0</Color>
+    <Color x:Key="HalconToolFontColor">#EEF2F7</Color>
 
     <!-- 强调 -->
     <Color x:Key="AccentColor">#2B6CB0</Color>
@@ -64,6 +65,9 @@
     <SolidColorBrush x:Key="PrimaryForeground" Color="{StaticResource TextPrimaryColor}"/>
     <SolidColorBrush x:Key="SecondaryForeground" Color="{StaticResource TextSecondaryColor}"/>
     <SolidColorBrush x:Key="TertiaryForeground" Color="{StaticResource TextTertiaryColor}"/>
+    <SolidColorBrush x:Key="HalconToolForeground" Color="{StaticResource HalconToolFontColor}"/>
+    
+    
     <SolidColorBrush x:Key="MenuContainerBrush" Color="{StaticResource MenuContainerColor}"/>
 
     <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>

@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Drawing;
+using System.IO;
+using System.Windows.Media;
 using System.Windows.Threading;
 using Commons.Enums;
 using Commons.Logging;
@@ -23,7 +25,8 @@ public class ImageCanvas : IDisposable
     private readonly List<IImageOverlay> _overlays = new();
     private readonly object _gate = new();
     private bool _renderQueued;
-
+    private int _fitWidth = -1;
+    private int _fitHeight = -1;
     public ImageCanvas(HSmartWindowControlWPF control, Func<bool> isGrayDisplay)
     {
         _control = control;
@@ -58,6 +61,69 @@ public class ImageCanvas : IDisposable
             _dispatcher.BeginInvoke(DispatcherPriority.Render, new Action(RenderPending));
     }
 
+    private void EnsureFit(HImage image)
+    {
+        HOperatorSet.GetImageSize(image,out var width,out var height );
+        if (width.I == _fitHeight && height.I == _fitHeight)
+            return;
+        _fitHeight = height.I;
+        _fitWidth = width.I;
+        try
+        {
+            _control.SetFullImagePart(image);
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e,"适配图像到窗口失败");
+        }
+    }
+
+    public void ResetView()
+    {
+        var image = _currentFrame.Peek();
+        if (image is null)
+            return;
+        try
+        {
+            _control.SetFullImagePart(image);
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e,"重置页面失败");
+        }
+        Redraw();
+    }
+
+    public void RequestRedrawDeferred() => _dispatcher.BeginInvoke(DispatcherPriority.Render, new Action(Redraw));
+
+    public bool TryGetPixel(Point controlPoint,out int row,out int col,out int gray)
+    {
+        row = col = gray = 0;
+        var image = _currentFrame.Peek();
+        if (image is null)
+            return false;
+        HOperatorSet.GetImageSize(image, out var width, out var height);
+        var context = new ImageCanvasContext(_control, width, height);
+        var dpi = VisualTreeHelper.GetDpi(_control);
+        var physical = new Point((int)(controlPoint.X * dpi.DpiScaleX), (int)(controlPoint.Y * dpi.DpiScaleY));
+        if (!context.TryScreenToImage(physical, out var imageRow, out var imageCol))
+            return false;
+        HOperatorSet.GetGrayval(image,imageRow,imageCol,out var grayval);
+        try
+        {
+            var channels = grayval.DArr;
+            gray = (int) (channels.Length == 3 ? 0.299 * channels[0] + 0.578 * channels[1] + 0.114 * channels[2] : channels[0]);
+        }
+        catch (Exception e)
+        {
+            grayval.Dispose();
+        }
+
+        row = (int)Math.Round(imageRow);
+        col = (int)Math.Round(imageCol);
+        return true;
+    }
+    
     /// <summary>
     /// 清空页面并释放当前帧
     /// </summary>
@@ -178,6 +244,7 @@ public class ImageCanvas : IDisposable
             return;
         }
 
+        EnsureFit(image);
         DrawImageLayer(window, image);
         DrawOverlays(window, image);
     }

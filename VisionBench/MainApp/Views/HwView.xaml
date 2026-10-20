@@ -29,11 +29,11 @@
         </StackPanel>
         <halcon:HSmartWindowControlWPF AutomationProperties.AutomationId="btn" Grid.Column="1" x:Name="HalconWindow"
                                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10">
-            <Border BorderThickness="1" Background="#0F000000"
-                    BorderBrush="{DynamicResource BorderBrush}" 
+        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="5,10">
+            <Border BorderThickness="1" Background="#990F172A" VerticalAlignment="Center" Opacity="0.6"
+                    BorderBrush="#5594A3B8" 
                     CornerRadius="5" IsHitTestVisible="False" Padding="8,4">
-                <StackPanel Orientation="Horizontal" TextBlock.Foreground="{DynamicResource HalconToolForeground}">
+                <StackPanel Orientation="Horizontal" TextBlock.FontSize="{DynamicResource SmallFontSize}" TextBlock.Foreground="{DynamicResource HalconToolForeground}">
                     <TextBlock VerticalAlignment="Center" Text="X:"/>
                     <TextBlock VerticalAlignment="Center" Width="40" Text="-"/>
                     <TextBlock VerticalAlignment="Center" Text="Y:"/>
@@ -42,11 +42,21 @@
                     <TextBlock VerticalAlignment="Center" Width="40" Text="-"/>
                 </StackPanel>
             </Border>
-            <components:IconButton BorderThickness="1" 
-                                   BorderBrush="{DynamicResource BorderBrush}" 
-                                   Foreground="{DynamicResource HalconToolForeground}"
-                                   Margin="10,0,0,0" Height="32" Width="32" IconSize="16" 
-                                   IconCode="&#xe657;"/>
+            <Button Width="20" Height="20" Margin="10,0,0,0">
+                <Button.Content>
+                    <TextBlock Text="&#xe657;" 
+                               FontSize="{DynamicResource SmallFontSize}"
+                               Foreground="{DynamicResource HalconToolForeground}" 
+                               FontFamily="{DynamicResource IconFont}"/>
+                </Button.Content>
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border BorderThickness="1" BorderBrush="#5594A3B8">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
         </StackPanel>
     </Grid>
 </UserControl>

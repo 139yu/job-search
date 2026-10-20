@@ -13,7 +13,7 @@
         WindowStartupLocation="CenterScreen" FontSize="{DynamicResource AppFontSize}"
         WindowStyle="None" SnapsToDevicePixels="True"
         Background="{DynamicResource AppBrush}"
-        Title="{Binding Title}" Height="1200" Width="1800">
+        Title="{Binding Title}" Height="1000" Width="1800">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToV"></BooleanToVisibilityConverter>
     </Window.Resources>

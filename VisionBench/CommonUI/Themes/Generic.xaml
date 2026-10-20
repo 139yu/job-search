@@ -9,8 +9,10 @@
             <Setter.Value>
                 <ControlTemplate TargetType="components:IconButton">
                     <Border x:Name="root" Background="{TemplateBinding Background}"
-                            Padding="0,8"
+                            Padding="{TemplateBinding Padding}"
                             IsHitTestVisible="True"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
                             Width="{TemplateBinding Width}" 
                             Height="{TemplateBinding Height}">
                         <StackPanel Orientation="Vertical">

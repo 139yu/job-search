@@ -21,35 +21,28 @@ public sealed class InfoOverlay : ImageOverlayBase
 
     public override void Render(HWindow window, ImageCanvasContext context)
     {
-        try
+        if (context.ImageWidth <= 0 || context.ImageHeight <= 0)
+            return;
+        window.GetWindowExtents(out int row, out int column, out int width, out int height);
+        window.SetColor(Color);
+        window.SetFont("Consolas-12");
+        string str;
+        if (!string.IsNullOrWhiteSpace(SourceText))
         {
-            if (context.ImageWidth <= 0 || context.ImageHeight <= 0)
-                return;
-            window.GetWindowExtents(out int row, out int column, out int width, out int height);
-            window.SetColor(Color);
-            window.SetFont("Consolas-12");
-            string str;
-            if (!string.IsNullOrWhiteSpace(SourceText))
-            {
-                str = $"{SourceText}·{context.ImageWidth}×{context.ImageHeight}";
-            }
-            else
-            {
-                str = $"{context.ImageWidth}×{context.ImageHeight}";
-            }
-            using HTuple color = new HTuple(Color);
-            using HTuple bottom = new HTuple("bottom");
-            using HTuple left = new HTuple("left");
-            using HTuple paramName = new HTuple(new[]{"box","box_color","shadow"});
-            using HTuple paramValue = new HTuple(new[]{"true","#000000CC","false"});
+            str = $"{SourceText}·{context.ImageWidth}×{context.ImageHeight}";
+        }
+        else
+        {
+            str = $"{context.ImageWidth}×{context.ImageHeight}";
+        }
+        using HTuple color = new HTuple(Color);
+        using HTuple bottom = new HTuple("bottom");
+        using HTuple left = new HTuple("left");
+        using HTuple paramName = new HTuple(new[]{"box","box_color","shadow"});
+        using HTuple paramValue = new HTuple(new[]{"true","#000000CC","false"});
          
-            using HTuple message = new HTuple(str);
-            window.DispText(message,
-                "window",bottom,left,color,paramName,paramValue);
-        }
-        catch (Exception e)
-        {
-            
-        }
+        using HTuple message = new HTuple(str);
+        window.DispText(message,
+            "window",bottom,left,color,paramName,paramValue);
     }
 }

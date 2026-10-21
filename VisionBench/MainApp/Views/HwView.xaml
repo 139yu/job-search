@@ -4,11 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:prism="http://prismlibrary.com/"
-             xmlns:local="clr-namespace:MainApp.Views"
-             xmlns:commonUi="clr-namespace:CommonUI;assembly=CommonUI"
              xmlns:halcon="clr-namespace:HalconDotNet;assembly=halcondotnet"
              xmlns:components="clr-namespace:CommonUI.Components;assembly=CommonUI"
              prism:ViewModelLocator.AutoWireViewModel="True"
+             PreviewMouseWheel="OnCanvasPreviewMouseWheel"
+             PreviewMouseMove="OnCanvasPreviewMouseMove"
+             PreviewMouseLeftButtonDown="OnCanvasPreviewMouseLeftButtonDown"
              mc:Ignorable="d"
              FontSize="{DynamicResource AppFontSize}"
              d:DesignHeight="300" d:DesignWidth="300">
@@ -35,14 +36,14 @@
                     CornerRadius="5" IsHitTestVisible="False" Padding="8,4">
                 <StackPanel Orientation="Horizontal" TextBlock.FontSize="{DynamicResource SmallFontSize}" TextBlock.Foreground="{DynamicResource HalconToolForeground}">
                     <TextBlock VerticalAlignment="Center" Text="X:"/>
-                    <TextBlock VerticalAlignment="Center" Width="40" Text="-"/>
+                    <TextBlock VerticalAlignment="Center" x:Name="HudX" Width="40" Text="-"/>
                     <TextBlock VerticalAlignment="Center" Text="Y:"/>
-                    <TextBlock VerticalAlignment="Center" Width="40" Text="-"/>
+                    <TextBlock VerticalAlignment="Center" x:Name="HudY" Width="40" Text="-"/>
                     <TextBlock VerticalAlignment="Center" Text="Gray:"/>
-                    <TextBlock VerticalAlignment="Center" Width="40" Text="-"/>
+                    <TextBlock VerticalAlignment="Center" x:Name="HudGray" Width="40" Text="-"/>
                 </StackPanel>
             </Border>
-            <Button Width="20" Height="20" Margin="10,0,0,0">
+            <Button Width="20" Height="20" Margin="10,0,0,0" Click="OnResetViewClick">
                 <Button.Content>
                     <TextBlock Text="&#xe657;" 
                                FontSize="{DynamicResource SmallFontSize}"

@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Commons.Enums;
 using Commons.Logging;
 using CommonUI.Helper;
 using CommonUI.Service;
+using HalconDotNet;
 using MainApp.Display;
 using MainApp.Overlays;
 using MainApp.ViewModels;
@@ -33,18 +35,28 @@ public partial class HwView : UserControl
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        // 保持比例
+        HalconWindow.HKeepAspectRatio = true;
+        // 缩放步长
+        HalconWindow.HZoomFactor = 1.2;
+        // 默认禁止拖拽 缩放
+        HalconWindow.HMoveContent = false;
+        HalconWindow.HZoomContent = HSmartWindowControlWPF.ZoomContent.Off;
         // Loaded 可能重复触发，只挂一次
         if (_canvas is not null)
             return;
-        _vm  = DataContext as HwViewModel;
+        _vm = DataContext as HwViewModel;
         if (_vm is null)
         {
             _logger.Error("采集窗口数据绑定失败");
             _messageDialogService.ErrorAsync("采集窗口数据绑定失败");
             return;
         }
+
         _canvas = new ImageCanvas(HalconWindow, () => _vm.IsGrayDisplay);
 
+        HalconWindow.HMouseWheel += OnHMouseWheel;
+        HalconWindow.HMouseUp += OnHMouseUp;
         _infoOverlay = new InfoOverlay()
         {
             Visible = true
@@ -54,7 +66,7 @@ public partial class HwView : UserControl
         _vm.SaveRequested += OnSaveRequested;
         _vm.PropertyChanged += OnViewModelPropertyChanged;
     }
-
+    
     private void UnLoaded(object sender, RoutedEventArgs e)
     {
         if (_subscribedSource is not null)
@@ -68,12 +80,12 @@ public partial class HwView : UserControl
             _vm.SaveRequested -= OnSaveRequested;
             _vm.PropertyChanged -= OnViewModelPropertyChanged;
         }
-
+        HalconWindow.HMouseWheel -= OnHMouseWheel;
+        HalconWindow.HMouseUp -= OnHMouseUp;
         _canvas?.Dispose();
         _canvas = null;
         _infoOverlay = null;
     }
-
 
     private void ResubscribeSource()
     {
@@ -124,5 +136,46 @@ public partial class HwView : UserControl
         if (_infoOverlay is not null && _vm is not null)
             _infoOverlay.SourceText = _vm.ImageSourceText;
         canvas.SetImage(e.Image);
+    }
+
+    private void OnResetViewClick(object sender, RoutedEventArgs e)
+    {
+        _canvas?.ResetView();
+    }
+
+    private void OnCanvasPreviewMouseWheel(object sender,MouseWheelEventArgs e)
+    {
+        bool ctrl = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
+        HalconWindow.HZoomContent = ctrl ? HSmartWindowControlWPF.ZoomContent.WheelForwardZoomsIn : HSmartWindowControlWPF.ZoomContent.Off;
+        if (!ctrl)
+            e.Handled = true;
+    }
+
+    private void OnCanvasPreviewMouseLeftButtonDown(object sender,MouseButtonEventArgs e)
+    {
+        HalconWindow.HMoveContent = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
+    }
+
+    private void OnCanvasPreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        if (_canvas is null || !_canvas.TryGetPixel(e.GetPosition(HalconWindow), out var row, out var col, out var gray))
+        {
+            HudX.Text = "—";
+            HudY.Text = "—";
+            HudGray.Text = "—";
+            return;
+        }
+        HudX.Text = col.ToString();      // X = 列
+        HudY.Text = row.ToString();      // Y = 行
+        HudGray.Text = gray.ToString("F0");
+    }
+
+    private void OnHMouseWheel(object sender, HSmartWindowControlWPF.HMouseEventArgsWPF hMouseEventArgsWpf)
+    {
+        _canvas?.RequestRedrawDeferred();
+    }
+    private void OnHMouseUp(object sender, HSmartWindowControlWPF.HMouseEventArgsWPF e)
+    {
+        _canvas?.RequestRedrawDeferred();
     }
 }

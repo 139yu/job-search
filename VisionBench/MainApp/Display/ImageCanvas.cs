@@ -1,5 +1,5 @@
-﻿using System.Drawing;
-using System.IO;
+﻿using System.IO;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Commons.Enums;
@@ -105,7 +105,7 @@ public class ImageCanvas : IDisposable
         HOperatorSet.GetImageSize(image, out var width, out var height);
         var context = new ImageCanvasContext(_control, width, height);
         var dpi = VisualTreeHelper.GetDpi(_control);
-        var physical = new Point((int)(controlPoint.X * dpi.DpiScaleX), (int)(controlPoint.Y * dpi.DpiScaleY));
+        var physical = new Point(controlPoint.X * dpi.DpiScaleX, controlPoint.Y * dpi.DpiScaleY);
         if (!context.TryScreenToImage(physical, out var imageRow, out var imageCol))
             return false;
         HOperatorSet.GetGrayval(image,imageRow,imageCol,out var grayval);
@@ -252,7 +252,7 @@ public class ImageCanvas : IDisposable
     /// <summary>图像层。灰度显示是查看偏好，不改动帧本身。</summary>
     private void DrawImageLayer(HWindow window, HImage image)
     {
-        if (!_isGrayDisplay() && image.CountChannels() == 3)
+        if (_isGrayDisplay() && image.CountChannels() == 3)
         {
             var gray = image.Rgb1ToGray();
             try

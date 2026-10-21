@@ -64,7 +64,7 @@ public class ImageCanvas : IDisposable
     private void EnsureFit(HImage image)
     {
         HOperatorSet.GetImageSize(image,out var width,out var height );
-        if (width.I == _fitHeight && height.I == _fitHeight)
+        if (width.I == _fitWidth && height.I == _fitHeight)
             return;
         _fitHeight = height.I;
         _fitWidth = width.I;
@@ -108,19 +108,29 @@ public class ImageCanvas : IDisposable
         var physical = new Point(controlPoint.X * dpi.DpiScaleX, controlPoint.Y * dpi.DpiScaleY);
         if (!context.TryScreenToImage(physical, out var imageRow, out var imageCol))
             return false;
-        HOperatorSet.GetGrayval(image,imageRow,imageCol,out var grayval);
+        var c = (int)Math.Round(imageCol);
+        var r = (int)Math.Round(imageRow);
+        if (c < 0 || r < 0 || c >= width.I || r >= height.I)
+            return false;
+        HOperatorSet.GetGrayval(image,r,c,out var grayval);
         try
         {
-            var channels = grayval.DArr;
-            gray = (int) (channels.Length == 3 ? 0.299 * channels[0] + 0.578 * channels[1] + 0.114 * channels[2] : channels[0]);
+            // mono8/mono16 返回 INTEGER 元组，DArr 会抛 HTupleAccessException，ToDArr 两种类型都适用
+            var channels = grayval.ToDArr();
+            gray = (int) (channels.Length >= 3 ? 0.299 * channels[0] + 0.578 * channels[1] + 0.114 * channels[2] : channels[0]);
         }
         catch (Exception e)
+        {
+            _logger.Warn(e, "读取像素灰度失败");
+            return false;
+        }
+        finally
         {
             grayval.Dispose();
         }
 
-        row = (int)Math.Round(imageRow);
-        col = (int)Math.Round(imageCol);
+        row = r;
+        col = c;
         return true;
     }
     

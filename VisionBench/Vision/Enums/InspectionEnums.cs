@@ -231,7 +231,7 @@ public static class MeasureUnitExtensions
         return (target, source)switch
         {
             (MeasureUnitEnum.Micrometer, MeasureUnitEnum.Millimeter) => 1000d,
-            (MeasureUnitEnum.Millimeter, MeasureUnitEnum.Micrometer) => 0.0001d,
+            (MeasureUnitEnum.Millimeter, MeasureUnitEnum.Micrometer) => 0.001d,
             _ => 1d
         };
     }

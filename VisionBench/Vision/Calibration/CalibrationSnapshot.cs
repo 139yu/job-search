@@ -12,6 +12,7 @@ public sealed class CalibrationSnapshot
     /// </summary>
     public static CalibrationSnapshot None { get; } = new() { Kind = CalibrationKindEnum.None };
 
+    /// <summary>快照结构版本。加载时校验：高于程序支持版本直接报错，不猜字段含义。</summary>
     public int SchemaVersion { get; init; } = CurrentSchemaVersion;
 
     /// <summary>版本标识，同时用于文件名与结果追溯。标定类快照不可为空。</summary>
